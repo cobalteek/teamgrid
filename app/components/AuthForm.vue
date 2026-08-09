@@ -1,0 +1,97 @@
+<script setup lang="ts">
+const props = defineProps<{
+  name: string,
+  inputs: readonly Field[];
+  modelValue: Model;
+  btnName: string;
+  disc: string;
+  link: string;
+  textLink: string;
+  sex?: boolean;
+}>();
+
+type Field = { key: string; type: string; placeholder: string }
+type Model = Record<string, string>
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', v: Model): void
+  (e: 'submit'): void
+}>()
+
+function setValue(key: string, value: string) {
+  emit('update:modelValue', {...props.modelValue, [key]: value})
+}
+
+</script>
+
+<template>
+  <div
+    class="w-2/6 min-w-[300px] max-w-[330px] max-h-4/6 p-10 bg-[var(--bg-modal)] border border-solid border-[var(--bg-main)] rounded-xl flex overflow-hidden">
+    <div class="flex mx-auto flex-col justify-between items-center">
+      <h4 class="font-bold text-xl mb-2 ">
+        {{ name }}
+      </h4>
+      <form
+        @submit.prevent="emit('submit')"
+        class="flex mx-auto flex-col justify-between items-center">
+        <input
+          v-for="field in inputs"
+          :key="field.key"
+          :value="modelValue[field.key] ?? ''"
+          @input="setValue(field.key, ($event.target as HTMLInputElement).value)"
+          :type="field.type"
+          :placeholder="$t(field.placeholder)"
+          class="p-1 pl-2 mb-5 rounded-md active:border-gray-200 text-[var(--input-text)] bg-[var(--input-bg)]"
+        />
+        <div v-if="sex" class="flex gap-6">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              name="gender"
+              value="male"
+              class="w-3 h-3 rounded-full border-2 border-gray-500
+            peer-checked:border-gray-300
+            peer-checked:bg-gray-600
+            transition"
+              :checked="modelValue.gender === 'male'"
+              @change="setValue('gender', 'male')"
+            />
+            <span>{{ $t('user.male') }}</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              name="gender"
+              value="female"
+              class="w-3 h-3 rounded-full border-2 border-gray-500
+             peer-checked:border-gray-300
+            peer-checked:bg-gray-600
+            transition"
+              :checked="modelValue.gender === 'female'"
+              @change="setValue('gender', 'female')"
+            />
+            <span>{{ $t('user.female') }}</span>
+          </label>
+        </div>
+        <button
+          type="submit"
+          class="w-1/2 text-bold bg-gray-800 mt-3 rounded-xl p-1 hover:bg-gray-600 transition duration-300"
+        >
+          {{ btnName }}
+        </button>
+      </form>
+      <div class="flex flex-col justify-between items-center pt-3 w-full">
+        <div>
+          {{ disc }}
+        </div>
+        <NuxtLink
+          v-if="textLink"
+          :to="link"
+          class="text-blue-200 hover:bg-gray-600 transition duration-300"
+        >
+          {{ textLink }}
+        </NuxtLink>
+      </div>
+    </div>
+  </div>
+</template>

@@ -1,0 +1,94 @@
+import {defineStore} from 'pinia'
+import type {User} from '~~/types/user'
+
+export const useAuthStore = defineStore('auth', () => {
+  const user = ref<User | null>(null)
+  const isReady = ref(false)
+  const isLoading = ref(false)
+  const error = ref<string | null>(null)
+
+  const isAuthed = computed(() => !!user.value)
+
+  async function fetchMe() {
+    try {
+      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
+
+      user.value = await $fetch<User>('/api/auth/me', {
+        credentials: 'include',
+        headers,
+      })
+    } catch (e: any) {
+      user.value = null
+      if (e?.statusCode !== 401 && e?.status !== 401) throw e
+    }
+  }
+
+  async function init() {
+    if (isReady.value) return
+    isLoading.value = true
+    error.value = null
+    try {
+      await fetchMe()
+    } finally {
+      isLoading.value = false
+      isReady.value = true
+    }
+  }
+
+  async function signIn(payload: { email: string; password: string }) {
+    isLoading.value = true
+    error.value = null
+    try {
+      await $fetch('/api/auth/login', {
+        method: 'POST',
+        body: payload,
+        credentials: 'include',
+      })
+
+      await fetchMe()
+    } catch (e: any) {
+      error.value = e?.data?.message ?? e?.message ?? $t('error.auth.signIn')
+      throw e
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  async function signUp(payload: { name: string; email: string; password: string; gender: string, role: string }) {
+    isLoading.value = true
+    error.value = null
+    try {
+      await $fetch('/api/auth/register', {
+        method: 'POST',
+        body: payload,
+        credentials: 'include',
+      })
+
+      await fetchMe()
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  async function logout() {
+    try {
+      user.value = null
+      await $fetch('/api/auth/logout', {method: 'POST', credentials: 'include'})
+    } catch (e: any) {
+      throw e
+    }
+  }
+
+  return {
+    user,
+    isAuthed,
+    isReady,
+    isLoading,
+    error,
+    init,
+    fetchMe,
+    signIn,
+    signUp,
+    logout,
+  }
+})
