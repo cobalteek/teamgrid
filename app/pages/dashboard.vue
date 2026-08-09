@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import '../components/Day.vue'
 const auth = useAuthStore()
 
 definePageMeta({
@@ -12,4 +13,5 @@ definePageMeta({
     <p>{{$t('message.welcome')}}, {{ auth.user?.name }}.</p>
     <p class="mt-2 text-(--text-soft)">{{ $t('message.signUser') }}</p>
   </section>
+  <Day/>
 </template>

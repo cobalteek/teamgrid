@@ -88,6 +88,8 @@ export default {
     hello: 'Hello',
     welcome: "Welcome",
     signUser: 'This page is available only to signed-in users.',
+    appInfo: 'Web application for managing employee shift schedules.',
+    signed: 'Signed in as ',
   },
   status: {
     notStarted: 'Not started',

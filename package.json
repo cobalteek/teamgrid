@@ -13,7 +13,9 @@
     "db:push": "prisma db push",
     "db:seed": "prisma db seed"
   },
-  "prisma": { "seed": "tsx prisma/seed.ts" },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "dependencies": {
     "@nuxtjs/i18n": "^10.2.3",
     "@pinia/nuxt": "^0.11.3",

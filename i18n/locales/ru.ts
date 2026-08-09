@@ -88,6 +88,8 @@ export default {
     hello: 'Привет',
     welcome: "Добро пожаловать",
     signUser: 'Эта страница доступна только для авторизованных пользователей.',
+    appInfo: 'Web application for managing employee shift schedules.',
+    signed: 'Вы вошли как ',
   },
   status: {
     notStarted: 'Не начат',
