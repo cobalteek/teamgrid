@@ -2,7 +2,6 @@
 import {useAuthStore} from "~/stores/auth";
 
 const auth = useAuthStore()
-const {t} = useI18n()
 const fields = computed(() => [
   {key: 'name', type: 'text', placeholder: 'form.placeholder.name'},
   {key: 'email', type: 'email', placeholder: 'form.placeholder.email'},
@@ -16,30 +15,15 @@ const form = ref({
   password: '',
   confirmPassword: '',
   gender: '',
-  role: ''
 })
 
 const modalRef = ref(false);
 const textError = ref('')
 
-function validate(text: string) {
-  if (!text) {
-    return false
-  }
-  return !/^[\x20-\x7E]+$/.test(text);
-
-}
-
 const type_ = ref('error')
 
 async function onRegister() {
-  console.count('onRegister called')
-  if (validate(form.value.password) || validate(form.value.name)) {
-    textError.value = $t('error.auth.onlyEnglish')
-    modalRef.value = true
-    type_.value = 'error'
-    return
-  } else if (form.value.email === '' ||
+  if (form.value.email === '' ||
     form.value.password === '' ||
     form.value.confirmPassword === '' ||
     form.value.name === ''
@@ -55,11 +39,11 @@ async function onRegister() {
     return
   }
   if (form.value.password !== form.value.confirmPassword) {
-    textError.value = $t('error.auth.passwordNotMatch')
+    textError.value = $t('error.auth.passwordsNotMatch')
     modalRef.value = true
     type_.value = 'error'
     return
-  } else if (form.value.password.length < 6) {
+  } else if (form.value.password.length < 8) {
     textError.value = $t('error.auth.passwordLength')
     modalRef.value = true
     type_.value = 'info'
@@ -72,19 +56,19 @@ async function onRegister() {
   }
 
   try {
-    await auth.signUp(form.value)
+    const {confirmPassword, ...payload} = form.value
+    await auth.signUp(payload)
 
     await auth.signIn(form.value)
 
     await navigateTo('/dashboard')
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const error = e as {statusCode?: number; status?: number; response?: {status?: number}}
+    const status = error.statusCode || error.status || error.response?.status
 
-    const status = e?.statusCode || e?.status || e?.response?.status
-
-    if (status === 409) {
-      alert($t('error.auth.emailExist'))
-      return
-    }
+    type_.value = 'error'
+    textError.value = status === 409 ? $t('error.auth.emailExist') : $t('error.auth.register')
+    modalRef.value = true
   }
 }
 

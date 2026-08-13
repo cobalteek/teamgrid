@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -8,26 +9,35 @@ datasource db {
 }
 
 model User {
-  id       String     @id @default(cuid())
-  email    String     @unique
-  password String
-  name     String
-  gender   String
-  roles    UserRole[]
+  id        String         @id @default(cuid())
+  email     String         @unique
+  password  String
+  name      String
+  gender    String
+  positions UserPosition[]
 }
 
-model Role {
-  id    Int        @id @default(autoincrement())
-  name  String     @unique
-  users UserRole[]
+model Candidate {
+  id         String @id @default(cuid())
+  name       String
+  surname    String
+  middlename String
+  position   String
+  email      String @unique
 }
 
-model UserRole {
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String
-  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  roleId Int
+model Position {
+  id    Int            @id @default(autoincrement())
+  name  String         @unique
+  users UserPosition[]
+}
 
-  @@id([userId, roleId])
-  @@index([roleId])
+model UserPosition {
+  userId     String
+  positionId Int
+  position   Position @relation(fields: [positionId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, positionId])
+  @@index([positionId])
 }

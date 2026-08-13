@@ -1,6 +1,8 @@
 import bcrypt from 'bcrypt'
 import {prisma} from '../../utils/prisma'
 import {signToken} from '../../utils/auth'
+import {enforceRateLimit} from '~~/server/utils/rate-limit'
+import {isValidEmail, isValidPassword} from '~~/server/utils/validation'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -8,8 +10,10 @@ export default defineEventHandler(async (event) => {
   const password = typeof body?.password === 'string' ? body.password : ''
   const t = await useTranslation(event)
 
-  if (!email || !password) {
-    throw createError({statusCode: 400, statusMessage: t('error.form.fieldsEmpty')})
+  enforceRateLimit(event, 'login', 10, 15 * 60 * 1000, t('error.auth.tooManyAttempts'))
+
+  if (!email || !password || !isValidEmail(email) || !isValidPassword(password)) {
+    throw createError({statusCode: 401, statusMessage: t('error.auth.credentials')})
   }
 
   const user = await prisma.user.findUnique({where: {email}})

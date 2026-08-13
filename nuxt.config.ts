@@ -11,14 +11,15 @@ export default defineNuxtConfig({
 
   modules: [
     '@pinia/nuxt',
-    '@nuxtjs/i18n'
+    '@nuxtjs/i18n',
+    '@nuxt/eslint'
   ],
 
   i18n: {
     defaultLocale: 'ru',
     locales: [
-      { code: 'ru', name: 'Русский', file: 'ru.ts' },
-      { code: 'en', name: 'English', file: 'en.ts' }
+      { code: 'ru', name: 'Русский', file: 'ru.json'},
+      { code: 'en', name: 'English', file: 'en.json'},
     ],
     detectBrowserLanguage: {
       useCookie: true,

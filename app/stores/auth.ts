@@ -1,6 +1,17 @@
 import {defineStore} from 'pinia'
 import type {User} from '~~/types/user'
 
+type RequestError = {
+  statusCode?: number
+  status?: number
+  data?: {message?: string}
+  message?: string
+}
+
+function asRequestError(error: unknown): RequestError {
+  return typeof error === 'object' && error !== null ? error as RequestError : {}
+}
+
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const isReady = ref(false)
@@ -17,9 +28,10 @@ export const useAuthStore = defineStore('auth', () => {
         credentials: 'include',
         headers,
       })
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const error = asRequestError(e)
       user.value = null
-      if (e?.statusCode !== 401 && e?.status !== 401) throw e
+      if (error.statusCode !== 401 && error.status !== 401) throw e
     }
   }
 
@@ -46,15 +58,16 @@ export const useAuthStore = defineStore('auth', () => {
       })
 
       await fetchMe()
-    } catch (e: any) {
-      error.value = e?.data?.message ?? e?.message ?? $t('error.auth.signIn')
+    } catch (e: unknown) {
+      const requestError = asRequestError(e)
+      error.value = requestError.data?.message ?? requestError.message ?? $t('error.auth.signIn')
       throw e
     } finally {
       isLoading.value = false
     }
   }
 
-  async function signUp(payload: { name: string; email: string; password: string; gender: string, role: string }) {
+  async function signUp(payload: { name: string; email: string; password: string; gender: string }) {
     isLoading.value = true
     error.value = null
     try {
@@ -63,20 +76,14 @@ export const useAuthStore = defineStore('auth', () => {
         body: payload,
         credentials: 'include',
       })
-
-      await fetchMe()
     } finally {
       isLoading.value = false
     }
   }
 
   async function logout() {
-    try {
-      user.value = null
-      await $fetch('/api/auth/logout', {method: 'POST', credentials: 'include'})
-    } catch (e: any) {
-      throw e
-    }
+    user.value = null
+    await $fetch('/api/auth/logout', {method: 'POST', credentials: 'include'})
   }
 
   return {

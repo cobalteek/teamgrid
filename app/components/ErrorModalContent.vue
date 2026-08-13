@@ -12,11 +12,6 @@ const emit = defineEmits<{
 
 const head = computed(() => props.type === 'error' ? 'Error' : 'Information')
 
-function close() {
-  emit('update:modelValue', false)
-  emit('close')
-}
-
 function onUpdateModelValue(value: boolean) {
   emit('update:modelValue', value)
 

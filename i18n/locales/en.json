@@ -1,0 +1,176 @@
+{
+  "pages": {
+    "about": "About",
+    "contact": "Contact",
+    "docs": "License",
+    "home": "Home",
+    "dashboard": "Dashboard"
+  },
+  "table": {
+    "title": "Title",
+    "description": "Description",
+    "createdAt": "Created At",
+    "deadline": "Deadline",
+    "status": "Status",
+    "createdBy": "Created By",
+    "handler": "Handler",
+    "doneAt": "Done At",
+    "selectHandler": "Select a handler"
+  },
+  "contextMenu": {
+    "open": "Open",
+    "viewTasks": "View Tasks",
+    "edit": "Edit"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "noAccount": "No account?",
+    "haveAccount": "Have an account?",
+    "email": "Email",
+    "password": "Password"
+  },
+  "form": {
+    "placeholder": {
+      "search": "Search",
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password"
+    }
+  },
+  "home": {
+    "title": "Home page"
+  },
+  "btn": {
+    "addEmployee": "Add Employee",
+    "allProjects": "All projects",
+    "myProjects": "My projects",
+    "allTasks": "All tasks",
+    "myTasks": "My tasks",
+    "add": "Create",
+    "changeRole": "Change Role",
+    "projects": "Projects",
+    "tasks": "Tasks",
+    "back": "Back",
+    "save": "Save",
+    "delete": "Delete",
+    "set": "Set",
+    "close": "Close",
+    "cancel": "Cancel",
+    "addProject": "Add project",
+    "addTask": "Add task",
+    "editProject": "Edit project",
+    "editTask": "Edit task",
+    "cross": "×",
+    "changePostEmployee": "Change the employee’s position",
+    "edit": "Edit"
+  },
+  "select": {
+    "selectUser": "Select user",
+    "selectRole": "Select role"
+  },
+  "user": {
+    "name": "Name",
+    "email": "Email",
+    "gender": "Gender",
+    "male": "Male",
+    "female": "Female",
+    "role": "Role"
+  },
+  "role": {
+    "user": "User",
+    "admin": "Admin",
+    "owner": "Owner"
+  },
+  "message": {
+    "hello": "Hello",
+    "welcome": "Welcome",
+    "signUser": "This page is available only to signed-in users.",
+    "appInfo": "Web application for managing employee shift schedules.",
+    "signed": "Signed in as "
+  },
+  "status": {
+    "notStarted": "Not started",
+    "inProcess": "In process",
+    "completed": "Completed",
+    "abandoned": "Abandoned",
+    "frozen": "Frozen"
+  },
+  "error": {
+    "notFound": "Not Found",
+    "project": {
+      "notFound": "Project not found",
+      "idRequired": "Project ID required",
+      "fetchAll": "Failed to fetch all projects",
+      "fetchMy": "Failed to fetch my projects",
+      "searchFailed": "Failed to search projects",
+      "deadlineEarlier": "The deadline cannot be earlier than the creation date of the project.",
+      "addEdit": "Operation failed, please check your project details.",
+      "create": "Failed to create project",
+      "update": "Failed to update project.",
+      "delete": "Failed to delete project."
+    },
+    "status": {
+      "statusId": "Status ID required",
+      "notFound": "Statuses not found",
+      "get": "Failed to get statuses"
+    },
+    "form": {
+      "fieldsEmpty": "The fields are empty."
+    },
+    "auth": {
+      "credentials": "Invalid credentials",
+      "signIn": "Sign in error",
+      "passwordLength": "Password must be between 8 and 128 characters.",
+      "invalidEmail": "Enter a valid email address.",
+      "tooManyAttempts": "Too many attempts. Try again later.",
+      "loginOrPasswordInvalid": "The login or password is incorrect. Please try again.",
+      "onlyEnglish": "Only English characters allowed.",
+      "selectGender": "Please select a gender.",
+      "passwordsNotMatch": "Passwords do not match.",
+      "nameLength": "The name must be at least 2 characters long.",
+      "emailExist": "Email already exists.",
+      "unAuth": "Unauthorized",
+      "logoutFailed": "Logout failed.",
+      "register": "Register failed."
+    },
+    "user": {
+      "notFound": "User not found",
+      "idRequired": "User ID required",
+      "onlyCreator": "Only the creator of the project can do it.",
+      "onlyOwner": "Only owner can do it.",
+      "creatorForever": "You can't stop being the owner.",
+      "chooseUserAndRole": "Please choose a user and a role.",
+      "loadUsers": "Failed to load users.",
+      "get": "Failed to get user",
+      "roleUserNotFound": "Role user not found",
+      "positionUserNotFound": "User position not found",
+      "onlyAdmin": "Only an admin can do it."
+    },
+    "role": {
+      "idNotFound": "Role ID not found",
+      "assignRole": "Couldn’t assign a role.",
+      "roleUserNotFound": "Role USER not found",
+      "creatorForever": "You can’t change your role!",
+      "change": "Failed to change role",
+      "get": "Failed to get role"
+    },
+    "data": {
+      "notFound": "Data not found"
+    },
+    "candidate": {
+      "loadCandidates": "Failed to load candidates"
+    }
+  },
+  "placeholder": {
+    "firstName": "Name",
+    "lastName": "Surname",
+    "middleName": "Middle name",
+    "position": "Position",
+    "email": "Email"
+  },
+  "validation": {
+    "candidate": "Fill in all fields"
+  }
+}

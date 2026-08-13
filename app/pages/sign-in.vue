@@ -18,12 +18,12 @@ const type_ = ref('')
 
 async function onLogin() {
 
-  if (form.value.email === '' && form.value.password === '') {
+  if (form.value.email === '' || form.value.password === '') {
     type_.value = 'error'
     textError.value = $t('error.form.fieldsEmpty')
     modalRef.value = true
     return
-  } else if (form.value.password.length < 6) {
+  } else if (form.value.password.length < 8) {
     type_.value = 'info'
     textError.value = $t('error.auth.passwordLength')
     modalRef.value = true
@@ -34,8 +34,9 @@ async function onLogin() {
     await auth.signIn(form.value)
 
     await navigateTo('/dashboard')
-  } catch (e: any) {
-    const status = e?.statusCode || e?.status || e?.response?.status
+  } catch (e: unknown) {
+    const error = e as {statusCode?: number; status?: number; response?: {status?: number}}
+    const status = error.statusCode || error.status || error.response?.status
     if (status === 401) {
       type_.value = 'error'
       textError.value = $t('error.auth.loginOrPasswordInvalid')
