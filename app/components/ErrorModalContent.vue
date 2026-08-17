@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const props = defineProps<{
   modelValue: boolean
-  type: string
+  type: 'error' | 'info'
   text: string
 }>()
 
@@ -50,7 +50,7 @@ function onUpdateModelValue(value: boolean) {
           {{ head }}
         </div>
         <div class="mx-auto font-mono mt-3">
-          {{ text }}
+          {{ $t(text) }}
         </div>
       </div>
     </div>

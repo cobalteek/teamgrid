@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import {useAuthStore} from "~/stores/auth";
-
+import {isValidEmail, isValidName, isValidPassword} from '../../server/utils/validation'
+import {useErrorModal} from '../composables/useErrorModal'
 const auth = useAuthStore()
+const errorModal = useErrorModal()
 const fields = computed(() => [
   {key: 'name', type: 'text', placeholder: 'form.placeholder.name'},
   {key: 'email', type: 'email', placeholder: 'form.placeholder.email'},
@@ -17,41 +19,33 @@ const form = ref({
   gender: '',
 })
 
-const modalRef = ref(false);
-const textError = ref('')
-
-const type_ = ref('error')
-
 async function onRegister() {
   if (form.value.email === '' ||
     form.value.password === '' ||
     form.value.confirmPassword === '' ||
     form.value.name === ''
   ) {
-    textError.value = $t('error.form.fieldsEmpty')
-    modalRef.value = true
-    type_.value = 'error'
+    errorModal.showError('error.form.fieldsEmpty')
     return
   } else if (form.value.gender === '') {
-    textError.value = $t('error.auth.selectGender')
-    modalRef.value = true
-    type_.value = 'error'
+    errorModal.showError('error.auth.selectGender')
     return
   }
   if (form.value.password !== form.value.confirmPassword) {
-    textError.value = $t('error.auth.passwordsNotMatch')
-    modalRef.value = true
-    type_.value = 'error'
+    errorModal.showError('error.auth.passwordsNotMatch')
     return
-  } else if (form.value.password.length < 8) {
-    textError.value = $t('error.auth.passwordLength')
-    modalRef.value = true
-    type_.value = 'info'
+  } else if (!isValidPassword(form.value.password)) {
+    errorModal.showInfo('error.auth.passwordLength')
     return
-  } else if (form.value.name.length < 3) {
-    textError.value = $t('error.auth.nameLength')
-    modalRef.value = true
-    type_.value = 'error'
+  } else if (!isValidName(form.value.name)) {
+    errorModal.showError('error.auth.nameLength')
+    return
+  } else if (!isValidName(form.value.name)) {
+    errorModal.showError('error.auth.nameLength')
+    return
+  }
+  if (!isValidEmail(form.value.email)) {
+    errorModal.showError('error.auth.emailInvalid')
     return
   }
 
@@ -66,9 +60,10 @@ async function onRegister() {
     const error = e as {statusCode?: number; status?: number; response?: {status?: number}}
     const status = error.statusCode || error.status || error.response?.status
 
-    type_.value = 'error'
-    textError.value = status === 409 ? $t('error.auth.emailExist') : $t('error.auth.register')
-    modalRef.value = true
+    errorModal.showError(status === 409
+    ? 'error.auth.emailExist'
+    : 'error.auth.register'
+    )
   }
 }
 
@@ -90,5 +85,11 @@ definePageMeta({
     link="/sign-in"
     v-model="form"
     @submit="onRegister"/>
-  <ErrorModalContent v-model="modalRef" class="w-[300px] h-[200px] top-[19%]" :type="type_" :text="textError"/>
+  <ErrorModalContent
+    :model-value="errorModal.isOpen.value"
+    :type="errorModal.type.value"
+    :text="errorModal.text.value"
+    @close="errorModal.close"
+    class="w-[300px] h-[200px] top-1/4"
+  />
 </template>

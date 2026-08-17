@@ -1,5 +1,5 @@
-export type Candidate = {
-  id: number
+export type Employee = {
+  id: string
   name: string
   surname: string
   middlename: string

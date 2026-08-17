@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import '../components/TeamGrid.vue'
-const auth = useAuthStore()
 
 definePageMeta({
   middleware: ['auth'],
-  layout: 'dashboard'
+  layout: 'dashboard-admin'
 })
 
 const toggleView = 'dayGridMonth'

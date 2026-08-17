@@ -4,7 +4,7 @@ const prisma = new PrismaClient()
 
 async function main() {
   await prisma.position.createMany({
-    data: ['user', 'admin', 'owner'].map((name) => ({ name })),
+    data: ['admin'].map((name) => ({ name })),
     skipDuplicates: true,
   })
 }

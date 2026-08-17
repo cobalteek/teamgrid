@@ -17,19 +17,37 @@ model User {
   positions UserPosition[]
 }
 
-model Candidate {
-  id         String @id @default(cuid())
+model Employee {
+  id         String     @id @default(cuid())
   name       String
   surname    String
   middlename String
-  position   String
-  email      String @unique
+  email      String     @unique
+
+  positionId Int
+  position   Position   @relation(fields: [positionId], references: [id])
+
+  shifts     Shift[]
+}
+
+model Shift {
+  id String @id @default(cuid())
+  date DateTime
+
+  employeeId String
+  positionId Int
+
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  position   Position @relation(fields: [positionId], references: [id])
 }
 
 model Position {
   id    Int            @id @default(autoincrement())
   name  String         @unique
+
   users UserPosition[]
+  shifts Shift[]
+  employees Employee[]
 }
 
 model UserPosition {

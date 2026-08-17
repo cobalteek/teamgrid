@@ -1,5 +1,17 @@
 <script setup lang="ts">
+import { Calendar } from '@fullcalendar/core/index.js';
+
 const isAddEmployeeModalOpen = ref(false)
+
+// function sendEvent() {
+//   const event = {
+//     title: 'New Event',
+//     start: new Date(),
+//     allDay: true
+//   }
+//   emit('send-event', event)
+// }
+
 </script>
 
 <template>
@@ -13,10 +25,9 @@ const isAddEmployeeModalOpen = ref(false)
     <button class="btn">
       {{ $t('btn.edit') }}
     </button>
-    <Modal v-model="isAddEmployeeModalOpen">
-      <EntityModalAddEmployee
-        @close="isAddEmployeeModalOpen = false"
-      />
-    </Modal>
+    <AddEmployeeModalContent
+      :model-value="isAddEmployeeModalOpen"
+      @close="isAddEmployeeModalOpen = false"
+    />
   </div>
 </template>

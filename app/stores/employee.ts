@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { Candidate } from '~~/types/candidate'
+import type { Employee } from '~~/types/employee'
 
 type RequestError = {
   data?: { message?: string }
@@ -8,7 +8,7 @@ type RequestError = {
 
 function getErrorMessage(error: unknown) {
   if (typeof error !== 'object' || error === null) {
-    return $t('error.candidate.loadCandidates')
+    return $t('error.candidate.loadEmployee')
   }
 
   const requestError = error as RequestError
@@ -16,25 +16,25 @@ function getErrorMessage(error: unknown) {
   return requestError.data?.message ?? requestError.message ?? $t('error.candidate.loadCandidates')
 }
 
-export const useCandidateStore = defineStore('candidate', () => {
-  const candidates = ref<Candidate[]>([])
+export const useEmployeeStore = defineStore('employee', () => {
+  const employees = ref<Employee[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
-  async function getCandidates() {
+  async function getEmployees() {
     isLoading.value = true
     error.value = null
 
     try {
       const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
 
-      candidates.value = await $fetch<Candidate[]>('/api/user/candidate', {
+      employees.value = await $fetch<Employee[]>('/api/user/employee', {
         credentials: 'include',
         method: 'GET',
         headers,
       })
 
-      return candidates.value
+      return employees.value
     } catch (e: unknown) {
       error.value = getErrorMessage(e)
       throw e
@@ -43,31 +43,36 @@ export const useCandidateStore = defineStore('candidate', () => {
     }
   }
 
-  async function createCandidate(candidateData: Omit<Candidate, 'id'>) {
+  async function createEmployee(employeeData: Omit<Employee, 'id'>) {
     try {
       const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
 
-      const newCandidate = await $fetch<Candidate>('/api/user/candidate', {
+      const newEmployee = await $fetch<Employee>('/api/user/employee', {
         credentials: 'include',
         method: 'POST',
         headers,
-        body: candidateData,
+        body: employeeData,
       })
 
-      candidates.value.push(newCandidate)
+      employees.value.push(newEmployee)
 
-      return newCandidate
+      return newEmployee
     } catch (e: unknown) {
       error.value = getErrorMessage(e)
       throw e
     }
   }
 
+  const options = computed(() =>
+    employees.value.map(e => ({value: e.id, label: `${e.surname} ${e.name} ${e.middlename}`}))
+  )
+
   return {
-    candidates,
+    employees,
     isLoading,
     error,
-    getCandidates,
-    createCandidate,
+    getEmployees,
+    createEmployee,
+    options
   }
 })

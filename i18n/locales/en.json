@@ -64,11 +64,15 @@
     "editTask": "Edit task",
     "cross": "×",
     "changePostEmployee": "Change the employee’s position",
-    "edit": "Edit"
+    "edit": "Edit",
+    "addEvent": "Add an event",
+    "addShift": "Add shift"
   },
   "select": {
     "selectUser": "Select user",
-    "selectRole": "Select role"
+    "selectRole": "Select role",
+    "position": "Select a position",
+    "employee": "Select an employee"
   },
   "user": {
     "name": "Name",
@@ -133,7 +137,9 @@
       "emailExist": "Email already exists.",
       "unAuth": "Unauthorized",
       "logoutFailed": "Logout failed.",
-      "register": "Register failed."
+      "register": "Register failed.",
+      "fullNameLength": "Full name length must be from 2 to 80 characters",
+      "emailInvalid": "Invalid email"
     },
     "user": {
       "notFound": "User not found",
@@ -146,7 +152,8 @@
       "get": "Failed to get user",
       "roleUserNotFound": "Role user not found",
       "positionUserNotFound": "User position not found",
-      "onlyAdmin": "Only an admin can do it."
+      "onlyAdmin": "Only an admin can do it.",
+      "positions": "Failed to get positions"
     },
     "role": {
       "idNotFound": "Role ID not found",
@@ -160,7 +167,18 @@
       "notFound": "Data not found"
     },
     "candidate": {
-      "loadCandidates": "Failed to load candidates"
+      "loadCandidates": "Failed to load candidates",
+      "loadEmployee": "Failed to load employees"
+    },
+    "employee": {
+      "get": "Failed to get employees",
+      "notFound": "No employees found"
+    },
+    "position": {
+      "notFound": "No positions found"
+    },
+    "shift": {
+      "duplicate": "This shift already exists"
     }
   },
   "placeholder": {

@@ -9,3 +9,7 @@ export function isValidPassword(value: string) {
 export function isValidName(value: string) {
   return value.length >= 2 && value.length <= 80
 }
+
+export function isValidPosition(value: string) {
+  return value.length >= 2 && value.length <= 128
+}

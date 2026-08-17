@@ -8,30 +8,27 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event)
     const t = await useTranslation(event)
 
-    const admin = await prisma.user.findUnique({
-        where: {id: userId},
-        select: {
-            positions: {
-                include: {
-                    position: true
-                }
-            }
-        }
-    })
+    // const admin = await prisma.user.findUnique({
+    //     where: {id: userId},
+    //     select: {
+    //         positions: {
+    //             include: {
+    //                 position: true
+    //             }
+    //         }
+    //     }
+    // })
 
-    console.log('USER ID:', userId)
-    console.log('ADMIN:', JSON.stringify(admin, null, 2))
+    // const canCreateEmployee = admin?.positions.some((userPosition) =>
+    //     ['admin', 'owner'].includes(userPosition.position.name)
+    // )
 
-    const canCreateCandidate = admin?.positions.some((userPosition) =>
-        ['admin', 'owner'].includes(userPosition.position.name)
-    )
-
-    if (!canCreateCandidate) {
-        throw createError({
-            statusCode: 403,
-            statusMessage: t('error.user.onlyAdmin')
-        })
-    }
+    // if (!canCreateEmployee) {
+    //     throw createError({
+    //         statusCode: 403,
+    //         statusMessage: t('error.user.onlyAdmin')
+    //     })
+    // }
 
     const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : ''
     const name = typeof body?.name === 'string' ? body.name.trim() : ''
@@ -42,7 +39,7 @@ export default defineEventHandler(async (event) => {
     if (!name || !surname || !middlename || !email || !position) {
         throw createError({
             statusCode: 400,
-            statusMessage: t('validation.candidate')
+            statusMessage: t('validation.employee.requiredFields')
         });
     }
     if (!isValidEmail(email)) {
@@ -52,7 +49,7 @@ export default defineEventHandler(async (event) => {
         throw createError({statusCode: 400, statusMessage: t('error.auth.nameLength')})
     }
 
-    const exists = await prisma.candidate.findUnique({
+    const exists = await prisma.employee.findUnique({
         where: { email },
     })
 
@@ -63,15 +60,25 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const candidate = await prisma.candidate.create({
+    const positionRecord = await prisma.position.upsert({
+        where: {
+            name: position
+        },
+        update: {},
+        create: {
+            name: position
+        }
+    })
+
+    const employee = await prisma.employee.create({
         data: {
             name,
             surname,
             middlename,
             email,
-            position
+            positionId: positionRecord.id
         }
     })
 
-    return candidate
+    return employee
 })

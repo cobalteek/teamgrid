@@ -2,7 +2,9 @@
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
-
+import { useCalendarStore } from '#imports'
+import {ruBetterLocale, enBetterLocale} from '../../server/utils/betterLocaleCalendarEnRu'
+import '@fullcalendar/vue3'
 
 const { locale } = useI18n()
 const props = defineProps<{
@@ -11,53 +13,8 @@ const props = defineProps<{
   }
 }>()
 
-const ruBetterLocale = {
-  code: 'ru',
-  week: {
-    dow: 1,
-    doy: 7
-  },
-  buttonText: {
-    prev: 'Пред',
-    next: 'След',
-    today: 'Сегодня',
-    month: 'Месяц',
-    week: 'Неделя',
-    day: 'День',
-    list: 'Повестка дня'
-  },
-  weekText: 'Неделя',
-  allDayText: 'Весь день',
-  moreLinkText(n : number) {
-    return '+ ещё ' + n
-  },
-  
-  noEventsText: 'Нет событий для отображения'
-}
-
-const enBetterLocale = {
-  code: 'en',
-  week: {
-    dow: 1,
-    doy: 7
-  },
-  buttonText: {
-    prev: 'Prev',
-    next: 'Next',
-    today: 'Today',
-    month: 'Month',
-    week: 'Week',
-    day: 'Day',
-    list: 'List'
-  },
-  weekText: 'Wk',
-  allDayText: 'All-day',
-  moreLinkText(n : number) {
-    return '+ more ' + n
-  },
-  
-  noEventsText: 'No events to display'
-}
+const isAddShiftModalOpen = ref(false)
+const infoDate = ref()
 
 const calendarOptions = computed(() => ({
   plugins: [dayGridPlugin, interactionPlugin],
@@ -67,6 +24,10 @@ const calendarOptions = computed(() => ({
   locale: locale.value === 'ru' ? ruBetterLocale : enBetterLocale,
   selectable: true,
   firstDay: 1,
+  dateClick: function(info: any) {
+    isAddShiftModalOpen.value = true
+    infoDate.value = info
+  },
   
 
   headerToolbar: {
@@ -97,5 +58,13 @@ const calendarOptions = computed(() => ({
 </script>
 
 <template>
-  <FullCalendar :options="calendarOptions" />
+  <FullCalendar
+    ref="calendarRef"
+    :options="calendarOptions"
+  />
+  <AddShiftModalContent
+    :info="infoDate"
+    :model-value="isAddShiftModalOpen"
+    @close="isAddShiftModalOpen = false"
+  />
 </template>
