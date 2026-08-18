@@ -16,7 +16,7 @@ async function goDashboard() {
 
 <template>
     <header class="flex items-center justify-between bg-[var(--bg-header)] px-4 py-3">
-      <NuxtLink to="/" class="font-semibold">Fullstack Starter</NuxtLink>
+      <NuxtLink to="/" class="font-semibold">TeamGrid</NuxtLink>
       <nav class="flex items-center gap-3">
         <select :value="locale" class="select" @change="setLocale(($event.target as HTMLSelectElement).value as 'ru' | 'en')">
           <option value="ru">Ru</option>
