@@ -4,3 +4,9 @@ export type Shift = {
     employeeId: string
     positionId: number
 }
+
+export type CreateShift = {
+    date: string
+    employeeId: string
+    positionId: number
+}

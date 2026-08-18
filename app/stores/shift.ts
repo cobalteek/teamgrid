@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import type { Shift } from "~~/types/shift"
+import type { CreateShift, Shift } from "~~/types/shift"
 
 type RequestError = {
   data?: { message?: string }
@@ -43,24 +43,33 @@ export const useShiftStore = defineStore('shift', () => {
         }
       }
 
-      async function createShift(shiftData: Omit<Shift, 'id'>) {
+      async function createShift(shiftData: Omit<CreateShift, 'id'>) {
         try {
+          if (
+            !shiftData.date ||
+            !shiftData.employeeId ||
+            !shiftData.positionId
+          ) {
+            throw new Error($t('validation.shift.requiredFields'))
+          }
+          const date = new Date(`${shiftData.date}`)
           const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-          const existingShift = shifts.value.find(shift => shift.date.getTime() === shiftData.date.getTime() && shift.employeeId === shiftData.employeeId)
+          const existingShift = shifts.value.find(shift => shift.date === date && shift.employeeId === shiftData.employeeId)
           if (existingShift) {
             throw new Error($t('error.shift.duplicate'))
           }
 
-          console.log('Creating shift with data:', shiftData)
+          const formattedShiftData = {
+            ...shiftData,
+            date
+          }
 
           const newShift = await $fetch<Shift>('/api/user/shift', {
             credentials: 'include',
             method: 'POST',
             headers,
-            body: shiftData,
+            body: formattedShiftData,
           })
-
-          console.log('New shift created:', newShift)
     
           shifts.value.push(newShift)
     

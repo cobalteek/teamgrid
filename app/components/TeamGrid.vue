@@ -2,8 +2,9 @@
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
-import { useCalendarStore } from '#imports'
 import {ruBetterLocale, enBetterLocale} from '../../server/utils/betterLocaleCalendarEnRu'
+import { useShiftStore } from '../stores/shift'
+import {loadShiftsToCallendar} from '../../server/utils/loadShiftsToCallendar'
 import '@fullcalendar/vue3'
 
 const { locale } = useI18n()
@@ -15,7 +16,8 @@ const props = defineProps<{
 
 const isAddShiftModalOpen = ref(false)
 const infoDate = ref()
-
+const calendarRef = ref<InstanceType<typeof FullCalendar> | null>(null)
+const calendarApi = calendarRef.value?.getApi()
 const calendarOptions = computed(() => ({
   plugins: [dayGridPlugin, interactionPlugin],
 
@@ -28,7 +30,11 @@ const calendarOptions = computed(() => ({
     isAddShiftModalOpen.value = true
     infoDate.value = info
   },
-  
+  // events: computed(async () => {
+  //   if(calendarApi)
+  //   await loadShiftsToCallendar(calendarApi)
+  // }),
+   
 
   headerToolbar: {
     left: 'prev,next today',

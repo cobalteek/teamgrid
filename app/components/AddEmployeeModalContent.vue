@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useEmployeeStore } from '~/stores/employee'
-import type { Employee } from '~~/types/employee'
+import type { CreateEmployee } from '~~/types/employee'
 import { isValidEmail, isValidName, isValidPosition } from '../../server/utils/validation'
 import { useErrorModal } from '#imports';
 
@@ -14,8 +14,7 @@ const emit = defineEmits<{
 }>()
 
 const employeeStore = useEmployeeStore()
-const employee = ref<Employee>({
-  id: '',
+const employee = ref<CreateEmployee>({
   name: '',
   surname: '',
   middlename: '',
@@ -24,9 +23,19 @@ const employee = ref<Employee>({
 })
 
 const handleCancel = () => {
+  resetEmployee()
   emit('close')
 }
 
+function resetEmployee() {
+  employee.value = {
+    name: '',
+    surname: '',
+    middlename: '',
+    position: '',
+    email: ''
+  }
+}
 
 function onUpdateModelValue(value: boolean) {
   emit('update:modelValue', value)
@@ -42,7 +51,6 @@ const handleSubmit = async () => {
   if(
     employee.value.name === '' ||
     employee.value.surname === '' ||
-    employee.value.middlename === '' ||
     employee.value.position === '' ||
     employee.value.email === ''
   ) {
@@ -53,7 +61,7 @@ const handleSubmit = async () => {
     errorModal.showError('error.auth.emailInvalid')
     return
   }
-  if (!isValidName(employee.value.name) || !isValidName(employee.value.surname) || employee.value.middlename && !isValidName(employee.value.middlename)) {
+  if (!isValidName(employee.value.name) || !isValidName(employee.value.surname) || (employee.value.middlename.length > 0 && !isValidName(employee.value.middlename))) {
     errorModal.showError('error.auth.fullNameLength')
     return
   }
@@ -62,7 +70,8 @@ const handleSubmit = async () => {
     return
   }
   try{
-    await employeeStore.createEmployee(employee.value as Employee)
+    await employeeStore.createEmployee(employee.value as CreateEmployee)
+    resetEmployee()
   } catch (e) {
     const error = e as {statusCode?: number; status?: number; response?: {status?: number}}
     const status = error.statusCode || error.status || error.response?.status

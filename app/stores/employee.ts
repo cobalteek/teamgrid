@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { Employee } from '~~/types/employee'
+import type { CreateEmployee, Employee } from '~~/types/employee'
 
 type RequestError = {
   data?: { message?: string }
@@ -43,7 +43,7 @@ export const useEmployeeStore = defineStore('employee', () => {
     }
   }
 
-  async function createEmployee(employeeData: Omit<Employee, 'id'>) {
+  async function createEmployee(employeeData: Omit<CreateEmployee, 'id'>) {
     try {
       const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
 
@@ -63,6 +63,27 @@ export const useEmployeeStore = defineStore('employee', () => {
     }
   }
 
+  async function getEmployeeById(employeeId:string) {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
+
+      const employee = await $fetch<Employee>('/api/user/employee', {
+        query: { employeeId },
+        headers
+      })
+
+      return employee
+    } catch (e: unknown) {
+      error.value = getErrorMessage(e)
+      throw e
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   const options = computed(() =>
     employees.value.map(e => ({value: e.id, label: `${e.surname} ${e.name} ${e.middlename}`}))
   )
@@ -73,6 +94,7 @@ export const useEmployeeStore = defineStore('employee', () => {
     error,
     getEmployees,
     createEmployee,
+    getEmployeeById,
     options
   }
 })

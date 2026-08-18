@@ -1,27 +1,56 @@
-<script setup lang="ts" generics="Model, Field, Select">
+<script setup lang="ts" generic="T extends Record<string, unknown>">
 const props = defineProps<{
   title: string,
-  fields?: readonly Field[];
-  selects?: readonly Select[];
-  modelValue: Model;
+  fields?: readonly Field<T>[];
+  selects?: readonly Select<T>[];
+  modelValue: T;
   date?: Date
   submitBtnName: string;
 }>()
-
-
-type SelectOption = { label: string, value: string | number }
-type Select = { key: string, placeholder: string, selectOption: SelectOption[]}
-type Field = { key: string; type: string; placeholder: string }
-type Model = Record<string, string | number | Date>
 
 const emit = defineEmits<{
   close: [],
   submit: []
 }>()
 
+type SelectKey<T> = {
+  [K in keyof T]: T[K] extends string | number ? K : never
+}[keyof T]
+
+type Select<T> = {
+  [K in SelectKey<T>]: {
+    key: K
+    placeholder: string
+    disabledOption: string
+    selectOption: {
+      label: string
+      value: T[K]
+    }[]
+  }
+}[SelectKey<T>]
+
+type StringKey<T> = {
+  [K in keyof T]: T[K] extends string ? K : never
+}[keyof T]
+
+type Field<T> = {
+  [K in StringKey<T>]: {
+    key: K
+    type: string
+    placeholder: string
+  }
+}[StringKey<T>]
+
+function updateField(
+  key: StringKey<T>,
+  value: string
+) {
+  ;(props.modelValue as Record<StringKey<T>, string>)[key] = value
+}
+
 function onSelectChange(
   event: Event,
-  select: Select
+  select: Select<T>
 ) {
   const value = (event.target as HTMLSelectElement).value
 
@@ -56,7 +85,10 @@ const formatedDate = new Intl.DateTimeFormat('ru-RU', {
         v-for="field in fields"
         :key="field.key"
         :value="modelValue[field.key] ?? ''"
-        @input="modelValue[field.key] = ($event.target as HTMLInputElement).value"
+        @input="updateField(
+          field.key,
+          ($event.target as HTMLInputElement).value
+        )"
         :type="field.type"
         :placeholder="$t(field.placeholder)"
         />
@@ -75,8 +107,8 @@ const formatedDate = new Intl.DateTimeFormat('ru-RU', {
           {{ $t(select.placeholder) }}
         </option>
         <option
-          v-for="(o) in select.selectOption"
-          :key="o.value"
+          v-for="o in select.selectOption"
+          :key="String(o.value)"
           :value="o.value"
         >
           {{ o.label }}

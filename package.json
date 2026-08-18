@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "prisma generate && nuxt build",
-    "dev": "prisma generate && nuxt dev",
+    "dev": "prisma generate && nuxt dev --host",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",

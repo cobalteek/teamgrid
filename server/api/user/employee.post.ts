@@ -45,7 +45,7 @@ export default defineEventHandler(async (event) => {
     if (!isValidEmail(email)) {
           throw createError({statusCode: 400, statusMessage: t('error.auth.invalidEmail')})
     }
-    if (!isValidName(name) || !isValidName(surname) || !isValidName(middlename)) {
+    if (!isValidName(name) || !isValidName(surname) || (middlename.length > 0 && !isValidName(middlename))) {
         throw createError({statusCode: 400, statusMessage: t('error.auth.nameLength')})
     }
 

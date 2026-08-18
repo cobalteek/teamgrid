@@ -1,22 +1,50 @@
-import {prisma} from '../../utils/prisma'
+import { prisma } from '../../utils/prisma'
 import {
     defineEventHandler,
-    createError
+    createError,
+    getQuery
 } from 'h3'
 
 export default defineEventHandler(async (event) => {
     const t = await useTranslation(event)
+    const query = getQuery(event)
+    const employeeId = query.employeeId ? String(query.employeeId) : undefined
 
     try {
-        const employees = await prisma.employee.findMany({
-            select: {
-                id: true,
-                name: true,
-                surname: true,
-                middlename: true,
-                position: true,
-                email: true
+        const selectFields = {
+            id: true,
+            name: true,
+            surname: true,
+            middlename: true,
+            position: true,
+            email: true
+        }
+
+        if (employeeId) {
+            const employee = await prisma.employee.findUnique({
+                where: { id: employeeId },
+                select: selectFields
+            })
+
+            if (!employee) {
+                throw createError({
+                    statusCode: 404,
+                    statusMessage: t('error.employee.notFound')
+                })
             }
+
+            return {
+                id: employee.id,
+                name: employee.name,
+                surname: employee.surname,
+                middlename: employee.middlename,
+                position: employee.position,
+                email: employee.email
+            }
+        }
+
+        const employees = await prisma.employee.findMany({
+            select: selectFields
         })
 
         if (!employees || employees.length === 0) {
@@ -34,8 +62,11 @@ export default defineEventHandler(async (event) => {
             position: employee.position,
             email: employee.email
         }))
-    } catch (error) {
-        console.log(error)
+
+    } catch (error: any) {
+        console.error(error)
+
+        if (error.statusCode) throw error
 
         throw createError({
             statusCode: 500,

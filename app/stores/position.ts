@@ -39,7 +39,28 @@ export const usePositionStore = defineStore('position', () => {
         } finally {
           isLoading.value = false
         }
+    }
+
+    async function getPositionById(positionId: number) {
+      isLoading.value = true
+      error.value = null
+      
+      try {
+        const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
+      
+        const position = await $fetch<Position>('/api/user/position', {
+          query: { positionId },
+          headers
+        })
+      
+        return position
+      } catch (e: unknown) {
+        error.value = getErrorMessage(e)
+        throw e
+      } finally {
+        isLoading.value = false
       }
+    }
 
     const options = computed(() =>
         positions.value.map(p => ({value: p.id, label: p.name}))
@@ -50,6 +71,7 @@ export const usePositionStore = defineStore('position', () => {
         error,
         isLoading,
         getPositions,
+        getPositionById,
         options
     }
 })
