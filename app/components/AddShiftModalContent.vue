@@ -12,6 +12,7 @@ const props = defineProps<{
 const employeeStore = useEmployeeStore()
 const positionStore = usePositionStore()
 const shiftStore = useShiftStore()
+const errorModal = useErrorModal()
 
 onMounted(async () => {
     await employeeStore.getEmployees()
@@ -44,18 +45,20 @@ const handleCancel = () => {
 }
 
 const handleSubmit = async () => {
-  console.log('shift.value', shift.value)
-    if(shift.value.employeeId === '' || shift.value.positionId === 0) {
-        useErrorModal().showError('error.form.fieldsEmpty')
-        return
-    }
-    console.log('shift.value', shift.value)
-    await shiftStore.createShift(shift.value)
-    emit('submit')
-    emit('close')
+  shift.value.date = props.info.dateStr
+  if(shift.value.employeeId === '' || shift.value.positionId === 0) {
+      errorModal.showError('error.form.fieldsEmpty')
+      return
+  }
+  try {
+      await shiftStore.createShift(shift.value)
+  } catch (error: any) {
+      errorModal.showError(error.message || 'error.shift.create')
+      return
+  }
+  emit('submit')
+  emit('close')
 }
-
-const errorModal = useErrorModal()
 
 </script>
 
@@ -68,8 +71,8 @@ const errorModal = useErrorModal()
         title="btn.addShift"
         :date="info.date"
         :selects="[
-            {key: 'employeeId', placeholder: $t('select.employee'), disabledOption: 'select.employee', selectOption: employeeStore.options},
-            {key: 'positionId', placeholder: $t('select.position'), disabledOption: 'select.position', selectOption: positionStore.options}    
+            {key: 'employeeId', placeholder: $t('select.employee'), selectOption: employeeStore.options},
+            {key: 'positionId', placeholder: $t('select.position'), selectOption: positionStore.options}    
         ]"
         v-model:modelValue="shift"
         submitBtnName="btn.addShift"

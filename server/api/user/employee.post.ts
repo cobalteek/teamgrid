@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
     const middlename = typeof body?.middlename === 'string' ? body.middlename.trim() : ''
     const position = typeof body?.position === 'string' ? body.position.trim() : ''
 
-    if (!name || !surname || !middlename || !email || !position) {
+    if (!name || !surname || !email || !position) {
         throw createError({
             statusCode: 400,
             statusMessage: t('validation.employee.requiredFields')

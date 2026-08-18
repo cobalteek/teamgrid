@@ -1,23 +1,38 @@
-<script setup lang="ts">
+<script setup lang="ts" generics="Model, Field, Select">
 const props = defineProps<{
   title: string,
   fields?: readonly Field[];
   selects?: readonly Select[];
   modelValue: Model;
-  date?: Date 
+  date?: Date
   submitBtnName: string;
 }>()
 
 
 type SelectOption = { label: string, value: string | number }
-type Select = { key: string, placeholder: string, disabledOption: string, selectOption: SelectOption[]}
+type Select = { key: string, placeholder: string, selectOption: SelectOption[]}
 type Field = { key: string; type: string; placeholder: string }
-type Model = Record<string, unknown>
+type Model = Record<string, string | number | Date>
+
 const emit = defineEmits<{
   close: [],
   submit: []
 }>()
 
+function onSelectChange(
+  event: Event,
+  select: Select
+) {
+  const value = (event.target as HTMLSelectElement).value
+
+  const option = select.selectOption.find(
+    option => String(option.value) === value
+  )
+
+  if (option) {
+    props.modelValue[select.key] = option.value
+  }
+}
 
 const handleCancel = () => {
   emit('close')
@@ -53,16 +68,16 @@ const formatedDate = new Intl.DateTimeFormat('ru-RU', {
         v-for="select in selects"
         :key="select.key"
         :value="modelValue[select.key] ?? ''"
-        @input="modelValue[select.key] = ($event.target as HTMLInputElement).value"
+        @input="onSelectChange($event, select)"
         class="border-1 rounded pl-2"
       >
         <option disabled value="">
-          {{ $t(select.disabledOption) }}
+          {{ $t(select.placeholder) }}
         </option>
         <option
-          v-for="(o, index) in select.selectOption"
+          v-for="(o) in select.selectOption"
           :key="o.value"
-          :value="index"
+          :value="o.value"
         >
           {{ o.label }}
         </option>

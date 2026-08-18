@@ -53,7 +53,7 @@ const handleSubmit = async () => {
     errorModal.showError('error.auth.emailInvalid')
     return
   }
-  if (!isValidName(employee.value.name) || !isValidName(employee.value.surname) || !isValidName(employee.value.middlename)) {
+  if (!isValidName(employee.value.name) || !isValidName(employee.value.surname) || employee.value.middlename && !isValidName(employee.value.middlename)) {
     errorModal.showError('error.auth.fullNameLength')
     return
   }

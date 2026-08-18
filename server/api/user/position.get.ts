@@ -16,11 +16,11 @@ export default defineEventHandler(async (event) => {
     })
 
     if (!positions || positions.length === 0) {
-            throw createError({
-                statusCode: 404,
-                statusMessage: t('error.position.notFound')
-            })
-        }
+      throw createError({
+        statusCode: 404,
+        statusMessage: t('error.position.notFound')
+      })
+    }
 
     return positions.map((position) => ({
       id: position.id,

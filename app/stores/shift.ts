@@ -46,17 +46,21 @@ export const useShiftStore = defineStore('shift', () => {
       async function createShift(shiftData: Omit<Shift, 'id'>) {
         try {
           const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-            
           const existingShift = shifts.value.find(shift => shift.date.getTime() === shiftData.date.getTime() && shift.employeeId === shiftData.employeeId)
           if (existingShift) {
             throw new Error($t('error.shift.duplicate'))
           }
+
+          console.log('Creating shift with data:', shiftData)
+
           const newShift = await $fetch<Shift>('/api/user/shift', {
             credentials: 'include',
             method: 'POST',
             headers,
             body: shiftData,
           })
+
+          console.log('New shift created:', newShift)
     
           shifts.value.push(newShift)
     

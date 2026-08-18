@@ -49,17 +49,6 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    const userPosition = await prisma.position.findUnique({
-      where: { name: 'user' },
-    })
-
-    if (!userPosition) {
-      throw createError({
-        statusCode: 500,
-        statusMessage: t('error.user.positionUserNotFound'),
-      })
-    }
-
     const hash = await bcrypt.hash(password, 10)
 
     const user = await prisma.user.create({
@@ -70,7 +59,7 @@ export default defineEventHandler(async (event) => {
         gender,
         positions: {
           create: {
-            positionId: userPosition.id,
+            positionId: 2,
           },
         },
       },
