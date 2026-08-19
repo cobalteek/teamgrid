@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import type { CreateShift, Shift } from "~~/types/shift"
+import type { CreateShift, ShiftWithRelations } from "~~/types/shift"
 
 type RequestError = {
   data?: { message?: string }
@@ -8,7 +8,7 @@ type RequestError = {
 
 function getErrorMessage(error: unknown) {
   if (typeof error !== 'object' || error === null) {
-    return $t('error.')
+    return $t('error.shift.notFound')
   }
 
   const requestError = error as RequestError
@@ -17,7 +17,7 @@ function getErrorMessage(error: unknown) {
 
 export const useShiftStore = defineStore('shift', () => {
 
-    const shifts = ref<Shift[]>([])
+    const shifts = ref<ShiftWithRelations[]>([])
     const isLoading = ref(false)
     const error = ref<string | null>(null)
 
@@ -28,10 +28,10 @@ export const useShiftStore = defineStore('shift', () => {
         try {
           const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
     
-          shifts.value = await $fetch<Shift[]>('/api/user/shift', {
+          shifts.value = await $fetch<ShiftWithRelations[]>('/api/user/shift', {
             credentials: 'include',
             method: 'GET',
-            headers,
+            headers
           })
     
           return shifts.value
@@ -50,13 +50,13 @@ export const useShiftStore = defineStore('shift', () => {
             !shiftData.employeeId ||
             !shiftData.positionId
           ) {
-            throw new Error($t('validation.shift.requiredFields'))
+            throw createError('validation.shift.requiredFields')
           }
           const date = new Date(`${shiftData.date}`)
           const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-          const existingShift = shifts.value.find(shift => shift.date === date && shift.employeeId === shiftData.employeeId)
+          const existingShift = shifts.value.find(shift => shift.date.toString().slice(0,10) === date.toLocaleDateString('sv-SE') && shift.employeeId === shiftData.employeeId)
           if (existingShift) {
-            throw new Error($t('error.shift.duplicate'))
+            throw createError('error.shift.duplicate')
           }
 
           const formattedShiftData = {
@@ -64,7 +64,7 @@ export const useShiftStore = defineStore('shift', () => {
             date
           }
 
-          const newShift = await $fetch<Shift>('/api/user/shift', {
+          const newShift = await $fetch<ShiftWithRelations>('/api/user/shift', {
             credentials: 'include',
             method: 'POST',
             headers,

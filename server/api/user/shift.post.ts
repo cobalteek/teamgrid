@@ -43,6 +43,10 @@ export default defineEventHandler(async (event) => {
         date,
         employeeId,
         positionId
+      },
+      include: {
+        employee: true,
+        position: true
       }
     })
 

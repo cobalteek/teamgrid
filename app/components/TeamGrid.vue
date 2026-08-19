@@ -2,9 +2,9 @@
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
+import listPlugin from '@fullcalendar/list'
 import {ruBetterLocale, enBetterLocale} from '../../server/utils/betterLocaleCalendarEnRu'
 import { useShiftStore } from '../stores/shift'
-import {loadShiftsToCallendar} from '../../server/utils/loadShiftsToCallendar'
 import '@fullcalendar/vue3'
 
 const { locale } = useI18n()
@@ -16,12 +16,22 @@ const props = defineProps<{
 
 const isAddShiftModalOpen = ref(false)
 const infoDate = ref()
+const shiftStore = useShiftStore()
 const calendarRef = ref<InstanceType<typeof FullCalendar> | null>(null)
-const calendarApi = calendarRef.value?.getApi()
-const calendarOptions = computed(() => ({
-  plugins: [dayGridPlugin, interactionPlugin],
+const events = computed(() => {
+  return shiftStore.shifts.map(shift => ({
+    id: shift.id,
+    title: `${shift.employee.name} ${shift.position.name}`,
+    start: shift.date,
+    allDay: true,
+    color: 'red'
+  }))
+})
 
-  initialView: props.settings.initialView || 'dayGridMonth',
+const calendarOptions = computed(() => ({
+  plugins: [dayGridPlugin, listPlugin, interactionPlugin],
+
+  initialView: window.innerWidth < 768 ? 'timeGridDay' : 'dayGridMonth',
 
   locale: locale.value === 'ru' ? ruBetterLocale : enBetterLocale,
   selectable: true,
@@ -30,16 +40,26 @@ const calendarOptions = computed(() => ({
     isAddShiftModalOpen.value = true
     infoDate.value = info
   },
-  // events: computed(async () => {
-  //   if(calendarApi)
-  //   await loadShiftsToCallendar(calendarApi)
-  // }),
-   
+  windowResize: function() {
+    const api = calendarRef.value?.getApi()
 
+    if (!api) return
+
+    if (window.innerWidth < 768) {
+      api.changeView('listWeek')
+    } else {
+      api.changeView('dayGridMonth')
+    }
+  },
+
+  events: events.value,
+  dayMaxEvents: window.innerWidth < 768 ? 1 : 3,
+  moreLinkClick: 'popover',
+   
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
-    right: ''
+    right: window.innerWidth < 768 ? 'timeGridDay,listWeek' : 'dayGridMonth,timeGridWeek'
   },
 
   titleFormat: (date : any) => {
@@ -60,6 +80,10 @@ const calendarOptions = computed(() => ({
     return text.charAt(0).toUpperCase() + text.slice(1)
   }
 }))
+
+onMounted(async () => {
+  await shiftStore.getShifts()
+})
 
 </script>
 

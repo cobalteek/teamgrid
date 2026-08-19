@@ -3,7 +3,7 @@ import { useErrorModal } from '#imports';
 import { useEmployeeStore } from '../stores/employee';
 import { usePositionStore } from '../stores/position';
 import { useShiftStore } from '../stores/shift';
-import type { CreateShift, Shift } from '../../types/shift';
+import type { CreateShift } from '../../types/shift';
 const props = defineProps<{
     modelValue: boolean
     info: any
@@ -63,6 +63,7 @@ const handleSubmit = async () => {
       return
   }
   emit('submit')
+  resetModal()
   emit('close')
 }
 
@@ -79,13 +80,13 @@ const handleSubmit = async () => {
         :selects="[
         {
           key: 'employeeId',
-          placeholder: $t('select.employee'),
+          placeholder: 'select.employee',
           disabledOption: 'select.employee',
           selectOption: employeeStore.options
         },
         {
           key: 'positionId',
-          placeholder: $t('select.position'),
+          placeholder: 'select.position',
           disabledOption: 'select.position',
           selectOption: positionStore.options
         }

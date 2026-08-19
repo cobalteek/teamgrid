@@ -11,8 +11,10 @@ const toggleView = 'dayGridMonth'
 </script>
 
 <template>
-  <div class="w-full">
-    <Toolbar/>
-    <TeamGrid :settings="{ initialView: toggleView }"/>
+  <div class="w-full max-sm:h-full">
+    <Toolbar class=""/>
+    <TeamGrid
+      :settings="{ initialView: toggleView }"
+    />
   </div>
 </template>

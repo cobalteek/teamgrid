@@ -33,9 +33,5 @@ export default defineNuxtConfig({
     vueI18n: './i18n.config.ts'
   },
 
-  devtools: {
-    enabled: true
-  },
-
   compatibilityDate: '2025-01-15'
 })

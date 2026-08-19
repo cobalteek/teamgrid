@@ -9,11 +9,9 @@ export default defineEventHandler(async (event) => {
 
   try {
     const shifts = await prisma.shift.findMany({
-      select: {
-        id: true,
-        date: true,
-        employeeId: true,
-        positionId: true,
+      include: {
+        employee: true,
+        position: true
       }
     })
 
@@ -28,7 +26,19 @@ export default defineEventHandler(async (event) => {
       id: shift.id,
       date: shift.date,
       employeeId: shift.employeeId,
-      positionId: shift.positionId
+      positionId: shift.positionId,
+      employee: {
+        id: shift.employee.id,
+        name: shift.employee.name,
+        surname: shift.employee.surname,
+        middlename: shift.employee.middlename,
+        positionId: shift.employee.positionId,
+        email: shift.employee.email
+      },
+      position: {
+        id: shift.position.id,
+        name: shift.position.name
+      }
     }))
 
   } catch (error) {
