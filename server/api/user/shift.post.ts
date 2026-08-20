@@ -8,12 +8,18 @@ export default defineEventHandler(async (event) => {
   const t = await useTranslation(event)
   const body = await readBody(event)
   try {
-    const { date, employeeId, positionId } = body
+    const { date, employeeId, positionId, organizationId } = body
 
     if (!date || !employeeId || !positionId) {
       throw createError({
         statusCode: 400,
         statusMessage: t('validation.shift.requiredFields')
+      })
+    }
+    if(!organizationId) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: t('error.organization.get')
       })
     }
     const employee = await prisma.employee.findUnique({
@@ -42,11 +48,13 @@ export default defineEventHandler(async (event) => {
       data: {
         date,
         employeeId,
-        positionId
+        positionId,
+        organizationId
       },
       include: {
         employee: true,
-        position: true
+        position: true,
+        organization: true
       }
     })
 

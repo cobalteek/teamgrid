@@ -6,14 +6,14 @@ import type {Prisma} from "@prisma/client";
 export default defineEventHandler(async (event) => {
   const {userId} = await requireUser(event)
   const t = await useTranslation(event)
-  type UserWithPositions = Prisma.UserGetPayload<{
-    include: {positions: {include: {position: true}}}
+  type UserMembreship = Prisma.UserGetPayload<{
+    include: {memberships: {include: {user: true, organization: true}}}
   }>
 
   const user = (await prisma.user.findUnique({
     where: {id: userId},
-    include: {positions: {include: {position: true}}}
-  })) as UserWithPositions | null
+    include: {memberships: {include: {user: true, organization: true}}}
+  })) as UserMembreship | null
 
   if (!user) {
     throw createError({
@@ -27,6 +27,5 @@ export default defineEventHandler(async (event) => {
     email: user.email,
     name: user.name,
     gender: user.gender,
-    positions: user.positions.map((userPosition) => userPosition.position.name),
   }
 })

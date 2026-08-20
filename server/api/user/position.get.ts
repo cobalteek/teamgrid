@@ -9,15 +9,19 @@ export default defineEventHandler(async (event) => {
   const t = await useTranslation(event)
   const query = getQuery(event)
   const positionId = query.positionId ? Number(query.positionId) : undefined
+  const organizationId = query.organizationId ? Number(query.organizationId) : undefined
   try {
     const selectedFields = {
       id: true,
-      name: true
+      name: true,
     }
 
     if(positionId) {
       const position = await prisma.position.findUnique({
-        where: {id: positionId},
+        where: {
+          id: positionId,
+          organizationId: organizationId
+        },
         select: selectedFields
       })
 
@@ -35,6 +39,9 @@ export default defineEventHandler(async (event) => {
     }
 
     const positions = await prisma.position.findMany({
+      where: {
+        organizationId: organizationId
+      },
       select: selectedFields
     })
 
@@ -47,7 +54,8 @@ export default defineEventHandler(async (event) => {
 
     return positions.map((position) => ({
       id: position.id,
-      name: position.name
+      name: position.name,
+      organizationId: organizationId
     }))
   } catch (error) {
     console.log(error)

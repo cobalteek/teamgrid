@@ -178,7 +178,11 @@
       "notFound": "No positions found"
     },
     "shift": {
-      "duplicate": "This shift already exists"
+      "duplicate": "This shift already exists",
+      "notFound": "Shift not found"
+    },
+    "organization": {
+      "get": "Organization not received"
     }
   },
   "placeholder": {

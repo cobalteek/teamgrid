@@ -51,34 +51,41 @@ export default defineEventHandler(async (event) => {
 
     const hash = await bcrypt.hash(password, 10)
 
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: hash,
-        name,
-        gender,
-        positions: {
-          create: {
-            positionId: 2,
-          },
-        },
-      },
-      include: {
-        positions: {
-          include: {
-            position: true,
-          },
-        },
-      },
-    })
+    await prisma.$transaction(async (tx) => {
 
-    return {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      gender: user.gender,
-      positions: user.positions.map((userPosition) => userPosition.position.name),
-    }
+      const organization = await tx.organization.create({
+        data: {
+          name: `${name}_organization`,
+        },
+      })
+
+      const user = await tx.user.create({
+        data: {
+          email,
+          password: hash,
+          name,
+          gender,
+        },
+      })
+
+      const membership = await tx.organizationMember.create({
+        data: {
+          userId: user.id,
+          organizationId: organization.id,
+          roleId: 2,
+        },
+        include: {
+          organization: true,
+          role: true,
+        },
+      })
+
+      return {
+        user,
+        membership,
+        organization
+      }
+  })
   } catch (error: unknown) {
     if (typeof error === 'object' && error !== null && 'statusCode' in error) {
       throw error

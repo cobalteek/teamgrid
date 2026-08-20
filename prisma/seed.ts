@@ -15,8 +15,8 @@ async function main() {
     await prisma.$executeRawUnsafe(`TRUNCATE TABLE ${tables} RESTART IDENTITY CASCADE;`)
   }
 
-  await prisma.position.createMany({
-    data: ['employee','admin'].map((name) => ({ name })),
+  await prisma.role.createMany({
+    data: ['owner','admin','user'].map((name) => ({ name })),
     skipDuplicates: true,
   })
 }

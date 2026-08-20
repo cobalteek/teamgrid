@@ -3,5 +3,9 @@ export type User = {
   email: string
   name: string
   gender: string
-  positions: string[]
+  roles: string[]
+  organization: {
+    id: number
+    name: string
+  }
 }

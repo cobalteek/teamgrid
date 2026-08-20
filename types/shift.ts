@@ -5,6 +5,10 @@ export type Shift = {
     date: Date
     employeeId: string
     positionId: number
+    organization: {
+        id: number
+        name: string
+    }
 }
 
 export type ShiftWithRelations = Shift & {

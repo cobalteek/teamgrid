@@ -4,31 +4,30 @@ import {isValidEmail, isValidName} from '../../utils/validation'
 
 
 export default defineEventHandler(async (event) => {
-    const {userId} = await requireUser(event)
+    const {userId, organizationId} = await requireUser(event)
     const body = await readBody(event)
     const t = await useTranslation(event)
 
-    // const admin = await prisma.user.findUnique({
-    //     where: {id: userId},
-    //     select: {
-    //         positions: {
-    //             include: {
-    //                 position: true
-    //             }
-    //         }
-    //     }
-    // })
+    const owner = await prisma.organizationMember.findUnique({
+        where: {
+            userId_organizationId: {
+                userId,
+                organizationId
+            }
+        },
+        include: {
+            role: true
+        }
+    })
 
-    // const canCreateEmployee = admin?.positions.some((userPosition) =>
-    //     ['admin', 'owner'].includes(userPosition.position.name)
-    // )
+    const canCreateEmployee = owner?.role.name === 'owner'
 
-    // if (!canCreateEmployee) {
-    //     throw createError({
-    //         statusCode: 403,
-    //         statusMessage: t('error.user.onlyAdmin')
-    //     })
-    // }
+    if (!canCreateEmployee) {
+        throw createError({
+            statusCode: 403,
+            statusMessage: t('error.user.onlyOwner')
+        })
+    }
 
     const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : ''
     const name = typeof body?.name === 'string' ? body.name.trim() : ''
@@ -62,11 +61,15 @@ export default defineEventHandler(async (event) => {
 
     const positionRecord = await prisma.position.upsert({
         where: {
-            name: position
+            organizationId_name: {
+                organizationId: organizationId,
+                name: name
+            }
         },
         update: {},
         create: {
-            name: position
+            name: position,
+            organizationId: organizationId
         }
     })
 
@@ -76,7 +79,8 @@ export default defineEventHandler(async (event) => {
             surname,
             middlename,
             email,
-            positionId: positionRecord.id
+            positionId: positionRecord.id,
+            organizationId: organizationId
         }
     })
 

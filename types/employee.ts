@@ -8,6 +8,10 @@ export type Employee = {
     name: string
   }
   email: string
+  organization: {
+      id: number
+      name: string
+  }
 }
 
 export type CreateEmployee = {

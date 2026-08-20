@@ -1,17 +1,45 @@
 import { prisma } from '../../utils/prisma'
 import {
   defineEventHandler,
-  createError
+  createError,
+  getQuery
 } from 'h3'
 
 export default defineEventHandler(async (event) => {
   const t = await useTranslation(event)
-
+  const query = getQuery(event)
+  const employeeId = query.employeeId ? String(query.employeeId) : undefined
+  const organizationId = query.organizationId ? Number(query.organizationId) : undefined
   try {
+    const where = {
+      organizationId,
+      ...(employeeId && { employeeId })
+    }
     const shifts = await prisma.shift.findMany({
-      include: {
-        employee: true,
-        position: true
+      where,
+      select: {
+        id: true,
+        date: true,
+        employeeId: true,
+        positionId: true,
+
+        employee: {
+          select: {
+            id: true,
+            name: true,
+            surname: true,
+            middlename: true,
+            positionId: true,
+            email: true
+          }
+        },
+
+        position: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
       }
     })
 

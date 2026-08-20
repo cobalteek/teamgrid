@@ -17,7 +17,8 @@ export default defineEventHandler(async (event) => {
             surname: true,
             middlename: true,
             position: true,
-            email: true
+            email: true,
+            organizationId: true
         }
 
         if (employeeId) {
@@ -38,7 +39,12 @@ export default defineEventHandler(async (event) => {
                 name: employee.name,
                 surname: employee.surname,
                 middlename: employee.middlename,
-                position: employee.position,
+                position: {
+                    id: employee.position.id,
+                    name: employee.position.name,
+                    organizationId: employee.position.organizationId
+                },
+                organizationId: employee.organizationId,
                 email: employee.email
             }
         }
@@ -59,7 +65,12 @@ export default defineEventHandler(async (event) => {
             name: employee.name,
             surname: employee.surname,
             middlename: employee.middlename,
-            position: employee.position,
+            position: {
+                id: employee.position.id,
+                name: employee.position.name,
+                organizationId: employee.position.organizationId
+            },
+            organizationId: employee.organizationId,
             email: employee.email
         }))
 
