@@ -31,7 +31,7 @@ const events = computed(() => {
 const calendarOptions = computed(() => ({
   plugins: [dayGridPlugin, listPlugin, interactionPlugin],
 
-  initialView: window.innerWidth < 768 ? 'timeGridDay' : 'dayGridMonth',
+  initialView: 'dayGridMonth',
 
   locale: locale.value === 'ru' ? ruBetterLocale : enBetterLocale,
   selectable: true,
@@ -40,20 +40,20 @@ const calendarOptions = computed(() => ({
     isAddShiftModalOpen.value = true
     infoDate.value = info
   },
-  windowResize: function() {
-    const api = calendarRef.value?.getApi()
+  // windowResize: function() {
+  //   const api = calendarRef.value?.getApi()
 
-    if (!api) return
+  //   if (!api) return
 
-    if (window.innerWidth < 768) {
-      api.changeView('listWeek')
-    } else {
-      api.changeView('dayGridMonth')
-    }
-  },
+  //   if (window.innerWidth < 768) {
+  //     api.changeView('listWeek')
+  //   } else {
+  //     api.changeView('dayGridMonth')
+  //   }
+  // },
 
   events: events.value,
-  dayMaxEvents: window.innerWidth < 768 ? 1 : 3,
+  // dayMaxEvents: window.innerWidth < 768 ? 1 : 3,
   moreLinkClick: 'popover',
    
   headerToolbar: {

@@ -4,9 +4,10 @@ import {isValidEmail, isValidName} from '../../utils/validation'
 
 
 export default defineEventHandler(async (event) => {
-    const {userId, organizationId} = await requireUser(event)
+    const {userId} = await requireUser(event)
     const body = await readBody(event)
     const t = await useTranslation(event)
+    const {organizationId} = body
 
     const owner = await prisma.organizationMember.findUnique({
         where: {

@@ -21,7 +21,6 @@ export default defineEventHandler(async (event) => {
 
   const ok = await bcrypt.compare(password, user.password)
   if (!ok) throw createError({statusCode: 401, statusMessage: t('error.auth.credentials')})
-  console.log('sosiska')
   const token = signToken({userId: user.id})
 
   setCookie(event, 'token', token, {
@@ -31,7 +30,6 @@ export default defineEventHandler(async (event) => {
     path: '/',
     maxAge: 60 * 60 * 24 * 7,
   })
-  console.log('sosiska2')
 
   return {success: true}
 })

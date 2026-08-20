@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useEmployeeStore } from '~/stores/employee'
+import { useOrganizationStore } from '~/stores/organization'
 import type { CreateEmployee } from '~~/types/employee'
 import { isValidEmail, isValidName, isValidPosition } from '../../server/utils/validation'
 import { useErrorModal } from '#imports';
@@ -14,12 +15,14 @@ const emit = defineEmits<{
 }>()
 
 const employeeStore = useEmployeeStore()
+const organizationStore = useOrganizationStore()
 const employee = ref<CreateEmployee>({
   name: '',
   surname: '',
   middlename: '',
   position: '',
-  email: ''
+  email: '',
+  organizationId: 0
 })
 
 const handleCancel = () => {
@@ -33,7 +36,8 @@ function resetEmployee() {
     surname: '',
     middlename: '',
     position: '',
-    email: ''
+    email: '',
+    organizationId: 0
   }
 }
 
@@ -82,6 +86,11 @@ const handleSubmit = async () => {
   emit('close')
 }
 
+onMounted(async () => {
+  await organizationStore.getOrganizations()
+  console.log(organizationStore.options)
+})
+
 </script>
 
 <template>
@@ -98,6 +107,12 @@ const handleSubmit = async () => {
           { key: 'position', type: 'text', placeholder: 'placeholder.position' },
           { key: 'email', type: 'email', placeholder: 'placeholder.email' }
         ]"
+        :selects="[{
+          key:'organizationId',
+          placeholder: 'select.organization',
+          disabledOption: 'select.organization',
+          selectOption: organizationStore.options
+        }]"
         v-model:modelValue="employee"
         submitBtnName="btn.addEmployee"
         @submit="handleSubmit"

@@ -26,11 +26,10 @@ export async function requireUser(event: H3Event) {
   const secret = getJwtSecret()
 
   try {
-    const payload = jwt.verify(token, secret) as {userId: string, organizationId: number}
+    const payload = jwt.verify(token, secret) as {userId: string}
     const userId = payload.userId
-    const organizationId = payload.organizationId
-    if (!userId || !organizationId) throw createError({statusCode: 401, statusMessage: t('error.auth.unAuth')})
-    return {userId, organizationId}
+    if (!userId) throw createError({statusCode: 401, statusMessage: t('error.auth.unAuth')})
+    return {userId}
 
   } catch {
     throw createError({statusCode: 401, statusMessage: t('error.auth.unAuth')})

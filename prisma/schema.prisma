@@ -87,6 +87,6 @@ model OrganizationMember {
   role         Role         @relation(fields: [roleId], references: [id])
 
   @@id([userId, organizationId])
-  @@index([organizationId])
+  @@index([organizationId, roleId])
   @@index([roleId])
 }

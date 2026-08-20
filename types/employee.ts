@@ -20,4 +20,5 @@ export type CreateEmployee = {
   middlename: string
   position: string
   email: string
+  organizationId: number
 }
