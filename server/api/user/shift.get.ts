@@ -39,6 +39,12 @@ export default defineEventHandler(async (event) => {
             id: true,
             name: true
           }
+        },
+        organization: {
+          select: {
+            id: true,
+            name: true
+          }
         }
       }
     })

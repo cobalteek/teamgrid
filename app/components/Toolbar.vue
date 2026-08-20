@@ -15,7 +15,7 @@ const isAddEmployeeModalOpen = ref(false)
 </script>
 
 <template>
-  <div class="flex justify-end flex-row gap-2 w-full mb-3">
+    <div class="flex justify-end flex-row gap-2 w-full mb-3">
     <button @click="isAddEmployeeModalOpen = true" class="btn">
         {{$t('btn.addEmployee')}}
     </button>

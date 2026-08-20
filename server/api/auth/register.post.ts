@@ -72,7 +72,7 @@ export default defineEventHandler(async (event) => {
         data: {
           userId: user.id,
           organizationId: organization.id,
-          roleId: 2,
+          roleId: 1,
         },
         include: {
           organization: true,

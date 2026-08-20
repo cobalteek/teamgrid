@@ -1,4 +1,5 @@
 import type { Employee } from "./employee"
+import type { Organization } from "./organization"
 import type { Position } from "./position"
 export type Shift = {
     id: string
@@ -14,6 +15,7 @@ export type Shift = {
 export type ShiftWithRelations = Shift & {
   employee: Employee
   position: Position
+  organization: Organization
 }
 
 export type CreateShift = {

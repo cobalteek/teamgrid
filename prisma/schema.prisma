@@ -89,4 +89,4 @@ model OrganizationMember {
   @@id([userId, organizationId])
   @@index([organizationId, roleId])
   @@index([roleId])
-}
+}x

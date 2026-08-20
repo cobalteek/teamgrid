@@ -12,6 +12,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:modelValue', v: boolean): void
   (e: 'close') : void
+  (e: 'submit') : void
 }>()
 
 const employeeStore = useEmployeeStore()
@@ -22,7 +23,7 @@ const employee = ref<CreateEmployee>({
   middlename: '',
   position: '',
   email: '',
-  organizationId: 0
+  organizationId: 1
 })
 
 const handleCancel = () => {
@@ -37,7 +38,7 @@ function resetEmployee() {
     middlename: '',
     position: '',
     email: '',
-    organizationId: 0
+    organizationId: 1
   }
 }
 
@@ -83,6 +84,7 @@ const handleSubmit = async () => {
       errorModal.showError('error.createEmployee')
     }
   }
+  emit('submit')
   emit('close')
 }
 

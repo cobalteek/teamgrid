@@ -182,7 +182,8 @@
       "notFound": "Shift not found"
     },
     "organization": {
-      "get": "Organization not received"
+      "get": "Organization not received",
+      "notCreate": "The organization has not been created"
     }
   },
   "placeholder": {
@@ -194,5 +195,11 @@
   },
   "validation": {
     "candidate": "Fill in all fields"
+  },
+  "ui": {
+    "currentOrganization": "Current organization",
+    "organization": {
+      "add": "Add an organization"
+    }
   }
 }

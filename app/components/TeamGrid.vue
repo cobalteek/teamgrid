@@ -59,7 +59,7 @@ const calendarOptions = computed(() => ({
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
-    right: window.innerWidth < 768 ? 'timeGridDay,listWeek' : 'dayGridMonth,timeGridWeek'
+    right: 'dayGridMonth,timeGridWeek'
   },
 
   titleFormat: (date : any) => {
