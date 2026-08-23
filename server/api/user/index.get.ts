@@ -72,9 +72,6 @@ export default defineEventHandler(async (event) => {
   } catch (error) {
     console.log(error)
 
-    throw createError({
-      statusCode: 404,
-      statusMessage: t('error.user.get')
-    })
+    throw error
   }
 })
