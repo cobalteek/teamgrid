@@ -1,6 +1,6 @@
 import { prisma } from '../../utils/prisma'
 import {requireUser} from '../../utils/auth'
-import {isValidEmail, isValidName} from '../../utils/validation'
+import {isValidEmail, isValidName} from '../../../shared/utils/validation'
 
 
 export default defineEventHandler(async (event) => {

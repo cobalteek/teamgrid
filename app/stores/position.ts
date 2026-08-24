@@ -26,7 +26,7 @@ export const usePositionStore = defineStore('position', () => {
         try {
           const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
     
-          positions.value = await $fetch<Position[]>('/api/user/position', {
+          positions.value = await $fetch<Position[]>('/api/position', {
             credentials: 'include',
             method: 'GET',
             headers,
@@ -48,7 +48,7 @@ export const usePositionStore = defineStore('position', () => {
       try {
         const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
       
-        const position = await $fetch<Position>('/api/user/position', {
+        const position = await $fetch<Position>('/api/position', {
           query: { positionId },
           headers
         })

@@ -2,6 +2,7 @@
 import { storeToRefs } from 'pinia'
 
 const auth = useAuthStore()
+const organizationStore = useOrganizationStore()
 const { user } = storeToRefs(auth)
 const { locale, setLocale } = useI18n()
 

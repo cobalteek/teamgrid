@@ -72,7 +72,8 @@
     "selectUser": "Select user",
     "selectRole": "Select role",
     "position": "Select a position",
-    "employee": "Select an employee"
+    "employee": "Select an employee",
+    "organization": "Select organization"
   },
   "user": {
     "name": "Name",
@@ -191,7 +192,8 @@
     "lastName": "Surname",
     "middleName": "Middle name",
     "position": "Position",
-    "email": "Email"
+    "email": "Email",
+    "organizationName": "Name of organization"
   },
   "validation": {
     "candidate": "Fill in all fields"

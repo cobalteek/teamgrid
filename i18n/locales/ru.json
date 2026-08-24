@@ -72,7 +72,8 @@
     "selectUser": "Пользователь",
     "selectRole": "Выберите роль",
     "position": "Выберите должность",
-    "employee": "Выберите сотрудника"
+    "employee": "Выберите сотрудника",
+    "organization": "Выберите организацию"
   },
   "user": {
     "name": "Имя",
@@ -191,7 +192,8 @@
     "lastName": "Фамилия",
     "middleName": "Отчество",
     "position": "Должность",
-    "email": "Почта"
+    "email": "Почта",
+    "organizationName": "Название орагнизации"
   },
   "validation": {
     "candidate": "Заполните все обязательные поля"
@@ -201,5 +203,8 @@
     "organization": {
       "add": "Добавить организацию"
     }
+  },
+  "modal": {
+    "editOrganization": "Редактировать организацию"
   }
 }

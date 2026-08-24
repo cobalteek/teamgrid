@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {useAuthStore} from "~/stores/auth";
-import {isValidEmail, isValidName, isValidPassword} from '../../server/utils/validation'
+import {isValidEmail, isValidName, isValidPassword} from '../../shared/utils/validation'
 import {useErrorModal} from '../composables/useErrorModal'
 const auth = useAuthStore()
 const errorModal = useErrorModal()

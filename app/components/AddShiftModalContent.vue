@@ -14,11 +14,6 @@ const positionStore = usePositionStore()
 const shiftStore = useShiftStore()
 const errorModal = useErrorModal()
 
-onMounted(async () => {
-    await employeeStore.getEmployees()
-    await positionStore.getPositions()
-})
-
 const createShift = ref<CreateShift>({
     date: '',
     employeeId: '',
@@ -57,7 +52,8 @@ const handleSubmit = async () => {
       return
   }
   try {
-      await shiftStore.createShift(createShift.value)
+    const organizationStore = useOrganizationStore()
+    await shiftStore.createShift(createShift.value, organizationStore.currentOrganizationId)
   } catch (error: any) {
       errorModal.showError(error.message || 'error.shift.create')
       return

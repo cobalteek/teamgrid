@@ -16,22 +16,32 @@ function getErrorMessage(error: unknown) {
 }
 
 export const useShiftStore = defineStore('shift', () => {
-
     const shifts = ref<ShiftWithRelations[]>([])
     const isLoading = ref(false)
     const error = ref<string | null>(null)
 
-    async function getShifts() {
+    async function getShifts(organizationId: number | undefined, employeeId?: string) {
         isLoading.value = true
         error.value = null
     
         try {
           const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
+
+          if(!organizationId) {
+            createError({
+              statusCode: 404,
+              statusMessage: 'error.organization.getId'
+            })
+          }
     
-          shifts.value = await $fetch<ShiftWithRelations[]>('/api/user/shift', {
+          shifts.value = await $fetch<ShiftWithRelations[]>('/api/shift', {
             credentials: 'include',
             method: 'GET',
-            headers
+            headers,
+            query: {
+              organizationId,
+              employeeId
+            }
           })
     
           return shifts.value
@@ -43,7 +53,7 @@ export const useShiftStore = defineStore('shift', () => {
         }
       }
 
-      async function createShift(shiftData: Omit<CreateShift, 'id'>) {
+      async function createShift(shiftData: Omit<CreateShift, 'id'>, organizationId: number | null) {
         try {
           if (
             !shiftData.date ||
@@ -64,10 +74,13 @@ export const useShiftStore = defineStore('shift', () => {
             date
           }
 
-          const newShift = await $fetch<ShiftWithRelations>('/api/user/shift', {
+          const newShift = await $fetch<ShiftWithRelations>('/api/shift', {
             credentials: 'include',
             method: 'POST',
             headers,
+            query: {
+              organizationId
+            },
             body: formattedShiftData,
           })
     

@@ -3,7 +3,7 @@ import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import listPlugin from '@fullcalendar/list'
-import {ruBetterLocale, enBetterLocale} from '../../server/utils/betterLocaleCalendarEnRu'
+import {ruBetterLocale, enBetterLocale} from '../../shared/utils/betterLocaleCalendarEnRu'
 import { useShiftStore } from '../stores/shift'
 import '@fullcalendar/vue3'
 
@@ -17,14 +17,16 @@ const props = defineProps<{
 const isAddShiftModalOpen = ref(false)
 const infoDate = ref()
 const shiftStore = useShiftStore()
-const calendarRef = ref<InstanceType<typeof FullCalendar> | null>(null)
+const organizationStore = useOrganizationStore()
+// const calendarRef = ref<InstanceType<typeof FullCalendar> | null>(null)
 const events = computed(() => {
   return shiftStore.shifts.map(shift => ({
     id: shift.id,
     title: `${shift.employee.name} ${shift.position.name}`,
     start: shift.date,
     allDay: true,
-    color: 'red'
+    color: 'red',
+    organizationId: organizationStore.currentOrganizationId
   }))
 })
 
@@ -81,9 +83,15 @@ const calendarOptions = computed(() => ({
   }
 }))
 
-onMounted(async () => {
-  await shiftStore.getShifts()
-})
+watch(
+  () => organizationStore.currentOrganizationId,
+  async (organizationId) => {
+    if (!organizationId) return
+
+    await shiftStore.getShifts(organizationId)
+  },
+  { immediate: true }
+)
 
 </script>
 

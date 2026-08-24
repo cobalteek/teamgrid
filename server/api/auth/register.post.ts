@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt'
 import { prisma } from '~~/server/utils/prisma'
 import { Prisma } from '@prisma/client'
 import {enforceRateLimit} from '~~/server/utils/rate-limit'
-import {isValidEmail, isValidName, isValidPassword} from '~~/server/utils/validation'
+import {isValidEmail, isValidName, isValidPassword} from '~~/shared/utils/validation'
 
 export default defineEventHandler(async (event) => {
   const t = await useTranslation(event)

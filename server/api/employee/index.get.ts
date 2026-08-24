@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
     const t = await useTranslation(event)
     const query = getQuery(event)
     const employeeId = query.employeeId ? String(query.employeeId) : undefined
-
+    const organizationId = query.organizationId ? Number(query.organizationId) : undefined
     try {
         const selectFields = {
             id: true,
@@ -50,6 +50,9 @@ export default defineEventHandler(async (event) => {
         }
 
         const employees = await prisma.employee.findMany({
+            where: {
+                organizationId
+            },
             select: selectFields
         })
 

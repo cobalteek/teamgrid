@@ -71,14 +71,20 @@ const handleSubmit = () => {
   emit('submit')
 }
 
-const formatedDate = new Intl.DateTimeFormat('ru-RU', {
-  dateStyle: 'short'
-}).format(props.date)
+const formatedDate = ref()
+
+if(props.date) {
+  formatedDate.value = new Intl.DateTimeFormat('ru-RU', {
+    dateStyle: 'short'
+  }).format(props.date)
+} else {
+  formatedDate.value = ''
+}
 </script>
 
 <template>
   <div class="flex flex-col justify-center items-center gap-4 p-4">
-    <h2 class="text-xl font-bold p-2 pt-6">{{ $t(title) + " " + formatedDate}}</h2>
+    <h2 class="text-xl font-bold p-2 pt-6">{{ $t(title) + " " + (formatedDate ? formatedDate : '')}}</h2>
     <form @submit.prevent="handleSubmit" class="flex flex-col gap-4 w-full">
       <input
         v-if="fields"
@@ -91,8 +97,9 @@ const formatedDate = new Intl.DateTimeFormat('ru-RU', {
         )"
         :type="field.type"
         :placeholder="$t(field.placeholder)"
+        class="pl-2"
         />
-      <template
+      <div
         v-if="selects"
         class="flex flex-col gap-4 w-full"
       >
@@ -114,7 +121,7 @@ const formatedDate = new Intl.DateTimeFormat('ru-RU', {
           {{ o.label }}
         </option>
       </select>
-      </template>
+      </div>
       <div class="flex justify-between gap-2">
         <button
           type="button"

@@ -21,17 +21,24 @@ export const useEmployeeStore = defineStore('employee', () => {
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
+  const organizationStore = useOrganizationStore()
+  const organizationId = organizationStore.currentOrganizationId
+
   async function getEmployees() {
     isLoading.value = true
     error.value = null
 
     try {
+      employees.value = []
       const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
 
-      employees.value = await $fetch<Employee[]>('/api/user/employee', {
+      employees.value = await $fetch<Employee[]>('/api/employee', {
         credentials: 'include',
         method: 'GET',
         headers,
+        query: {
+          organizationId
+        }
       })
 
       return employees.value
@@ -47,11 +54,14 @@ export const useEmployeeStore = defineStore('employee', () => {
     try {
       const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
 
-      const newEmployee = await $fetch<Employee>('/api/user/employee', {
+      const newEmployee = await $fetch<Employee>('/api/employee', {
         credentials: 'include',
         method: 'POST',
         headers,
         body: employeeData,
+        query: {
+          organizationId
+        }
       })
 
       employees.value.push(newEmployee)
@@ -70,7 +80,7 @@ export const useEmployeeStore = defineStore('employee', () => {
     try {
       const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
 
-      const employee = await $fetch<Employee>('/api/user/employee', {
+      const employee = await $fetch<Employee>('/api/employee', {
         query: { employeeId },
         headers
       })
