@@ -202,7 +202,10 @@
     "currentOrganization": "Текущая организация",
     "organization": {
       "add": "Добавить организацию"
-    }
+    },
+    "employees": "Сотрудники",
+    "positions": "Должности",
+    "roles": "Роли"
   },
   "modal": {
     "editOrganization": "Редактировать организацию"

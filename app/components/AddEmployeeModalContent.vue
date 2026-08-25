@@ -17,6 +17,7 @@ const emit = defineEmits<{
 
 const employeeStore = useEmployeeStore()
 const organizationStore = useOrganizationStore()
+
 const employee = ref<CreateEmployee>({
   name: '',
   surname: '',
@@ -26,21 +27,30 @@ const employee = ref<CreateEmployee>({
   organizationId: 1
 })
 
-const handleCancel = () => {
-  resetEmployee()
-  emit('close')
-}
 
 function resetEmployee() {
+  const orgId = organizationStore.currentOrganization?.id
+  if (orgId === undefined) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'error.organization.notFound'
+    })
+  }
   employee.value = {
     name: '',
     surname: '',
     middlename: '',
     position: '',
     email: '',
-    organizationId: 1
+    organizationId: orgId
   }
 }
+
+const handleCancel = () => {
+  resetEmployee()
+  emit('close')
+}
+
 
 function onUpdateModelValue(value: boolean) {
   emit('update:modelValue', value)
@@ -87,6 +97,16 @@ const handleSubmit = async () => {
   emit('submit')
   emit('close')
 }
+
+watch(
+    () => props.modelValue,
+    (isOpen) => {
+        if (isOpen && organizationStore.currentOrganizationId !== null) {
+            employee.value.organizationId =
+                organizationStore.currentOrganizationId
+        }
+    }
+)
 
 </script>
 

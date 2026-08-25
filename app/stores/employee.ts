@@ -22,11 +22,11 @@ export const useEmployeeStore = defineStore('employee', () => {
   const error = ref<string | null>(null)
 
   const organizationStore = useOrganizationStore()
-  const organizationId = organizationStore.currentOrganizationId
 
   async function getEmployees() {
     isLoading.value = true
     error.value = null
+    const organizationId = organizationStore.currentOrganizationId
 
     try {
       employees.value = []
@@ -51,6 +51,7 @@ export const useEmployeeStore = defineStore('employee', () => {
   }
 
   async function createEmployee(employeeData: Omit<CreateEmployee, 'id'>) {
+    const organizationId = organizationStore.currentOrganizationId
     try {
       const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
 
