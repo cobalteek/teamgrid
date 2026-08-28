@@ -1,5 +1,6 @@
 <script setup lang="ts">
-initializeApp()
+const useInit = useInitializeApp()
+await useInit.init()
 </script>
 
 <template>

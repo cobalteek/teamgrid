@@ -1,29 +1,29 @@
 export function useErrorModal() {
-  const isOpen = ref(false)
-  const text = ref('')
-  const type = ref<'error' | 'info'>('error')
+  const error = ref({
+    modelValue: false,
+    text: '',
+    type: <'error' | 'info'> 'error'
+  })
 
   function showError(message: string) {
-    type.value = 'error'
-    text.value = message
-    isOpen.value = true
+    error.value.type = 'error'
+    error.value.text = message
+    error.value.modelValue = true
   }
 
   function showInfo(message: string) {
-    type.value = 'info'
-    text.value = message
-    isOpen.value = true
+    error.value.type = 'info'
+    error.value.text = message
+    error.value.modelValue = true
   }
 
   function close() {
-    isOpen.value = false
-    text.value = ''
+    error.value.modelValue = false
+    error.value.text = ''
   }
 
   return {
-    isOpen,
-    text,
-    type,
+    error,
     showError,
     showInfo,
     close,

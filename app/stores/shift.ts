@@ -20,9 +20,13 @@ export const useShiftStore = defineStore('shift', () => {
     const isLoading = ref(false)
     const error = ref<string | null>(null)
 
-    async function getShifts(organizationId: number | undefined, employeeId?: string) {
+    const organizationStore = useOrganizationStore()
+
+    async function getShifts(employeeId?: string) {
         isLoading.value = true
         error.value = null
+
+        const organizationId = organizationStore.currentOrganizationId
     
         try {
           const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
@@ -53,7 +57,8 @@ export const useShiftStore = defineStore('shift', () => {
         }
       }
 
-      async function createShift(shiftData: Omit<CreateShift, 'id'>, organizationId: number | null) {
+      async function createShift(shiftData: Omit<CreateShift, 'id'>) {
+        const organizationId = organizationStore.currentOrganizationId
         try {
           if (
             !shiftData.date ||
@@ -93,11 +98,65 @@ export const useShiftStore = defineStore('shift', () => {
         }
       }
 
+      async function createManyShifts(shiftData: Omit<CreateShift, 'id'>[]) {
+        const organizationId = organizationStore.currentOrganizationId
+        if (!shifts || !Array.isArray(shifts) || shifts.length === 0) {
+          throw createError({
+            statusCode: 400,
+            statusMessage: 'error.bulk.notFound'
+          })
+        }
+        const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
+        for (const newShift of shiftData) {
+          const existingShift = shifts.value.find(
+            shift =>
+              formatDate(new Date(shift.date)) === formatDate(new Date(newShift.date)) &&
+              shift.employeeId === newShift.employeeId
+          )
+
+          if (existingShift) {
+            throw createError({
+              statusCode: 409,
+              statusMessage: 'error.shift.duplicate'
+            })
+          }
+        }
+
+        const formattedShifts = shiftData.map(shift => ({
+          ...shift,
+          date: new Date(`${shift.date}T00:00:00`)
+        }))
+
+
+        try {
+          const newShifts = await $fetch<ShiftWithRelations[]>(
+            '/api/shift/bulk',
+            {
+              credentials: 'include',
+              method: 'POST',
+              headers,
+              body: {
+                shifts: formattedShifts,
+                organizationId
+              }
+            }
+          )
+    
+          shifts.value.push(...newShifts)
+    
+          return newShifts
+        } catch (e: unknown) {
+          error.value = getErrorMessage(e)
+          throw e
+        }
+      }
+
     return {
         shifts,
         error,
         isLoading,
         getShifts,
-        createShift
+        createShift,
+        createManyShifts
     }
 })

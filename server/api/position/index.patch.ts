@@ -10,9 +10,10 @@ export default defineEventHandler(async (event) => {
   const {userId} = await requireUser(event)
   const query = getQuery(event)
   const organizationId = query.organizationId ? Number(query.organizationId) : undefined
+  const positionId = query.positionId ? Number(query.positionId) : undefined
   const body = await readBody(event)
-  const {name} = body
-  if(!isValidName(name)) {
+  const {name, fullName} = body
+  if(!isValidName(name) || !isValidName(fullName)) {
       throw createError({
         statusCode: 400,
         statusMessage: 'error.invalidName'
@@ -41,21 +42,22 @@ export default defineEventHandler(async (event) => {
         statusMessage: 'error.role.notFound'
       })
   }
-  const canChangeName = ['owner', 'admin'].includes(member?.role.name)
-  if(!canChangeName) {
+  const canChangePosition= ['owner', 'admin'].includes(member?.role.name)
+  if(!canChangePosition) {
     throw createError({
         statusCode: 403,
         statusMessage: 'error.permissionDenied'
       })
   }
-    const changeOrganization = await prisma.organization.update({
+    const changePosition = await prisma.position.update({
       where: {
-        id: organizationId
+        id: positionId
       },
       data: {
-        name
+        name,
+        fullName
       }
     })
 
-    return changeOrganization
+    return changePosition
 })

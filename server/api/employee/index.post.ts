@@ -1,6 +1,7 @@
 import { prisma } from '../../utils/prisma'
 import {requireUser} from '../../utils/auth'
 import {isValidEmail, isValidName} from '../../../shared/utils/validation'
+import { EMPLOYEE_COLORS, POSITION_COLORS } from '../../../shared/utils/defaultColors'
 
 
 export default defineEventHandler(async (event) => {
@@ -61,6 +62,19 @@ export default defineEventHandler(async (event) => {
         })
     }
 
+    const positionsCount = await prisma.position.count({
+        where: {
+            organizationId
+        }
+    })
+
+    const colorIndexPosition = Math.min(
+        positionsCount,
+        POSITION_COLORS.length - 1
+    )
+
+    const colorPosition = POSITION_COLORS[colorIndexPosition]
+
     const positionRecord = await prisma.position.upsert({
         where: {
             organizationId_name: {
@@ -71,9 +85,24 @@ export default defineEventHandler(async (event) => {
         update: {},
         create: {
             name: position,
-            organizationId: organizationId
+            fullName: `fullName_${position}`,
+            organizationId: organizationId,
+            color: colorPosition
         }
     })
+
+    const employeesCount = await prisma.employee.count({
+        where: {
+            organizationId
+        }
+    })
+
+    const colorIndexEmployee = Math.min(
+        employeesCount,
+        EMPLOYEE_COLORS.length - 1
+    )
+
+    const colorEmployee = EMPLOYEE_COLORS[colorIndexEmployee]
 
     const employee = await prisma.employee.create({
         data: {
@@ -82,7 +111,8 @@ export default defineEventHandler(async (event) => {
             middlename,
             email,
             positionId: positionRecord.id,
-            organizationId: organizationId
+            organizationId: organizationId,
+            color: colorEmployee
         }
     })
 

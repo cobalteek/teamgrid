@@ -16,19 +16,40 @@ const props = defineProps<{
 
 const isAddShiftModalOpen = ref(false)
 const infoDate = ref()
+
 const shiftStore = useShiftStore()
-const organizationStore = useOrganizationStore()
-// const calendarRef = ref<InstanceType<typeof FullCalendar> | null>(null)
+
+const selectedEmployeeId = ref<number | null>(null)
+const selectedPositionId = ref<number | null>(null)
 const events = computed(() => {
   return shiftStore.shifts.map(shift => ({
     id: shift.id,
     title: `${shift.employee.name} ${shift.position.name}`,
     start: shift.date,
     allDay: true,
-    color: 'red',
-    organizationId: organizationStore.currentOrganizationId
+
+    extendedProps: {
+      employeeId: shift.employee.id,
+      positionId: shift.position.id,
+
+      employeeColor: shift.employee.color,
+      positionColor: shift.position.color,
+
+      opacity: getEventOpacity(shift)
+    }
   }))
 })
+
+const calendarWrapper = ref<HTMLElement | null>(null)
+
+function resetSelection(event: MouseEvent) {
+  const target = event.target as HTMLElement
+
+  if (!target.closest('.fc-event')) {
+    selectedEmployeeId.value = null
+    selectedPositionId.value = null
+  }
+}
 
 const calendarOptions = computed(() => ({
   plugins: [dayGridPlugin, listPlugin, interactionPlugin],
@@ -36,26 +57,13 @@ const calendarOptions = computed(() => ({
   initialView: 'dayGridMonth',
 
   locale: locale.value === 'ru' ? ruBetterLocale : enBetterLocale,
-  selectable: true,
   firstDay: 1,
   dateClick: function(info: any) {
+    selectedEmployeeId.value = null
+    selectedPositionId.value = null
     isAddShiftModalOpen.value = true
     infoDate.value = info
   },
-  // windowResize: function() {
-  //   const api = calendarRef.value?.getApi()
-
-  //   if (!api) return
-
-  //   if (window.innerWidth < 768) {
-  //     api.changeView('listWeek')
-  //   } else {
-  //     api.changeView('dayGridMonth')
-  //   }
-  // },
-
-  events: events.value,
-  // dayMaxEvents: window.innerWidth < 768 ? 1 : 3,
   moreLinkClick: 'popover',
    
   headerToolbar: {
@@ -80,26 +88,96 @@ const calendarOptions = computed(() => ({
     })
 
     return text.charAt(0).toUpperCase() + text.slice(1)
+  },
+  events: events.value,
+  eventDidMount,
+  eventClick(info: any) {
+    const rect = info.el.getBoundingClientRect()
+
+    const x = info.jsEvent.clientX - rect.left
+    const y = info.jsEvent.clientY - rect.top
+
+    const employeeId = info.event.extendedProps.employeeId
+    const positionId = info.event.extendedProps.positionId
+
+    const diagonalX =
+      rect.width * 0.5 +
+      (y / rect.height - 0.5) * 20
+
+    if (x < diagonalX) {
+      selectedEmployeeId.value =
+        selectedEmployeeId.value === employeeId
+          ? null
+          : employeeId
+
+      selectedPositionId.value = null
+    } else {
+      selectedPositionId.value =
+        selectedPositionId.value === positionId
+          ? null
+          : positionId
+
+      selectedEmployeeId.value = null
+    }
   }
 }))
 
-watch(
-  () => organizationStore.currentOrganizationId,
-  async (organizationId) => {
-    if (!organizationId) return
+function eventDidMount(info: any) {
+  const employeeColor = info.event.extendedProps.employeeColor
+  const positionColor = info.event.extendedProps.positionColor
 
-    await shiftStore.getShifts(organizationId)
-  },
-  { immediate: true }
-)
+  info.el.style.background = `
+    linear-gradient(
+      110deg,
+      ${employeeColor} 0%,
+      ${employeeColor} 50%,
+      ${positionColor} 50%,
+      ${positionColor} 100%
+    )
+  `
+
+  info.el.style.opacity = String(
+    info.event.extendedProps.opacity
+  )
+}
+
+function getEventOpacity(shift: any) {
+  if (
+    selectedEmployeeId.value === null &&
+    selectedPositionId.value === null
+  ) {
+    return 1
+  }
+
+  if (selectedEmployeeId.value !== null) {
+    return shift.employee.id === selectedEmployeeId.value
+      ? 1
+      : 0.35
+  }
+
+  // Выбрана должность
+  if (selectedPositionId.value !== null) {
+    return shift.position.id === selectedPositionId.value
+      ? 1
+      : 0.35
+  }
+
+  return 1
+}
 
 </script>
 
 <template>
-  <FullCalendar
-    ref="calendarRef"
-    :options="calendarOptions"
-  />
+  <div
+    ref="calendarWrapper"
+    @click="resetSelection"
+  >
+    <FullCalendar
+      ref="calendarRef"
+      :key="`${selectedEmployeeId}-${selectedPositionId}`"
+      :options="calendarOptions"
+    />
+  </div>
   <AddShiftModalContent
     :info="infoDate"
     :model-value="isAddShiftModalOpen"

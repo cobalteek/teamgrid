@@ -23,3 +23,9 @@ export type CreateShift = {
     employeeId: string
     positionId: number
 }
+
+export type ScheduleTemplate = {
+  workDays: number
+  restDays: number
+  endDate: Date
+}

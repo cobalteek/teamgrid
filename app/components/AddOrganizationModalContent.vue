@@ -35,6 +35,7 @@ const handleCancel = () => {
 const handleSubmit = async () => {
   if(!isValidName(newOrganization.value.name)) {
     errorModal.showError('error.organization.invalidName')
+    return
   }
   try {
     await organizationStore.createOrganization(newOrganization.value.name)
@@ -61,4 +62,9 @@ const handleSubmit = async () => {
       @close="handleCancel"
     />
   </Modal>
+  <ErrorModalContent
+    :error="errorModal.error.value"
+    @close="errorModal.close"
+    class="w-[300px] h-[200px] top-1/4"
+  />
 </template>

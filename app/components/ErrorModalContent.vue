@@ -1,8 +1,10 @@
 <script setup lang="ts">
 const props = defineProps<{
-  modelValue: boolean
-  type: 'error' | 'info'
-  text: string
+  error: {
+    modelValue: boolean
+    type: 'error' | 'info'
+    text: string
+  }
 }>()
 
 const emit = defineEmits<{
@@ -10,7 +12,7 @@ const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
-const head = computed(() => props.type === 'error' ? 'Error' : 'Information')
+const head = computed(() => props.error.type === 'error' ? 'Error' : 'Information')
 
 function onUpdateModelValue(value: boolean) {
   emit('update:modelValue', value)
@@ -24,7 +26,7 @@ function onUpdateModelValue(value: boolean) {
 
 <template>
   <Modal
-    :model-value="modelValue"
+    :model-value="error.modelValue"
     @update:model-value="onUpdateModelValue"
     class="w-[320px] h-[200px] fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
   >
@@ -33,13 +35,13 @@ function onUpdateModelValue(value: boolean) {
     >
       <div class="row-start-1 flex justify-center items-center mt-9">
         <div
-          v-if="type == 'error'"
+          v-if="error.type == 'error'"
           class="w-[30px] h-[30px] bg-[var(--bg-error)] rounded-full border border-[var(--bg-main)] leading-tight text-center text-xl"
         >
           !
         </div>
         <div
-          v-if="type == 'info'"
+          v-if="error.type == 'info'"
           class="w-[30px] h-[30px] bg-[var(--bg-info)] text-semibold text-black rounded-full border border-[var(--bg-main)] leading-tight text-center text-xl"
         >
           i
@@ -50,7 +52,7 @@ function onUpdateModelValue(value: boolean) {
           {{ head }}
         </div>
         <div class="mx-auto font-mono mt-3">
-          {{ $t(text) }}
+          {{ $t(error.text) }}
         </div>
       </div>
     </div>

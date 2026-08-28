@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Modal from './Modal.vue'
 import {isValidName} from '../../shared/utils/validation'
-import { listen } from 'node:quic';
+import EditPositionForm from './EditPositionForm.vue';
 
 const props = defineProps<{
   modelValue: boolean
@@ -15,11 +15,13 @@ const emit = defineEmits<{
 const organizationStore = useOrganizationStore()
 const employeeStore = useEmployeeStore()
 const positionStore = usePositionStore()
-// const rolesStore = useRoleStore()
+const userStore = useUserStore()
 const errorModal = useErrorModal()
 
 const organizationName = ref('')
 const isDisableName = ref(true)
+const isOpenEditPositionForm = ref(false)
+const posId = ref(0)
 
 function onUpdateModelValue(value: boolean) {
   emit('update:modelValue', value)
@@ -45,6 +47,11 @@ async function handleSubmit() {
   } catch(e) {
     console.log(e)
   }
+}
+
+function openEditPositionForm(positionId: number) {
+  posId.value = positionId
+  isOpenEditPositionForm.value = true
 }
 
 watch(
@@ -91,25 +98,51 @@ watch(
         </form>
       </section>
       <hr>
-        <div class="grid grid-cols-3 gap-3 w-full max-w-4xl mx-auto justify-items-center">
-          <div class="border rounded h-full w-full">
+        <div class="flex justify-around h-[60%] mt-2">
+          <div class="flex flex-col items-center border rounded w-[30%] h-full">
             <h4>{{ $t('ui.employees') }}</h4>
-            <li>
-              <ol
+            <ol>
+              <li
                 v-for="emp in employeeStore.options"
+                class="pl-2"
               >
                 {{ emp.label }}
-              </ol>
-            </li>
+              </li>
+            </ol>
           </div>
-          <div>
+          <div class="flex flex-col items-center border rounded w-[30%] h-full">
             <h4>{{ $t('ui.positions') }}</h4>
-
+            <ol>
+              <li
+                v-for="pos in positionStore.options"
+                class="cursor-pointer"
+                @click="openEditPositionForm(pos.value)"
+              >
+                {{ pos.fullLabel }}
+              </li>
+            </ol>
           </div>
-          <div>
-            <h4>{{ $t('ui.roles') }}</h4>
+          <div class="flex flex-col items-center border rounded w-[30%] h-full">
+            <h4>{{ $t('ui.users') }}</h4>
+            <ol>
+              <li
+                v-for="user in userStore.options"
+              >
+                {{ user.label }}
+              </li>
+            </ol>
           </div>
         </div>
     </div>
   </Modal>
+  <EditPositionForm
+    :model-value="isOpenEditPositionForm"
+    :position-id="posId"
+    @close="isOpenEditPositionForm = false"
+  />
+  <ErrorModalContent
+    :error="errorModal.error.value"
+    @close="errorModal.close"
+    class="w-[300px] h-[200px] top-1/4"
+  />
 </template>

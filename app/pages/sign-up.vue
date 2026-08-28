@@ -86,9 +86,7 @@ definePageMeta({
     v-model="form"
     @submit="onRegister"/>
   <ErrorModalContent
-    :model-value="errorModal.isOpen.value"
-    :type="errorModal.type.value"
-    :text="errorModal.text.value"
+    :error="errorModal.error.value"
     @close="errorModal.close"
     class="w-[300px] h-[200px] top-1/4"
   />

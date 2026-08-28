@@ -32,7 +32,6 @@ watch(isEditOrganizationModalOpen, () => {
     <EditOrganizationModalContent
       :model-value="isEditOrganizationModalOpen"
       @close="isEditOrganizationModalOpen = false"
-      :organization="organization"
     />
   </div>
 </template>

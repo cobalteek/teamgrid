@@ -43,10 +43,15 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  const options = computed(() =>
+        users.value.map(u => ({value: u.id, label: u.name}))
+    )
+
   return {
     users,
     isLoading,
     error,
+    options,
     getUsers,
   }
 })

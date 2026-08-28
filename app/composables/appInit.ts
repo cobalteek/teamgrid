@@ -1,13 +1,22 @@
-const organizationStore = useOrganizationStore()
-const shiftStore = useShiftStore()
-const employeeStore = useEmployeeStore()
-const positionStore = usePositionStore()
+export function useInitializeApp() {
 
-export async function initializeApp() {
-  await organizationStore.getOrganizations(),
+  const organizationStore = useOrganizationStore()
+  const shiftStore = useShiftStore()
+  const employeeStore = useEmployeeStore()
+  const positionStore = usePositionStore()
+  const authStore = useAuthStore()
+  const userStore = useUserStore()
+  async function init() {
+    await authStore.init()
+    await userStore.getUsers()
+    await organizationStore.getOrganizations(),
     await Promise.all([
-        shiftStore.getShifts(organizationStore.currentOrganization?.id),
+        shiftStore.getShifts(),
         employeeStore.getEmployees(),
         positionStore.getPositions()
     ])
+  }
+  return {
+    init
+  }
 }

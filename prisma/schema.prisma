@@ -24,6 +24,7 @@ model Employee {
   surname    String
   middlename String
   email      String     @unique
+  color      String
 
   positionId Int
   position   Position   @relation(fields: [positionId], references: [id])
@@ -50,7 +51,9 @@ model Shift {
 model Position {
   id             Int @id @default(autoincrement())
   name           String
+  fullName       String
   organizationId Int
+  color          String
 
   organization Organization @relation(fields: [organizationId], references: [id])
   employees    Employee[]

@@ -42,6 +42,7 @@ export default defineEventHandler(async (event) => {
                 position: {
                     id: employee.position.id,
                     name: employee.position.name,
+                    fullName: employee.position.fullName,
                     organizationId: employee.position.organizationId
                 },
                 organizationId: employee.organizationId,
@@ -56,7 +57,7 @@ export default defineEventHandler(async (event) => {
             select: selectFields
         })
 
-        if (!employees || employees.length === 0) {
+        if (!employees) {
             throw createError({
                 statusCode: 404,
                 statusMessage: t('error.employee.notFound')
@@ -77,7 +78,7 @@ export default defineEventHandler(async (event) => {
             email: employee.email
         }))
 
-    } catch (error: any) {
+    } catch (error) {
         console.error(error)
 
         throw error

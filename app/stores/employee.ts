@@ -51,7 +51,6 @@ export const useEmployeeStore = defineStore('employee', () => {
   }
 
   async function createEmployee(employeeData: Omit<CreateEmployee, 'id'>) {
-    const organizationId = organizationStore.currentOrganizationId
     try {
       const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
 
@@ -59,10 +58,7 @@ export const useEmployeeStore = defineStore('employee', () => {
         credentials: 'include',
         method: 'POST',
         headers,
-        body: employeeData,
-        query: {
-          organizationId
-        }
+        body: employeeData
       })
 
       employees.value.push(newEmployee)

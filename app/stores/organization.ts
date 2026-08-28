@@ -41,18 +41,19 @@ export const useOrganizationStore = defineStore('organization', () => {
             organizations.value = await $fetch<Organization[]>('/api/organization', {
                 credentials: 'include',
                 method: 'GET',
-                headers,
+                headers
             })
 
-            const savedId = localStorage.getItem('currentOrganizationId')
-
-            if (savedId) {
-                currentOrganization.value =
+            if(import.meta.client) {
+                const savedId = localStorage.getItem('currentOrganizationId')
+                if (savedId) {
+                    currentOrganization.value =
                     organizations.value.find(org => org.id === Number(savedId))
                     ?? organizations.value[0]
                     ?? null
-            } else {
+                } else {
                 currentOrganization.value = organizations.value[0] ?? null
+                }
             }
         
             return organizations.value

@@ -205,7 +205,14 @@
     },
     "employees": "Сотрудники",
     "positions": "Должности",
-    "roles": "Роли"
+    "roles": "Роли",
+    "users": "Пользователи",
+    "advancedSettings": "Расширенные настройки",
+    "templateGrid": "Шаблон графика",
+    "workDays": "Рабочих",
+    "restDays": "Выходных",
+    "startDate": "Начало цикла",
+    "endDate": "Конец цикла"
   },
   "modal": {
     "editOrganization": "Редактировать организацию"

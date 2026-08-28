@@ -16,6 +16,7 @@ const organization = ref<Organization>({
 })
 
 const organizationStore = useOrganizationStore()
+const useInit = useInitializeApp()
 
 watch(
   () => organizationStore.currentOrganization,
@@ -26,7 +27,7 @@ watch(
   { immediate: true }
 )
 
-watch(organization.value, () => {
+watch(organization.value, async () => {
   const orgId = organization.value
   if(!orgId) {
     throw createError({
@@ -34,15 +35,15 @@ watch(organization.value, () => {
       statusMessage: 'error.organization.notFound'
     })
   }
-  organizationStore.changeOrganization(orgId)
-  initializeApp()
+  await organizationStore.changeOrganization(orgId)
+  await useInit.init()
 })
 
 </script>
 
 <template>
-  <div class="inline-flex gap-3 justify-center items-center">
-    <h4>{{$t('ui.currentOrganization') + ':'}}</h4>
+  <div class="inline-flex gap-3 pl-2 justify-center items-center">
+    <h4 class="block max-sm:hidden">{{$t('ui.currentOrganization') + ':'}}</h4>
     <select v-model="organization.id">
       <option
         v-for="org in organizationStore.options"

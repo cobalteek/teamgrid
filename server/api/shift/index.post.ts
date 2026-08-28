@@ -9,8 +9,8 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const query = getQuery(event)
   const organizationId = query.organizationId ? Number(query.organizationId) : undefined
-  try {
-    const { date, employeeId, positionId } = body
+
+  const { date, employeeId, positionId } = body
 
     if (!date || !employeeId || !positionId) {
       throw createError({
@@ -25,6 +25,7 @@ export default defineEventHandler(async (event) => {
         statusMessage: t('error.organization.get')
       })
     }
+
     const employee = await prisma.employee.findUnique({
       where: { id: employeeId }
     })
@@ -46,6 +47,8 @@ export default defineEventHandler(async (event) => {
         statusMessage: t('error.position.notFound')
       })
     }
+
+  try {
 
     const shift = await prisma.shift.create({
       data: {

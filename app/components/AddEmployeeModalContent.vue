@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useEmployeeStore } from '~/stores/employee'
+import { useEmployeeStore } from '../stores/employee'
 import { useOrganizationStore } from '~/stores/organization'
 import type { CreateEmployee } from '~~/types/employee'
 import { isValidEmail, isValidName, isValidPosition } from '../../shared/utils/validation'
@@ -17,6 +17,7 @@ const emit = defineEmits<{
 
 const employeeStore = useEmployeeStore()
 const organizationStore = useOrganizationStore()
+const useInit = useInitializeApp()
 
 const employee = ref<CreateEmployee>({
   name: '',
@@ -93,6 +94,8 @@ const handleSubmit = async () => {
     if (status === 401) {
       errorModal.showError('error.createEmployee')
     }
+  } finally {
+    await useInit.init()
   }
   emit('submit')
   emit('close')
@@ -135,11 +138,12 @@ watch(
         @submit="handleSubmit"
         @close="handleCancel"
       />
+  <Loading
+    v-if="employeeStore.isLoading"
+  />
   </Modal>
   <ErrorModalContent
-    :model-value="errorModal.isOpen.value"
-    :type="errorModal.type.value"
-    :text="errorModal.text.value"
+    :error="errorModal.error.value"
     @close="errorModal.close"
     class="w-[300px] h-[200px] top-1/4"
   />

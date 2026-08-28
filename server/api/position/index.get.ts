@@ -14,6 +14,7 @@ export default defineEventHandler(async (event) => {
     const selectedFields = {
       id: true,
       name: true,
+      fullName: true
     }
 
     if(positionId) {
@@ -34,7 +35,8 @@ export default defineEventHandler(async (event) => {
 
       return {
         id: position.id,
-        name: position.name
+        name: position.name,
+        fullName: position.fullName
       }
     }
 
@@ -45,7 +47,7 @@ export default defineEventHandler(async (event) => {
       select: selectedFields
     })
 
-    if (!positions || positions.length === 0) {
+    if (!positions) {
       throw createError({
         statusCode: 404,
         statusMessage: t('error.position.notFound')
@@ -55,6 +57,7 @@ export default defineEventHandler(async (event) => {
     return positions.map((position) => ({
       id: position.id,
       name: position.name,
+      fullName: position.fullName,
       organizationId: organizationId
     }))
   } catch (error) {

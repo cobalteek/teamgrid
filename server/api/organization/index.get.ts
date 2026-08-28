@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
       }
     })
 
-    if(!owneredOrganizations || owneredOrganizations.length === 0) {
+    if(!owneredOrganizations) {
       throw createError({
         statusCode: 404,
         statusMessage: t('error.organization.notFound')

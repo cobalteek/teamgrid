@@ -30,14 +30,16 @@ export default defineEventHandler(async (event) => {
             surname: true,
             middlename: true,
             positionId: true,
-            email: true
+            email: true,
+            color: true
           }
         },
 
         position: {
           select: {
             id: true,
-            name: true
+            name: true,
+            color: true
           }
         },
         organization: {
@@ -49,7 +51,7 @@ export default defineEventHandler(async (event) => {
       }
     })
 
-    if (!shifts || shifts.length === 0) {
+    if (!shifts) {
       throw createError({
         statusCode: 404,
         statusMessage: t('error.shift.notFound')
@@ -67,11 +69,13 @@ export default defineEventHandler(async (event) => {
         surname: shift.employee.surname,
         middlename: shift.employee.middlename,
         positionId: shift.employee.positionId,
-        email: shift.employee.email
+        email: shift.employee.email,
+        color: shift.employee.color
       },
       position: {
         id: shift.position.id,
-        name: shift.position.name
+        name: shift.position.name,
+        color: shift.position.color
       }
     }))
 
