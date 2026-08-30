@@ -3,7 +3,7 @@ import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import listPlugin from '@fullcalendar/list'
-import {ruBetterLocale, enBetterLocale} from '../../shared/utils/betterLocaleCalendarEnRu'
+import {ruBetterLocale, enBetterLocale} from '~~/shared/utils/betterLocaleCalendarEnRu'
 import { useShiftStore } from '../stores/shift'
 import '@fullcalendar/vue3'
 
