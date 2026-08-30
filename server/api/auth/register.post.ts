@@ -1,8 +1,8 @@
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 import { prisma } from '~~/server/utils/prisma'
 import { Prisma } from '@prisma/client'
 import {enforceRateLimit} from '~~/server/utils/rate-limit'
-import {isValidEmail, isValidName, isValidPassword} from '~~/server/utils/validation'
+import {isValidEmail, isValidName, isValidPassword} from '~~/shared/utils/validation'
 
 export default defineEventHandler(async (event) => {
   const t = await useTranslation(event)
@@ -49,47 +49,47 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    const userPosition = await prisma.position.findUnique({
-      where: { name: 'user' },
-    })
-
-    if (!userPosition) {
-      throw createError({
-        statusCode: 500,
-        statusMessage: t('error.user.positionUserNotFound'),
-      })
-    }
-
     const hash = await bcrypt.hash(password, 10)
 
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: hash,
-        name,
-        gender,
-        positions: {
-          create: {
-            positionId: userPosition.id,
-          },
-        },
-      },
-      include: {
-        positions: {
-          include: {
-            position: true,
-          },
-        },
-      },
-    })
+    await prisma.$transaction(async (tx) => {
 
-    return {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      gender: user.gender,
-      positions: user.positions.map((userPosition) => userPosition.position.name),
-    }
+      const organization = await tx.organization.create({
+        data: {
+          name: `${name}_organization`,
+        },
+      })
+
+      const user = await tx.user.create({
+        data: {
+          email,
+          password: hash,
+          name,
+          gender,
+        },
+      })
+
+      const role = await tx.role.findFirst({
+            where: { name: 'owner' } // или 'admin'
+          })
+
+      const membership = await tx.organizationMember.create({
+        data: {
+          userId: user.id,
+          organizationId: organization.id,
+          roleId: 1,
+        },
+        include: {
+          organization: true,
+          role: true,
+        },
+      })
+
+      return {
+        user,
+        membership,
+        organization
+      }
+  })
   } catch (error: unknown) {
     if (typeof error === 'object' && error !== null && 'statusCode' in error) {
       throw error

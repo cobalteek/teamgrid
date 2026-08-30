@@ -2,7 +2,10 @@
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
-
+import listPlugin from '@fullcalendar/list'
+import {ruBetterLocale, enBetterLocale} from '~~/shared/utils/betterLocaleCalendarEnRu'
+import { useShiftStore } from '../stores/shift'
+import '@fullcalendar/vue3'
 
 const { locale } = useI18n()
 const props = defineProps<{
@@ -11,68 +14,66 @@ const props = defineProps<{
   }
 }>()
 
-const ruBetterLocale = {
-  code: 'ru',
-  week: {
-    dow: 1,
-    doy: 7
-  },
-  buttonText: {
-    prev: 'Пред',
-    next: 'След',
-    today: 'Сегодня',
-    month: 'Месяц',
-    week: 'Неделя',
-    day: 'День',
-    list: 'Повестка дня'
-  },
-  weekText: 'Неделя',
-  allDayText: 'Весь день',
-  moreLinkText(n : number) {
-    return '+ ещё ' + n
-  },
-  
-  noEventsText: 'Нет событий для отображения'
-}
+const isAddShiftModalOpen = ref(false)
+const infoDate = ref()
 
-const enBetterLocale = {
-  code: 'en',
-  week: {
-    dow: 1,
-    doy: 7
-  },
-  buttonText: {
-    prev: 'Prev',
-    next: 'Next',
-    today: 'Today',
-    month: 'Month',
-    week: 'Week',
-    day: 'Day',
-    list: 'List'
-  },
-  weekText: 'Wk',
-  allDayText: 'All-day',
-  moreLinkText(n : number) {
-    return '+ more ' + n
-  },
-  
-  noEventsText: 'No events to display'
+const shiftStore = useShiftStore()
+
+const selectedEmployeeId = ref<number | null>(null)
+const selectedPositionId = ref<number | null>(null)
+const events = computed(() => {
+  return shiftStore.shifts.map(shift => {
+    return {
+      id: shift.id,
+      title: `${shift.employee.name} ${shift.position.name}`,
+      start: new Date(shift.date).toISOString().split('T')[0],
+      allDay: true,
+
+      extendedProps: {
+      employeeId: shift.employee.id,
+      positionId: shift.position.id,
+
+      employeeColor: shift.employee.color,
+      positionColor: shift.position.color,
+
+      opacity: getEventOpacity(shift)
+      } 
+    } 
+  })
+})
+
+
+
+const calendarWrapper = ref<HTMLElement | null>(null)
+
+function resetSelection(event: MouseEvent) {
+  const target = event.target as HTMLElement
+
+  if (!target.closest('.fc-event')) {
+    selectedEmployeeId.value = null
+    selectedPositionId.value = null
+  }
 }
 
 const calendarOptions = computed(() => ({
-  plugins: [dayGridPlugin, interactionPlugin],
+  plugins: [dayGridPlugin, listPlugin, interactionPlugin],
 
-  initialView: props.settings.initialView || 'dayGridMonth',
+  initialView: 'dayGridMonth',
 
   locale: locale.value === 'ru' ? ruBetterLocale : enBetterLocale,
-  selectable: true,
   firstDay: 1,
-  
-
+  dateClick: function(info: any) {
+    selectedEmployeeId.value = null
+    selectedPositionId.value = null
+    isAddShiftModalOpen.value = true
+    infoDate.value = info
+  },
+  moreLinkClick: 'popover',
+   
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
-    right: ''
+    right: 'dayGridMonth,timeGridWeek'
   },
 
   titleFormat: (date : any) => {
@@ -91,11 +92,99 @@ const calendarOptions = computed(() => ({
     })
 
     return text.charAt(0).toUpperCase() + text.slice(1)
+  },
+  events: events.value,
+  eventDidMount,
+  eventClick(info: any) {
+    const rect = info.el.getBoundingClientRect()
+
+    const x = info.jsEvent.clientX - rect.left
+    const y = info.jsEvent.clientY - rect.top
+
+    const employeeId = info.event.extendedProps.employeeId
+    const positionId = info.event.extendedProps.positionId
+
+    const diagonalX =
+      rect.width * 0.5 +
+      (y / rect.height - 0.5) * 20
+
+    if (x < diagonalX) {
+      selectedEmployeeId.value =
+        selectedEmployeeId.value === employeeId
+          ? null
+          : employeeId
+
+      selectedPositionId.value = null
+    } else {
+      selectedPositionId.value =
+        selectedPositionId.value === positionId
+          ? null
+          : positionId
+
+      selectedEmployeeId.value = null
+    }
   }
 }))
+
+function eventDidMount(info: any) {
+  const employeeColor = info.event.extendedProps.employeeColor
+  const positionColor = info.event.extendedProps.positionColor
+
+  info.el.style.background = `
+    linear-gradient(
+      110deg,
+      ${employeeColor} 0%,
+      ${employeeColor} 50%,
+      ${positionColor} 50%,
+      ${positionColor} 100%
+    )
+  `
+
+  info.el.style.opacity = String(
+    info.event.extendedProps.opacity
+  )
+}
+
+function getEventOpacity(shift: any) {
+  if (
+    selectedEmployeeId.value === null &&
+    selectedPositionId.value === null
+  ) {
+    return 1
+  }
+
+  if (selectedEmployeeId.value !== null) {
+    return shift.employee.id === selectedEmployeeId.value
+      ? 1
+      : 0.35
+  }
+
+  // Выбрана должность
+  if (selectedPositionId.value !== null) {
+    return shift.position.id === selectedPositionId.value
+      ? 1
+      : 0.35
+  }
+
+  return 1
+}
 
 </script>
 
 <template>
-  <FullCalendar :options="calendarOptions" />
+  <div
+    ref="calendarWrapper"
+    @click="resetSelection"
+  >
+    <FullCalendar
+      ref="calendarRef"
+      :key="`${selectedEmployeeId}-${selectedPositionId}`"
+      :options="calendarOptions"
+    />
+  </div>
+  <AddShiftModalContent
+    :info="infoDate"
+    :model-value="isAddShiftModalOpen"
+    @close="isAddShiftModalOpen = false"
+  />
 </template>

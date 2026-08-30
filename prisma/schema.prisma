@@ -9,35 +9,87 @@ datasource db {
 }
 
 model User {
-  id        String         @id @default(cuid())
-  email     String         @unique
-  password  String
-  name      String
-  gender    String
-  positions UserPosition[]
+  id       String @id @default(cuid())
+  email    String @unique
+  password String
+  name     String
+  gender   String
+
+  memberships OrganizationMember[]
 }
 
-model Candidate {
-  id         String @id @default(cuid())
+model Employee {
+  id         String     @id @default(cuid())
   name       String
   surname    String
   middlename String
-  position   String
-  email      String @unique
+  email      String     @unique
+  color      String
+
+  positionId Int
+  position   Position   @relation(fields: [positionId], references: [id])
+
+  organizationId Int
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  shifts     Shift[]
+}
+
+model Shift {
+  id String @id @default(cuid())
+  date DateTime
+
+  employeeId String
+  positionId Int
+  organizationId Int
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  position   Position @relation(fields: [positionId], references: [id])
 }
 
 model Position {
-  id    Int            @id @default(autoincrement())
-  name  String         @unique
-  users UserPosition[]
+  id             Int @id @default(autoincrement())
+  name           String
+  fullName       String
+  organizationId Int
+  color          String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  employees    Employee[]
+  shifts       Shift[]
+
+  @@unique([organizationId, name])
 }
 
-model UserPosition {
-  userId     String
-  positionId Int
-  position   Position @relation(fields: [positionId], references: [id], onDelete: Cascade)
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@id([userId, positionId])
-  @@index([positionId])
+model Organization {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  members   OrganizationMember[]
+  positions Position[]
+  shifts    Shift[]
+  employees Employee[]
+}
+
+model Role {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  memberships OrganizationMember[]
+}
+
+model OrganizationMember {
+  userId         String
+  organizationId Int
+  roleId         Int
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role         Role         @relation(fields: [roleId], references: [id])
+
+  @@id([userId, organizationId])
+  @@index([organizationId, roleId])
+  @@index([roleId])
 }

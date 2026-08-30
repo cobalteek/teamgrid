@@ -1,8 +1,8 @@
-import bcrypt from 'bcrypt'
-import {prisma} from '../../utils/prisma'
-import {signToken} from '../../utils/auth'
+import bcrypt from 'bcryptjs'
+import {prisma} from '~~/server/utils/prisma'
+import {signToken} from '~~/server/utils/auth'
 import {enforceRateLimit} from '~~/server/utils/rate-limit'
-import {isValidEmail, isValidPassword} from '~~/server/utils/validation'
+import {isValidEmail, isValidPassword} from '~~/shared/utils/validation'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -21,7 +21,6 @@ export default defineEventHandler(async (event) => {
 
   const ok = await bcrypt.compare(password, user.password)
   if (!ok) throw createError({statusCode: 401, statusMessage: t('error.auth.credentials')})
-
   const token = signToken({userId: user.id})
 
   setCookie(event, 'token', token, {

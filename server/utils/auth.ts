@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import {createError, getCookie, type H3Event} from 'h3'
+import { OrganizationMember } from '@prisma/client'
 
 function getJwtSecret() {
   const secret = process.env.JWT_SECRET

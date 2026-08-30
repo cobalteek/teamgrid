@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {useAuthStore} from "~/stores/auth";
+import {useErrorModal} from '../composables/useErrorModal'
 
 const auth = useAuthStore()
 const fields = [
@@ -12,21 +13,15 @@ const form = ref({
   password: '',
 })
 
-const modalRef = ref(false);
-const textError = ref('')
-const type_ = ref('')
+const errorModal = useErrorModal()
 
 async function onLogin() {
 
   if (form.value.email === '' || form.value.password === '') {
-    type_.value = 'error'
-    textError.value = $t('error.form.fieldsEmpty')
-    modalRef.value = true
+    errorModal.showError('error.form.fieldsEmpty')
     return
   } else if (form.value.password.length < 8) {
-    type_.value = 'info'
-    textError.value = $t('error.auth.passwordLength')
-    modalRef.value = true
+    errorModal.showInfo('error.auth.passwordLength')
     return
   }
 
@@ -38,17 +33,9 @@ async function onLogin() {
     const error = e as {statusCode?: number; status?: number; response?: {status?: number}}
     const status = error.statusCode || error.status || error.response?.status
     if (status === 401) {
-      type_.value = 'error'
-      textError.value = $t('error.auth.loginOrPasswordInvalid')
-      modalRef.value = true
+      errorModal.showError('error.auth.loginOrPasswordInvalid')
     }
   }
-}
-
-function resetErrorModal() {
-  modalRef.value = false
-  textError.value = ''
-  type_.value = ''
 }
 
 definePageMeta({
@@ -70,10 +57,8 @@ definePageMeta({
     @submit="onLogin"
   />
   <ErrorModalContent
-    :model-value="modalRef"
-    :type="type_"
-    :text="textError"
-    @close="resetErrorModal"
+    :error="errorModal.error.value"
+    @close="errorModal.close"
     class="w-[300px] h-[200px] top-1/4"
   />
 </template>

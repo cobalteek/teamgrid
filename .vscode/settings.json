@@ -8,5 +8,11 @@
   "i18n-ally.keystyle": "nested",
   
   "i18n-ally.readonly": false,
-  "i18n-ally.editor.readonly": false
+  "i18n-ally.editor.readonly": false,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  }
 }

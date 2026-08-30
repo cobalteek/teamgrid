@@ -1,13 +1,13 @@
 <script setup lang="ts">
-
+const useInit = useInitializeApp()
+await useInit.init()
 </script>
 
 <template>
-
   <div class="min-h-screen bg-[var(--bg-back)] text-[var(--text-main)]">
-  <Header/>
+    <Header/>
     <main class="mx-auto flex min-h-[calc(100vh-64px)] max-w-5xl p-6">
-        <slot/>
+      <slot/>
     </main>
   </div>
 </template>
