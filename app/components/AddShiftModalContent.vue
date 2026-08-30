@@ -80,8 +80,10 @@ const handleSubmit = async () => {
       return
     }
 
-    if(new Date(`${template.value.endDate}T00:00:00Z`) >= new Date(`${createShift.value.date}T00:00:00Z`)) {
+    if (new Date(`${createShift.value.date}T00:00:00Z`) > new
+    Date(`${template.value.endDate}T00:00:00Z`)) {
       errorModal.showError('error.form.startOlderEnd')
+      return
     }
 
     const shifts = generateShifts(createShift.value, template.value)

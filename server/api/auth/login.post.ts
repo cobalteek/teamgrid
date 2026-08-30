@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 import {prisma} from '~~/server/utils/prisma'
 import {signToken} from '~~/server/utils/auth'
 import {enforceRateLimit} from '~~/server/utils/rate-limit'

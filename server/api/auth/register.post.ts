@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 import { prisma } from '~~/server/utils/prisma'
 import { Prisma } from '@prisma/client'
 import {enforceRateLimit} from '~~/server/utils/rate-limit'
@@ -67,6 +67,10 @@ export default defineEventHandler(async (event) => {
           gender,
         },
       })
+
+      const role = await tx.role.findFirst({
+            where: { name: 'owner' } // или 'admin'
+          })
 
       const membership = await tx.organizationMember.create({
         data: {
