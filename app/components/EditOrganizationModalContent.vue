@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Modal from './Modal.vue'
-import {isValidName} from '../../shared/utils/validation'
+import {isValidName} from '~~/shared/utils/validation'
 import EditPositionForm from './EditPositionForm.vue';
 
 const props = defineProps<{

@@ -1,7 +1,7 @@
-import { prisma } from '../../utils/prisma'
-import {requireUser} from '../../utils/auth'
-import {isValidEmail, isValidName} from '../../../shared/utils/validation'
-import { EMPLOYEE_COLORS, POSITION_COLORS } from '../../../shared/utils/defaultColors'
+import { prisma } from '~~/server/utils/prisma'
+import {requireUser} from '~~/server/utils/auth'
+import {isValidEmail, isValidName} from '~~/shared/utils/validation'
+import { EMPLOYEE_COLORS, POSITION_COLORS } from '~~/shared/utils/defaultColors'
 
 
 export default defineEventHandler(async (event) => {

@@ -1,5 +1,5 @@
-import { prisma } from '../../utils/prisma'
-import { isValidName } from '../../../shared/utils/validation'
+import { prisma } from '~~/server/utils/prisma'
+import { isValidName } from '~~/shared/utils/validation'
 import {
   defineEventHandler,
   createError,

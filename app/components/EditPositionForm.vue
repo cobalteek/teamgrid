@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Modal from './Modal.vue'
 import { usePositionStore } from '../stores/position';
-import type {Position} from '../../types/position'
+import type {Position} from '~~/types/position'
 import { error } from 'node:console';
 
 const props = defineProps<{

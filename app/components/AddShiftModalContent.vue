@@ -3,7 +3,7 @@ import { useErrorModal } from '#imports';
 import { useEmployeeStore } from '../stores/employee';
 import { usePositionStore } from '../stores/position';
 import { useShiftStore } from '../stores/shift';
-import type { CreateShift } from '../../types/shift';
+import type { CreateShift } from '~~/types/shift';
 import type { ScheduleTemplate } from '~~/types/shift';
 import { formatDateStr } from '~~/shared/utils/formatDate';
 import { createEmptyEventStore } from '@fullcalendar/core/internal';

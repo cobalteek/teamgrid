@@ -1,5 +1,5 @@
-import {prisma} from '../../utils/prisma'
-import {requireUser} from '../../utils/auth'
+import {prisma} from '~~/server/utils/prisma'
+import {requireUser} from '~~/server/utils/auth'
 import {createError} from 'h3'
 import type {Prisma} from "@prisma/client";
 

@@ -1,4 +1,4 @@
-import type { Organization } from "../../types/organization"
+import type { Organization } from "~~/types/organization"
 import { defineStore } from "pinia"
 
 type RequestError = {

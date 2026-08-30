@@ -1,8 +1,8 @@
 import bcrypt from 'bcrypt'
-import {prisma} from '../../utils/prisma'
-import {signToken} from '../../utils/auth'
+import {prisma} from '~~/server/utils/prisma'
+import {signToken} from '~~/server/utils/auth'
 import {enforceRateLimit} from '~~/server/utils/rate-limit'
-import {isValidEmail, isValidPassword} from '../../../shared/utils/validation'
+import {isValidEmail, isValidPassword} from '~~/shared/utils/validation'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)

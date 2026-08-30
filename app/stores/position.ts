@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import type { Position } from "../../types/position"
+import type { Position } from "~~/types/position"
 type RequestError = {
   data?: { message?: string }
   message?: string

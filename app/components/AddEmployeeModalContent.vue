@@ -2,7 +2,7 @@
 import { useEmployeeStore } from '../stores/employee'
 import { useOrganizationStore } from '~/stores/organization'
 import type { CreateEmployee } from '~~/types/employee'
-import { isValidEmail, isValidName, isValidPosition } from '../../shared/utils/validation'
+import { isValidEmail, isValidName, isValidPosition } from '~~/shared/utils/validation'
 import { useErrorModal } from '#imports';
 
 const props = defineProps<{

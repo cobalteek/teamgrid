@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Organization } from '../../types/organization';
+import type { Organization } from '~~/types/organization';
 
 const newOrganization = ref<Organization>({
   id: 0,
