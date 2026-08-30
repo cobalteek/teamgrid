@@ -75,6 +75,13 @@ export default defineEventHandler(async (event) => {
 
     const colorPosition = POSITION_COLORS[colorIndexPosition]
 
+    if(!colorPosition) {
+        throw createError({
+            statusCode: 409,
+            statusMessage: t('error.color.notFound'),
+        })
+    }
+
     const positionRecord = await prisma.position.upsert({
         where: {
             organizationId_name: {
@@ -103,6 +110,13 @@ export default defineEventHandler(async (event) => {
     )
 
     const colorEmployee = EMPLOYEE_COLORS[colorIndexEmployee]
+
+    if(!colorEmployee) {
+        throw createError({
+            statusCode: 409,
+            statusMessage: t('error.color.notFound'),
+        })
+    }
 
     const employee = await prisma.employee.create({
         data: {
