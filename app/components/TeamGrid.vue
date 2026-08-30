@@ -22,13 +22,14 @@ const shiftStore = useShiftStore()
 const selectedEmployeeId = ref<number | null>(null)
 const selectedPositionId = ref<number | null>(null)
 const events = computed(() => {
-  return shiftStore.shifts.map(shift => ({
-    id: shift.id,
-    title: `${shift.employee.name} ${shift.position.name}`,
-    start: shift.date,
-    allDay: true,
+  return shiftStore.shifts.map(shift => {
+    return {
+      id: shift.id,
+      title: `${shift.employee.name} ${shift.position.name}`,
+      start: new Date(shift.date).toISOString().split('T')[0],
+      allDay: true,
 
-    extendedProps: {
+      extendedProps: {
       employeeId: shift.employee.id,
       positionId: shift.position.id,
 
@@ -36,9 +37,12 @@ const events = computed(() => {
       positionColor: shift.position.color,
 
       opacity: getEventOpacity(shift)
-    }
-  }))
+      } 
+    } 
+  })
 })
+
+
 
 const calendarWrapper = ref<HTMLElement | null>(null)
 

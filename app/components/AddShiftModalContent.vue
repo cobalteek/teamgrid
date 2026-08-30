@@ -6,6 +6,7 @@ import { useShiftStore } from '../stores/shift';
 import type { CreateShift } from '../../types/shift';
 import type { ScheduleTemplate } from '~~/types/shift';
 import { formatDateStr } from '~~/shared/utils/formatDate';
+import { createEmptyEventStore } from '@fullcalendar/core/internal';
 const props = defineProps<{
     modelValue: boolean
     info: any
@@ -27,7 +28,7 @@ const createShift = ref<CreateShift>({
 const template = ref<ScheduleTemplate>({
   workDays: 0,
   restDays: 0,
-  endDate: new Date()
+  endDate: new Date().toISOString().split('T')[0] ?? ''
 })
 
 const emit = defineEmits<{
@@ -48,6 +49,9 @@ function onUpdateModelValue(value: boolean) {
 function resetModal() {
   createShift.value.employeeId = ''
   createShift.value.positionId = 1
+  template.value.endDate = new Date().toISOString().split('T')[0] ?? ''
+  template.value.restDays = 0
+  template.value.workDays = 0
 }
 
 const handleCancel = () => {
@@ -62,6 +66,7 @@ const handleSubmit = async () => {
       return
   }
   if(advancedSettings.value) {
+    console.log(template.value)
     if(!template.value.endDate ||
        !template.value.restDays ||
        !template.value.workDays
@@ -70,13 +75,22 @@ const handleSubmit = async () => {
       return
     }
 
+    if(template.value.workDays === 0) {
+      errorModal.showError('error.form.workDaysZero')
+      return
+    }
+
+    if(new Date(`${template.value.endDate}T00:00:00Z`) >= new Date(`${createShift.value.date}T00:00:00Z`)) {
+      errorModal.showError('error.form.startOlderEnd')
+    }
+
     const shifts = generateShifts(createShift.value, template.value)
-    console.log('shiftGen' + shifts)
-    if(!shifts?.value) {
+    if(!shifts) {
       errorModal.showError('error.form.shiftsEmpty')
       return
     }
-    await shiftStore.createManyShifts(shifts?.value)
+    await shiftStore.createManyShifts(shifts)
+    return
   }
   try {
     await shiftStore.createShift(createShift.value)
@@ -97,24 +111,27 @@ function generateShifts(
   createShift: CreateShift,
   template: ScheduleTemplate
 ) {
-  const newShifts = ref<CreateShift[]>([])
+  const newShifts: CreateShift[] = []
 
   let daysPassed = 0
-  let date = new Date(createShift.date)
 
-  while (date <= template.endDate) {
+  let date = new Date(`${createShift.date}T00:00:00Z`)
+  const endDate = new Date(`${template.endDate}T00:00:00Z`)
 
-    const cycleLength =
-      template.workDays + template.restDays
+  const cycleLength =
+    template.workDays + template.restDays
 
+  while (date <= endDate) {
     const cyclePosition =
       daysPassed % cycleLength
 
     if (cyclePosition < template.workDays) {
-
       const dateStr = formatDateStr(date)
       if(!dateStr) {
-        return
+        throw createError({
+          statusCode: 400,
+          statusMessage: 'error.invalidData'
+        })
       }
 
       const newShift: CreateShift = {
@@ -123,15 +140,13 @@ function generateShifts(
         positionId: createShift.positionId
       }
 
-      newShifts.value.push(newShift)
+      newShifts.push(newShift)
     }
 
     daysPassed++
 
     date.setDate(date.getDate() + 1)
   }
-
-  console.log('newShifts' + newShifts.value)
 
   return newShifts
 }

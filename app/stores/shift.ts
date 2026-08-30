@@ -1,5 +1,6 @@
 import { defineStore } from "pinia"
 import type { CreateShift, ShiftWithRelations } from "~~/types/shift"
+import { formatDateStr } from "~~/shared/utils/formatDate" 
 
 type RequestError = {
   data?: { message?: string }
@@ -67,12 +68,14 @@ export const useShiftStore = defineStore('shift', () => {
           ) {
             throw createError('validation.shift.requiredFields')
           }
-          const date = new Date(`${shiftData.date}`)
+          const date = new Date(`${shiftData.date}T00:00:00Z`)
           const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-          const existingShift = shifts.value.find(shift => shift.date.toString().slice(0,10) === date.toLocaleDateString('sv-SE') && shift.employeeId === shiftData.employeeId)
-          if (existingShift) {
-            throw createError('error.shift.duplicate')
-          }
+          const existingShift = shifts.value.find(shift => 
+            formatDateStr(new Date(shift.date)) === formatDateStr(date)
+            &&
+            shift.employeeId === shiftData.employeeId
+          )
+          if (existingShift) throw createError('error.shift.duplicate')
 
           const formattedShiftData = {
             ...shiftData,
@@ -98,58 +101,49 @@ export const useShiftStore = defineStore('shift', () => {
         }
       }
 
-      async function createManyShifts(shiftData: Omit<CreateShift, 'id'>[]) {
-        const organizationId = organizationStore.currentOrganizationId
-        if (!shifts || !Array.isArray(shifts) || shifts.length === 0) {
-          throw createError({
-            statusCode: 400,
-            statusMessage: 'error.bulk.notFound'
-          })
-        }
-        const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-        for (const newShift of shiftData) {
-          const existingShift = shifts.value.find(
-            shift =>
-              formatDate(new Date(shift.date)) === formatDate(new Date(newShift.date)) &&
-              shift.employeeId === newShift.employeeId
-          )
-
-          if (existingShift) {
-            throw createError({
-              statusCode: 409,
-              statusMessage: 'error.shift.duplicate'
-            })
-          }
-        }
-
-        const formattedShifts = shiftData.map(shift => ({
-          ...shift,
-          date: new Date(`${shift.date}T00:00:00`)
-        }))
-
-
-        try {
-          const newShifts = await $fetch<ShiftWithRelations[]>(
-            '/api/shift/bulk',
-            {
-              credentials: 'include',
-              method: 'POST',
-              headers,
-              body: {
-                shifts: formattedShifts,
-                organizationId
-              }
+        async function createManyShifts(shiftData: Omit<CreateShift, 'id'>[]) {
+            const organizationId = organizationStore.currentOrganizationId
+            if (!Array.isArray(shiftData) || shiftData.length === 0) {
+              throw createError({ statusCode: 400, statusMessage: 'error.bulk.notFound' })
             }
-          )
+            
+            const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
+            
+            for (const newShift of shiftData) {
+              const dateUTC = new Date(`${newShift.date}T00:00:00Z`)
+                const existingShift = shifts.value.find(
+                  shift =>
+                  formatDateStr(shift.date) ===
+                  formatDateStr(dateUTC) &&
+                     shift.employeeId === newShift.employeeId
+                  )
+              if (existingShift) throw createError({ statusCode: 409,
+                statusMessage: 'error.shift.duplicate' })
+              }
     
-          shifts.value.push(...newShifts)
+            const formattedShifts = shiftData.map(shift => ({
+              ...shift,
+              date: new Date(`${shift.date}T00:00:00Z`)
+            }))
     
-          return newShifts
-        } catch (e: unknown) {
-          error.value = getErrorMessage(e)
-          throw e
+            try {
+              const newShifts = await $fetch<ShiftWithRelations[]>(
+                '/api/shift/bulk',
+                {
+                  credentials: 'include',
+                  method: 'POST',
+                  headers,
+                  body: { shifts: formattedShifts, organizationId }
+                }
+              )
+        
+              shifts.value.push(...newShifts)
+              return true
+            } catch (e: unknown) {
+              error.value = getErrorMessage(e)
+              throw e
+            }
         }
-      }
 
     return {
         shifts,

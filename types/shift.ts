@@ -27,5 +27,5 @@ export type CreateShift = {
 export type ScheduleTemplate = {
   workDays: number
   restDays: number
-  endDate: Date
+  endDate: string
 }
