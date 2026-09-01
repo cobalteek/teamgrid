@@ -1,6 +1,6 @@
 import { prisma } from '~~/server/utils/prisma'
 import { requireUser } from '~~/server/utils/auth'
-import { isOwnerOrganization } from '~~/shared/utils/validation'
+import { isOwnerOrganization } from '~~/server/utils/member'
 import {
   defineEventHandler,
   createError,

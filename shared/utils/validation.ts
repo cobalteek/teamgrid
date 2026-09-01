@@ -14,19 +14,3 @@ export function isValidName(value: string) {
 export function isValidPosition(value: string) {
   return value.length >= 2 && value.length <= 128
 }
-
-export async function isOwnerOrganization(userId: string, organizationId: number) {
-  const owneredOrganization = await prisma.organizationMember.findUnique({
-    where: {
-      userId_organizationId: {
-      userId,
-      organizationId
-    }
-    },
-    include: {
-      role: true
-    }
-  })
-
-  return owneredOrganization?.role.name === 'owner'
-}
