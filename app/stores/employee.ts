@@ -91,8 +91,6 @@ export const useEmployeeStore = defineStore('employee', () => {
     }
   }
 
-<<<<<<< HEAD
-=======
   async function changeEmployee(employee:Employee) {
     isLoading.value = true
     error.value = null
@@ -116,7 +114,6 @@ export const useEmployeeStore = defineStore('employee', () => {
     }
   }
 
->>>>>>> develop
   const options = computed(() =>
     employees.value.map(e => ({value: e.id, label: `${e.surname} ${e.name} ${e.middlename}`}))
   )
@@ -128,10 +125,7 @@ export const useEmployeeStore = defineStore('employee', () => {
     getEmployees,
     createEmployee,
     getEmployeeById,
-<<<<<<< HEAD
-=======
     changeEmployee,
->>>>>>> develop
     options
   }
 })

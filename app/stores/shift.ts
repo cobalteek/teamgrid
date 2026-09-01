@@ -13,11 +13,7 @@ function getErrorMessage(error: unknown) {
   }
 
   const requestError = error as RequestError
-<<<<<<< HEAD
-  return requestError.data?.message ?? requestError.message ?? $t('error.')
-=======
   return requestError.data?.message ?? requestError.message ?? $t('error.shift.notFound')
->>>>>>> develop
 }
 
 export const useShiftStore = defineStore('shift', () => {
@@ -147,9 +143,6 @@ export const useShiftStore = defineStore('shift', () => {
               error.value = getErrorMessage(e)
               throw e
             }
-<<<<<<< HEAD
-        }
-=======
       }
 
       async function deleteShift(shiftId: string) {
@@ -175,7 +168,6 @@ export const useShiftStore = defineStore('shift', () => {
           isLoading.value = false
         }
       }
->>>>>>> develop
 
     return {
         shifts,
@@ -183,11 +175,7 @@ export const useShiftStore = defineStore('shift', () => {
         isLoading,
         getShifts,
         createShift,
-<<<<<<< HEAD
-        createManyShifts
-=======
         createManyShifts,
         deleteShift
->>>>>>> develop
     }
 })

@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 import { prisma } from '~~/server/utils/prisma'
->>>>>>> develop
 export function isValidEmail(value: string) {
   return value.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
 }
@@ -16,8 +13,6 @@ export function isValidName(value: string) {
 
 export function isValidPosition(value: string) {
   return value.length >= 2 && value.length <= 128
-<<<<<<< HEAD
-=======
 }
 
 export async function isOwnerOrganization(userId: string, organizationId: number) {
@@ -34,5 +29,4 @@ export async function isOwnerOrganization(userId: string, organizationId: number
   })
 
   return owneredOrganization?.role.name === 'owner'
->>>>>>> develop
 }
