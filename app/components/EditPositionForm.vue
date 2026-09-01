@@ -2,7 +2,7 @@
 import Modal from './Modal.vue'
 import { usePositionStore } from '../stores/position';
 import type {Position} from '~~/types/position'
-import { error } from 'node:console';
+import {isValidPosition} from '~~/shared/utils/validation'
 
 const props = defineProps<{
   modelValue: boolean
@@ -39,8 +39,8 @@ const initApp = useInitializeApp()
 
 async function handleSubmit() {
   if(position.value &&
-    (!isValidName(position.value.name) ||
-    !isValidName(position.value.fullName))) {
+    (!isValidPosition(position.value.name) ||
+    !isValidPosition(position.value.fullName))) {
     errorModal.showError('error.invalidName')
     return
   }
@@ -83,7 +83,7 @@ watch(
   >
     <Form
       v-if="position"
-      title="ui.position.edit"
+      title="ui.positionEdit"
       :fields="[
         {key: 'name', type: 'text', placeholder: 'placeholder.position.name'},
         {key: 'fullName', type: 'text', placeholder: 'placeholder.position.fullName'},

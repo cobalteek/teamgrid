@@ -13,7 +13,7 @@ function getErrorMessage(error: unknown) {
   }
 
   const requestError = error as RequestError
-  return requestError.data?.message ?? requestError.message ?? $t('error.')
+  return requestError.data?.message ?? requestError.message ?? $t('error.shift.notFound')
 }
 
 export const useShiftStore = defineStore('shift', () => {
@@ -143,7 +143,31 @@ export const useShiftStore = defineStore('shift', () => {
               error.value = getErrorMessage(e)
               throw e
             }
+      }
+
+      async function deleteShift(shiftId: string) {
+        isLoading.value = true
+        error.value = null
+
+        try {
+          const deleteShift = await $fetch('/api/shift/delete', {
+            credentials: 'include',
+            method: 'POST',
+            body: {
+              id: shiftId
+            }
+          })
+          
+          return deleteShift
+        } catch(e) {
+          error.value = String(e)
+          console.log(e)
+          throw e
+        } finally {
+          await getShifts()
+          isLoading.value = false
         }
+      }
 
     return {
         shifts,
@@ -151,6 +175,7 @@ export const useShiftStore = defineStore('shift', () => {
         isLoading,
         getShifts,
         createShift,
-        createManyShifts
+        createManyShifts,
+        deleteShift
     }
 })

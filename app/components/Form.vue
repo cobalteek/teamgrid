@@ -13,39 +13,41 @@ const emit = defineEmits<{
   submit: []
 }>()
 
-type SelectKey<T> = {
-  [K in keyof T]: T[K] extends string | number ? K : never
-}[keyof T]
-
 type Select<T> = {
-  [K in SelectKey<T>]: {
-    key: K
-    placeholder: string
-    disabledOption: string
-    selectOption: {
-      label: string
-      value: T[K]
-    }[]
-  }
-}[SelectKey<T>]
-
-type StringKey<T> = {
-  [K in keyof T]: T[K] extends string ? K : never
-}[keyof T]
+  key: string
+  placeholder: string
+  disabledOption: string
+  selectOption: {
+    label: string
+    value: any
+  }[]
+}
 
 type Field<T> = {
-  [K in StringKey<T>]: {
-    key: K
-    type: string
-    placeholder: string
-  }
-}[StringKey<T>]
+  key: string
+  type: string
+  placeholder: string
+}
+
+function getDeepValue(obj: any, path: string) {
+  return path.split('.').reduce((acc, part) => acc && acc[part], obj)
+}
+
+function setDeepValue(obj: any, path: string, value: any) {
+  const parts = path.split('.')
+  const last = parts.pop()!
+  const deepParent = parts.reduce((acc, part) => {
+    if (!acc[part]) acc[part] = {}
+    return acc[part]
+  }, obj)
+  deepParent[last] = value
+}
 
 function updateField(
-  key: StringKey<T>,
+  key: string,
   value: string
 ) {
-  ;(props.modelValue as Record<StringKey<T>, string>)[key] = value
+  setDeepValue(props.modelValue, key, value)
 }
 
 function onSelectChange(
@@ -59,7 +61,7 @@ function onSelectChange(
   )
 
   if (option) {
-    props.modelValue[select.key] = option.value
+    setDeepValue(props.modelValue, select.key, option.value)
   }
 }
 
@@ -90,14 +92,14 @@ if(props.date) {
         v-if="fields"
         v-for="field in fields"
         :key="field.key"
-        :value="modelValue[field.key] ?? ''"
+        :value="getDeepValue(modelValue, field.key) ?? ''"
         @input="updateField(
           field.key,
           ($event.target as HTMLInputElement).value
         )"
         :type="field.type"
         :placeholder="$t(field.placeholder)"
-        class="pl-2"
+        class="pl-2 p-1 rounded-md active:border-gray-200 text-[var(--input-text)] bg-[var(--input-bg)]"
         />
       <div
         v-if="selects"
@@ -106,7 +108,7 @@ if(props.date) {
         <select
         v-for="select in selects"
         :key="select.key"
-        :value="modelValue[select.key] ?? ''"
+        :value="getDeepValue(modelValue, select.key) ?? ''"
         @input="onSelectChange($event, select)"
         class="border-1 rounded pl-2"
       >

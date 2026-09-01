@@ -7,11 +7,11 @@ type RequestError = {
 
 function getErrorMessage(error: unknown) {
   if (typeof error !== 'object' || error === null) {
-    return $t('error.')
+    return $t('error.position.notFound')
   }
 
   const requestError = error as RequestError
-  return requestError.data?.message ?? requestError.message ?? $t('error.')
+  return requestError.data?.message ?? requestError.message ?? $t('error.position.notFound')
 }
 
 export const usePositionStore = defineStore('position', () => {
@@ -110,7 +110,11 @@ export const usePositionStore = defineStore('position', () => {
     }
 
     const options = computed(() =>
-        positions.value.map(p => ({value: p.id, label: p.name, fullLabel: p.fullName}))
+        positions.value.map(p => ({value: p.id, label: p.name}))
+    )
+
+    const optionsFull = computed(() =>
+        positions.value.map(p => ({value: p.id, label: p.fullName}))
     )
 
     return {
@@ -120,6 +124,7 @@ export const usePositionStore = defineStore('position', () => {
         getPositions,
         getPositionById,
         changePosition,
-        options
+        options,
+        optionsFull
     }
 })

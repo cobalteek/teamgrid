@@ -16,20 +16,21 @@ const organizationStore = useOrganizationStore()
 const employeeStore = useEmployeeStore()
 const positionStore = usePositionStore()
 const userStore = useUserStore()
+
 const errorModal = useErrorModal()
 
 const organizationName = ref('')
 const isDisableName = ref(true)
 const isOpenEditPositionForm = ref(false)
+const isOpenEditEmployeeForm = ref(false)
+
 const posId = ref(0)
+const empId = ref('')
 
 function onUpdateModelValue(value: boolean) {
   emit('update:modelValue', value)
 
   if (!value) {
-    if(organizationName.value !== organizationStore.currentOrganization?.name) {
-      console.log('sosiska')
-    }
     isDisableName.value = true
     emit('close')
   }
@@ -54,6 +55,11 @@ function openEditPositionForm(positionId: number) {
   isOpenEditPositionForm.value = true
 }
 
+function openEditEmployeeForm(employeeId: string) {
+  empId.value = employeeId
+  isOpenEditEmployeeForm.value = true
+}
+
 watch(
   () => props.modelValue,
   async (isOpen) => {
@@ -72,7 +78,7 @@ watch(
     :model-value="modelValue"
     @update:model-value="onUpdateModelValue"
   >
-    <div class="w-[500px] h-[300px]">
+    <div class="w-[700px] h-[400px]">
       <section class="inline-flex justify-center text-center font-bold text-lg items-center py-3 w-full">
         <form
           class="flex justify-center gap-2"
@@ -100,27 +106,28 @@ watch(
       <hr>
         <div class="flex justify-around h-[60%] mt-2">
           <div class="flex flex-col items-center border rounded w-[30%] h-full">
-            <h4>{{ $t('ui.employees') }}</h4>
-            <ol>
+            <h4 class="pb-2">{{ $t('ui.employees') }}</h4>
+            <ul>
               <li
                 v-for="emp in employeeStore.options"
-                class="pl-2"
+                class="pl-2 cursor-pointer pb-2"
+                @click="openEditEmployeeForm(emp.value)"
               >
-                {{ emp.label }}
+                <p>{{ emp.label }}</p>
               </li>
-            </ol>
+            </ul>
           </div>
           <div class="flex flex-col items-center border rounded w-[30%] h-full">
-            <h4>{{ $t('ui.positions') }}</h4>
-            <ol>
+            <h4 class="pb-2">{{ $t('ui.positions') }}</h4>
+            <ul>
               <li
-                v-for="pos in positionStore.options"
-                class="cursor-pointer"
+                v-for="pos in positionStore.optionsFull"
+                class="pl-2 cursor-pointer pb-2"
                 @click="openEditPositionForm(pos.value)"
               >
-                {{ pos.fullLabel }}
+                {{ pos.label }}
               </li>
-            </ol>
+            </ul>
           </div>
           <div class="flex flex-col items-center border rounded w-[30%] h-full">
             <h4>{{ $t('ui.users') }}</h4>
@@ -139,6 +146,11 @@ watch(
     :model-value="isOpenEditPositionForm"
     :position-id="posId"
     @close="isOpenEditPositionForm = false"
+  />
+  <EditEmployeeForm
+    :model-value="isOpenEditEmployeeForm"
+    :employee-id="empId"
+    @close="isOpenEditEmployeeForm = false"
   />
   <ErrorModalContent
     :error="errorModal.error.value"
