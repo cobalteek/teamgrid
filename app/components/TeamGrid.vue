@@ -34,9 +34,7 @@ const events = computed(() => {
       positionId: shift.position.id,
 
       employeeColor: shift.employee.color,
-      positionColor: shift.position.color,
-
-      opacity: getEventOpacity(shift)
+      positionColor: shift.position.color
       } 
     } 
   })
@@ -45,6 +43,9 @@ const events = computed(() => {
 
 
 const calendarWrapper = ref<HTMLElement | null>(null)
+const eventElements = new Map<string, HTMLElement[]>()
+
+const calendarRef = ref<InstanceType<typeof FullCalendar> | null>(null)
 
 function resetSelection(event: MouseEvent) {
   const target = event.target as HTMLElement
@@ -127,8 +128,11 @@ const calendarOptions = computed(() => ({
 }))
 
 function eventDidMount(info: any) {
-  const employeeColor = info.event.extendedProps.employeeColor
-  const positionColor = info.event.extendedProps.positionColor
+  const employeeColor =
+    info.event.extendedProps.employeeColor
+
+  const positionColor =
+    info.event.extendedProps.positionColor
 
   info.el.style.background = `
     linear-gradient(
@@ -140,12 +144,21 @@ function eventDidMount(info: any) {
     )
   `
 
-  info.el.style.opacity = String(
-    info.event.extendedProps.opacity
-  )
+  const eventId = String(info.event.id)
+
+  const elements = eventElements.get(eventId) ?? []
+
+  elements.push(info.el)
+
+  eventElements.set(eventId, elements)
+
+  updateEventOpacity(info.event)
 }
 
-function getEventOpacity(shift: any) {
+function getEventOpacity(
+  employeeId: number,
+  positionId: number
+) {
   if (
     selectedEmployeeId.value === null &&
     selectedPositionId.value === null
@@ -154,20 +167,57 @@ function getEventOpacity(shift: any) {
   }
 
   if (selectedEmployeeId.value !== null) {
-    return shift.employee.id === selectedEmployeeId.value
+    return selectedEmployeeId.value === employeeId
       ? 1
       : 0.35
   }
 
-  // Выбрана должность
   if (selectedPositionId.value !== null) {
-    return shift.position.id === selectedPositionId.value
+    return selectedPositionId.value === positionId
       ? 1
       : 0.35
   }
 
   return 1
 }
+
+function updateEventOpacity(event: any) {
+  const employeeId =
+    event.extendedProps.employeeId
+
+  const positionId =
+    event.extendedProps.positionId
+
+  const opacity = getEventOpacity(
+    employeeId,
+    positionId
+  )
+
+  const elements = eventElements.get(
+    String(event.id)
+  )
+
+  elements?.forEach(element => {
+    element.style.opacity = String(opacity)
+  })
+}
+
+function updateAllEventsOpacity() {
+  const calendarApi = calendarRef.value?.getApi()
+
+  if (!calendarApi) return
+
+  calendarApi.getEvents().forEach((event) => {
+    updateEventOpacity(event)
+  })
+}
+
+watch(
+  [selectedEmployeeId, selectedPositionId],
+  () => {
+    updateAllEventsOpacity()
+  }
+)
 
 </script>
 
@@ -178,7 +228,6 @@ function getEventOpacity(shift: any) {
   >
     <FullCalendar
       ref="calendarRef"
-      :key="`${selectedEmployeeId}-${selectedPositionId}`"
       :options="calendarOptions"
     />
   </div>

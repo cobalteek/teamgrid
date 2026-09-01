@@ -65,6 +65,10 @@
     "cross": "×",
     "changePostEmployee": "Change the employee’s position",
     "edit": "Edit",
+<<<<<<< HEAD
+=======
+    "editEmployee": "Edit Employee",
+>>>>>>> develop
     "addEvent": "Add an event",
     "addShift": "Add shift"
   },
@@ -122,7 +126,10 @@
       "get": "Failed to get statuses"
     },
     "form": {
-      "fieldsEmpty": "The fields are empty."
+      "fieldsEmpty": "The fields are empty.",
+      "workDaysZero": "The number of working days cannot be zero.",
+      "startOlderEnd": "The start date cannot be later than the end date.",
+      "shiftsEmpty": "The shift list cannot be empty."
     },
     "auth": {
       "credentials": "Invalid credentials",
@@ -140,7 +147,12 @@
       "logoutFailed": "Logout failed.",
       "register": "Register failed.",
       "fullNameLength": "Full name length must be from 2 to 80 characters",
+<<<<<<< HEAD
       "emailInvalid": "Invalid email"
+=======
+      "emailInvalid": "Invalid email",
+      "positionLength": "Invalid position length"
+>>>>>>> develop
     },
     "user": {
       "notFound": "User not found",
@@ -162,10 +174,20 @@
       "roleUserNotFound": "Role USER not found",
       "creatorForever": "You can’t change your role!",
       "change": "Failed to change role",
-      "get": "Failed to get role"
+      "get": "Failed to get role",
+      "notFound": "Role not found"
     },
     "data": {
       "notFound": "Data not found"
+    },
+    "bulk": {
+      "notFound": "Bulk action: data not found"
+    },
+    "general": {
+      "invalidName": "Invalid name",
+      "invalidEmail": "Invalid email",
+      "permissionDenied": "Permission denied",
+      "invalidData": "Invalid data"
     },
     "candidate": {
       "loadCandidates": "Failed to load candidates",
@@ -175,8 +197,18 @@
       "get": "Failed to get employees",
       "notFound": "No employees found"
     },
+<<<<<<< HEAD
     "position": {
       "notFound": "No positions found"
+=======
+    "color": {
+      "notFound": "Color not found"
+    },
+    "position": {
+      "notFound": "No positions found",
+      "invalidData": "Invalid position data",
+      "invalidName": "Invalid position name"
+>>>>>>> develop
     },
     "shift": {
       "duplicate": "This shift already exists",
@@ -184,7 +216,16 @@
     },
     "organization": {
       "get": "Organization not received",
+<<<<<<< HEAD
       "notCreate": "The organization has not been created"
+=======
+      "notCreate": "The organization has not been created",
+      "notFound": "Organization not found",
+      "invalidName": "Invalid organization name",
+      "create": "Failed to create organization",
+      "getId": "Failed to get organization ID",
+      "notFoundNotOwner": "Organization not found or you are not the owner"
+>>>>>>> develop
     }
   },
   "placeholder": {
@@ -192,17 +233,46 @@
     "lastName": "Surname",
     "middleName": "Middle name",
     "position": "Position",
+<<<<<<< HEAD
+=======
+    "positionName": "Position Name",
+    "positionFullName": "Position Full Name",
+>>>>>>> develop
     "email": "Email",
     "organizationName": "Name of organization"
   },
   "validation": {
+<<<<<<< HEAD
     "candidate": "Fill in all fields"
+=======
+    "candidate": "Fill in all fields",
+    "shift": {
+      "requiredFields": "Fill in all required shift fields"
+    },
+    "employee": {
+      "requiredFields": "Fill in all required employee fields"
+    }
+>>>>>>> develop
   },
   "ui": {
     "currentOrganization": "Current organization",
     "organization": {
       "add": "Add an organization"
     },
+<<<<<<< HEAD
     "employees": "Employees"
+=======
+    "employees": "Employees",
+    "positions": "Positions",
+    "users": "Users",
+    "employeeEdit": "Edit Employee",
+    "positionEdit": "Edit Position",
+    "advancedSettings": "Advanced Settings",
+    "templateGrid": "Grid Template",
+    "workDays": "Work Days",
+    "restDays": "Rest Days",
+    "startDate": "Start Date",
+    "endDate": "End Date"
+>>>>>>> develop
   }
 }

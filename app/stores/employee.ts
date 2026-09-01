@@ -91,6 +91,32 @@ export const useEmployeeStore = defineStore('employee', () => {
     }
   }
 
+<<<<<<< HEAD
+=======
+  async function changeEmployee(employee:Employee) {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
+
+      const changedEmployee = await $fetch<Employee>('/api/employee', {
+        credentials: 'include',
+        method: 'PATCH',
+        body: employee,
+        headers
+      })
+
+      return changedEmployee
+    } catch (e: unknown) {
+      error.value = getErrorMessage(e)
+      throw e
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+>>>>>>> develop
   const options = computed(() =>
     employees.value.map(e => ({value: e.id, label: `${e.surname} ${e.name} ${e.middlename}`}))
   )
@@ -102,6 +128,10 @@ export const useEmployeeStore = defineStore('employee', () => {
     getEmployees,
     createEmployee,
     getEmployeeById,
+<<<<<<< HEAD
+=======
+    changeEmployee,
+>>>>>>> develop
     options
   }
 })
