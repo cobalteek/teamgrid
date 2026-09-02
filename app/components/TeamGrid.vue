@@ -144,6 +144,15 @@ function eventDidMount(info: any) {
       ${positionColor} 100%
     )
   `
+  info.el.addEventListener('contextmenu', async (e: MouseEvent) => {
+    e.preventDefault()
+
+    const confirmed = confirm('Удалить смену?')
+
+    if (confirmed) {
+      await shiftStore.deleteShift(info.event.id)
+    }
+  })
 
   const eventId = String(info.event.id)
 

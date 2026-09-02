@@ -19,9 +19,6 @@ watch(isEditOrganizationModalOpen, () => {
     <button @click="isAddEmployeeModalOpen = true" class="btn">
         {{$t('btn.addEmployee')}}
     </button>
-    <button class="btn">
-      {{ $t('btn.changePostEmployee') }}
-    </button>
     <button @click="isEditOrganizationModalOpen = true" class="btn">
       {{ $t('btn.edit') }}
     </button>

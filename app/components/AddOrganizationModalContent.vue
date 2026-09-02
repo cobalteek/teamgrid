@@ -58,6 +58,7 @@ const handleSubmit = async () => {
       :fields="[{ key: 'name', type: 'text', placeholder: 'placeholder.organizationName'}]"  
       v-model="newOrganization"
       submitBtnName="ui.organization.add"
+      :is-loading="organizationStore.isLoading"
       @submit="handleSubmit"
       @close="handleCancel"
     />

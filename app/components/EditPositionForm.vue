@@ -85,11 +85,12 @@ watch(
       v-if="position"
       title="ui.positionEdit"
       :fields="[
-        {key: 'name', type: 'text', placeholder: 'placeholder.position.name'},
-        {key: 'fullName', type: 'text', placeholder: 'placeholder.position.fullName'},
+        {key: 'name', type: 'text', placeholder: 'placeholder.positionName'},
+        {key: 'fullName', type: 'text', placeholder: 'placeholder.positionFullName'},
         ]"
       v-model:model-value="position"
       submit-btn-name="btn.save"
+      :is-loading="positionStore.isLoading"
       @submit="handleSubmit"
       @close="handleCancel"
     />

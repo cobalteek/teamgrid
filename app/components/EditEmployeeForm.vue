@@ -111,6 +111,7 @@ watch(
         }]"
         v-model:modelValue="employee"
         submitBtnName="btn.editEmployee"
+        :is-loading="employeeStore.isLoading"
         @submit="handleSubmit"
         @close="handleCancel"
     />

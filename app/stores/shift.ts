@@ -155,6 +155,9 @@ export const useShiftStore = defineStore('shift', () => {
             method: 'POST',
             body: {
               id: shiftId
+            },
+            query: {
+              organizationId: organizationStore.currentOrganizationId
             }
           })
           
