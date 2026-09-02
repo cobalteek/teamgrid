@@ -246,6 +246,7 @@
     "workDays": "Work Days",
     "restDays": "Rest Days",
     "startDate": "Start Date",
-    "endDate": "End Date"
+    "endDate": "End Date",
+    "shiftDeleteConfirm": "Delete a shift?"
   }
 }

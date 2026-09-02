@@ -147,7 +147,7 @@ function eventDidMount(info: any) {
   info.el.addEventListener('contextmenu', async (e: MouseEvent) => {
     e.preventDefault()
 
-    const confirmed = confirm('Удалить смену?')
+    const confirmed = confirm($t('ui.shiftDeleteConfirm') as string)
 
     if (confirmed) {
       await shiftStore.deleteShift(info.event.id)

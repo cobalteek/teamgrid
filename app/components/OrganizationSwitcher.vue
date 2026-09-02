@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Organization } from '@prisma/client';
+import type { Organization } from '~~/types/organization';
 import {useOrganizationStore} from '../stores/organization'
 
 const emit = defineEmits<{
