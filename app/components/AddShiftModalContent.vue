@@ -197,6 +197,7 @@ watch(
         ]"
         v-model="createShift"
         submitBtnName="btn.addShift"
+        :is-loading="shiftStore.isLoading"
         @submit="handleSubmit"
         @close="handleCancel"
     />

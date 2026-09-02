@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import type { Organization } from '~~/types/organization';
 import {useOrganizationStore} from '../stores/organization'
-import type { Organization } from '~~/types/organization'
 
 const emit = defineEmits<{
   (e: 'addOrganization') : void

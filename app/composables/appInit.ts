@@ -13,7 +13,8 @@ export function useInitializeApp() {
     await Promise.all([
         shiftStore.getShifts(),
         employeeStore.getEmployees(),
-        positionStore.getPositions()
+        positionStore.getPositions(),
+        userStore.getOrganizationUsers()
     ])
   }
   return {

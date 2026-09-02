@@ -6,6 +6,7 @@ const props = defineProps<{
   modelValue: T;
   date?: Date
   submitBtnName: string;
+  isLoading: boolean
 }>()
 
 const emit = defineEmits<{
@@ -128,13 +129,15 @@ if(props.date) {
         <button
           type="button"
           @click="handleCancel"
-          class="btn btn-secondary"
+          class="btn btn-secondary disabled:opacity-10"
+          :disabled="isLoading"
         >
           {{ $t('btn.cancel') }}
         </button>
         <button
           type="submit"
           class="btn btn-primary"
+          :disabled="isLoading"
         >
           {{ $t(submitBtnName) }}
         </button>

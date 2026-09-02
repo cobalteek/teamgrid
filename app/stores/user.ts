@@ -1,4 +1,5 @@
 import {defineStore} from 'pinia'
+import {useOrganizationStore} from '~/stores/organization'
 import type {User} from '~~/types/user'
 
 type RequestError = {
@@ -18,8 +19,11 @@ function getErrorMessage(error: unknown) {
 
 export const useUserStore = defineStore('user', () => {
   const users = ref<User[]>([])
+  const organizationUsers = ref<User[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
+
+  const organizationStore = useOrganizationStore()
 
   async function getUsers() {
     isLoading.value = true
@@ -43,15 +47,44 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  async function getOrganizationUsers() {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      organizationUsers.value = await $fetch('/api/user', {
+        credentials: 'include',
+        method: 'GET',
+        query: {
+          organizationId: organizationStore.currentOrganizationId
+        }
+      })
+
+      return organizationUsers
+    } catch(e) {
+      error.value = String(e)
+      console.log(e)
+      throw e
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   const options = computed(() =>
-        users.value.map(u => ({value: u.id, label: u.name}))
-    )
+    users.value.map(u => ({value: u.id, label: u.name}))
+  )
+
+  const organizationOptions = computed(() =>
+    organizationUsers.value.map(ou => ({value: ou.id, label: ou.name}))
+  )
 
   return {
     users,
     isLoading,
     error,
     options,
+    organizationOptions,
     getUsers,
+    getOrganizationUsers
   }
 })

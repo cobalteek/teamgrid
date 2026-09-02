@@ -142,6 +142,15 @@ function eventDidMount(info: any) {
       ${positionColor} 100%
     )
   `
+  info.el.addEventListener('contextmenu', async (e: MouseEvent) => {
+    e.preventDefault()
+
+    const confirmed = confirm($t('ui.shiftDeleteConfirm') as string)
+
+    if (confirmed) {
+      await shiftStore.deleteShift(info.event.id)
+    }
+  })
 
   const eventId = String(info.event.id)
 

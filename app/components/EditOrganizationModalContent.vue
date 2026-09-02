@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Modal from './Modal.vue'
+import { useUserStore } from '~/stores/user.ts';
 import {isValidName} from '~~/shared/utils/validation'
 import EditPositionForm from './EditPositionForm.vue';
 
@@ -133,7 +134,7 @@ watch(
             <h4>{{ $t('ui.users') }}</h4>
             <ol>
               <li
-                v-for="user in userStore.options"
+                v-for="user in userStore.organizationOptions"
               >
                 {{ user.label }}
               </li>

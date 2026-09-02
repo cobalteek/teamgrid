@@ -247,7 +247,8 @@
     "workDays": "Рабочих",
     "restDays": "Выходных",
     "startDate": "Начало цикла",
-    "endDate": "Конец цикла"
+    "endDate": "Конец цикла",
+    "shiftDeleteConfirm": "Удалить смену?"
   },
   "modal": {
     "editOrganization": "Редактировать организацию"
