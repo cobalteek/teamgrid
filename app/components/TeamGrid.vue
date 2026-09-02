@@ -5,8 +5,6 @@ import interactionPlugin from '@fullcalendar/interaction'
 import listPlugin from '@fullcalendar/list'
 import {ruBetterLocale, enBetterLocale} from '~~/shared/utils/betterLocaleCalendarEnRu'
 import { useShiftStore } from '../stores/shift'
-import type { EventApi } from '@fullcalendar/core'
-import '@fullcalendar/vue3'
 
 const { locale } = useI18n()
 const props = defineProps<{
