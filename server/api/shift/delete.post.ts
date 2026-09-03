@@ -1,6 +1,6 @@
 import { prisma } from '~~/server/utils/prisma'
 import { requireUser } from '~~/server/utils/auth'
-import { isOwnerOrganization } from '~~/server/utils/member'
+import { isManagerOrganization } from '~~/server/utils/member'
 import {
   defineEventHandler,
   createError,
@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
   if (!id) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'error.shift.notFound'
+      statusMessage: 'error.shiftId.notFound'
     })
   }
 
@@ -24,6 +24,15 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 400,
       statusMessage: 'error.organization.notFound'
+    })
+  }
+
+  const isManager = await isManagerOrganization(userId, organizationId)
+
+  if(!isManager) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'error.onlyManager'
     })
   }
 
@@ -37,15 +46,7 @@ export default defineEventHandler(async (event) => {
   if (!shift) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Shift not found'
-    })
-  }
-
-  const ownered = !(await isOwnerOrganization(userId, organizationId))
-  if(ownered) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'error.notOwner'
+      statusMessage: 'error.shift.notFound'
     })
   }
 

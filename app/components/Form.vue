@@ -136,7 +136,7 @@ if(props.date) {
         </button>
         <button
           type="submit"
-          class="btn btn-primary"
+          class="btn btn-primary bg-[var(--btn-bg)] hover:bg-[var(--btn-hover-bg)] disabled:opacity-10"
           :disabled="isLoading"
         >
           {{ $t(submitBtnName) }}

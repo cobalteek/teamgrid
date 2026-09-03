@@ -12,5 +12,5 @@ export function isValidName(value: string) {
 }
 
 export function isValidPosition(value: string) {
-  return value.length >= 2 && value.length <= 128
+  return value.length >= 1 && value.length <= 128
 }

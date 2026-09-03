@@ -46,10 +46,10 @@ const employee = ref<Employee>({
 })
 
 async function handleSubmit() {
-  if(employee.value &&
+  if(employee.value.id &&
     (!isValidName(employee.value.name) ||
-    !isValidName(employee.value.surname) ||
-    !isValidName(employee.value.middlename))
+    (employee.value.surname && !isValidName(employee.value.surname)) ||
+    (employee.value.middlename && !isValidName(employee.value.middlename)))
     ) {
     errorModal.showError('error.invalidName')
     return
@@ -116,4 +116,8 @@ watch(
         @close="handleCancel"
     />
   </Modal>
+  <ErrorModalContent
+    :error="errorModal.error.value"
+    @close="errorModal.close"
+  />
 </template>

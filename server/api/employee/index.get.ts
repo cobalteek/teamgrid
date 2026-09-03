@@ -6,10 +6,35 @@ import {
 } from 'h3'
 
 export default defineEventHandler(async (event) => {
+    const {userId} = await requireUser(event)
     const t = await useTranslation(event)
     const query = getQuery(event)
     const employeeId = query.employeeId ? String(query.employeeId) : undefined
     const organizationId = query.organizationId ? Number(query.organizationId) : undefined
+    
+    if (!organizationId) {
+        throw createError({
+            statusCode: 400,
+            statusMessage: t('error.organization.notFound')
+        })
+    }
+
+    if (employeeId && isNaN(Number(employeeId))) {
+        throw createError({
+            statusCode: 400,
+            statusMessage: t('error.employeeId.notFound')
+        })
+    }
+
+    const isManager = await isManagerOrganization(userId, organizationId)
+
+    if (!isManager) {
+        throw createError({
+            statusCode: 403,
+            statusMessage: t('error.onlyManager')
+        })
+    }
+    
     try {
         const selectFields = {
             id: true,

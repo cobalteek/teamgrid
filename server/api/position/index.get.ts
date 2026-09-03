@@ -6,16 +6,42 @@ import {
 } from 'h3'
 
 export default defineEventHandler(async (event) => {
+  const {userId} = await requireUser(event)
   const t = await useTranslation(event)
   const query = getQuery(event)
   const positionId = query.positionId ? Number(query.positionId) : undefined
   const organizationId = query.organizationId ? Number(query.organizationId) : undefined
-  try {
-    const selectedFields = {
+ 
+  if(!organizationId) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: t('error.organization.get')
+    })
+  }
+
+  if(!positionId && isNaN(Number(positionId))) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: t('error.position.get')
+    })
+  }
+
+  const isManager = await isManagerOrganization(userId, organizationId)
+
+  if(!isManager) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: t('error.onlyManager')
+    })
+  }
+
+  const selectedFields = {
       id: true,
       name: true,
       fullName: true
-    }
+  }
+  
+  try {
 
     if(positionId) {
       const position = await prisma.position.findUnique({
@@ -63,9 +89,6 @@ export default defineEventHandler(async (event) => {
   } catch (error) {
     console.log(error)
 
-    throw createError({
-      statusCode: 404,
-      statusMessage: t('error.user.positions')
-    })
+    throw error
   }
 })

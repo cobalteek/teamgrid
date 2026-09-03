@@ -26,7 +26,7 @@ async function onLogin() {
   }
 
   try {
-    await auth.signIn(form.value)
+    await auth.login(form.value)
 
     await navigateTo('/dashboard')
   } catch (e: unknown) {
@@ -47,9 +47,9 @@ definePageMeta({
 
 <template>
   <AuthForm
-    :name="$t('auth.signIn')"
+    :name="$t('auth.login')"
     :inputs="fields"
-    :btn-name="$t('auth.signIn')"
+    :btn-name="$t('auth.login')"
     :disc="$t('auth.noAccount')"
     :text-link="$t('auth.signUp')"
     link="/sign-up"

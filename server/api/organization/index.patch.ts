@@ -24,33 +24,30 @@ export default defineEventHandler(async (event) => {
         statusMessage: 'error.organization.get'
       })
   }
-  const member = await prisma.organizationMember.findUnique({
-      where: {
-        userId_organizationId: {
-          userId,
-          organizationId
-        }
-      },
-      include: {
-        role: true
-      }
-  })
-  if(!member) {
+  const isManager = await isManagerOrganization(userId, organizationId)
+
+  if(!isManager) {
     throw createError({
-        statusCode: 404,
-        statusMessage: 'error.role.notFound'
-      })
+      statusCode: 403,
+      statusMessage: 'error.onlyManager'
+    })
   }
-  const canChangeName = ['owner', 'admin'].includes(member?.role.name)
-  if(!canChangeName) {
+
+  const organization = await prisma.organization.findUnique({
+    where: {
+      id: organizationId
+    }
+  })
+
+  if (!organization) {
     throw createError({
-        statusCode: 403,
-        statusMessage: 'error.permissionDenied'
-      })
+      statusCode: 404,
+      statusMessage: 'error.organization.notFound'
+    })
   }
     const changeOrganization = await prisma.organization.update({
       where: {
-        id: organizationId
+        id: organization.id
       },
       data: {
         name

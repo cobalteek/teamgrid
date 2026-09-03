@@ -5,6 +5,8 @@ import interactionPlugin from '@fullcalendar/interaction'
 import listPlugin from '@fullcalendar/list'
 import {ruBetterLocale, enBetterLocale} from '~~/shared/utils/betterLocaleCalendarEnRu'
 import { useShiftStore } from '../stores/shift'
+import { useOrganizationStore } from '../stores/organization'
+import { useEmployeeStore } from '../stores/employee'
 
 const { locale } = useI18n()
 const props = defineProps<{
@@ -24,7 +26,7 @@ const events = computed(() => {
   return shiftStore.shifts.map(shift => {
     return {
       id: shift.id,
-      title: `${shift.employee.name} ${shift.position.name}`,
+      title: `${shift.position.name} ${shift.employee.name}`,
       start: new Date(shift.date).toISOString().split('T')[0],
       allDay: true,
 
@@ -39,7 +41,11 @@ const events = computed(() => {
   })
 })
 
-
+const isAddEmployeeModalOpen = ref(false)
+const isEditOrganizationModalOpen = ref(false)
+const organizationStore = useOrganizationStore()
+const employeeStore = useEmployeeStore()
+const organization = ref()
 
 const calendarWrapper = ref<HTMLElement | null>(null)
 const eventElements = new Map<string, HTMLElement[]>()
@@ -59,21 +65,41 @@ const calendarOptions = computed(() => ({
   plugins: [dayGridPlugin, listPlugin, interactionPlugin],
 
   initialView: 'dayGridMonth',
-
+  aspectRatio: 1.2,
   locale: locale.value === 'ru' ? ruBetterLocale : enBetterLocale,
   firstDay: 1,
   dateClick: function(info: any) {
     selectedEmployeeId.value = null
     selectedPositionId.value = null
-    isAddShiftModalOpen.value = true
+
+    if(employeeStore.employees.length === 0) {
+      isAddEmployeeModalOpen.value = true
+      return
+    } else {
+      isAddShiftModalOpen.value = true
+    }
     infoDate.value = info
   },
   moreLinkClick: 'popover',
+  customButtons: {
+    addEmployee: {
+      text: $t('btn.addEmployee') as string,
+      click: () => {
+        isAddEmployeeModalOpen.value = true
+      }
+    },
+    editOrganization: {
+      text: $t('btn.edit') as string,
+      click: () => {
+        isEditOrganizationModalOpen.value = true
+      }
+    }
+  },
    
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
-    right: 'dayGridMonth,timeGridWeek'
+    right: 'addEmployee editOrganization'
   },
 
   titleFormat: (date : any) => {
@@ -136,10 +162,10 @@ function eventDidMount(info: any) {
   info.el.style.background = `
     linear-gradient(
       110deg,
-      ${employeeColor} 0%,
-      ${employeeColor} 50%,
+      ${positionColor} 0%,
       ${positionColor} 50%,
-      ${positionColor} 100%
+      ${employeeColor} 50%,
+      ${employeeColor} 100%
     )
   `
   info.el.addEventListener('contextmenu', async (e: MouseEvent) => {
@@ -227,6 +253,11 @@ watch(
   }
 )
 
+watch(isEditOrganizationModalOpen, () => {
+  organization.value = computed(() => {
+    organizationStore.currentOrganization?.name
+  })
+})
 </script>
 
 <template>
@@ -244,4 +275,12 @@ watch(
     :model-value="isAddShiftModalOpen"
     @close="isAddShiftModalOpen = false"
   />
+  <AddEmployeeModalContent
+      :model-value="isAddEmployeeModalOpen"
+      @close="isAddEmployeeModalOpen = false"
+    />
+    <EditOrganizationModalContent
+      :model-value="isEditOrganizationModalOpen"
+      @close="isEditOrganizationModalOpen = false"
+    />
 </template>

@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import Modal from './Modal.vue'
-import { useUserStore } from '~/stores/user.ts';
+import { useUserStore } from '~/stores/user';
+import { useOrganizationStore } from '~/stores/organization';
+import { useEmployeeStore } from '~/stores/employee';
+import { usePositionStore } from '~/stores/position';
 import {isValidName} from '~~/shared/utils/validation'
 import EditPositionForm from './EditPositionForm.vue';
+import EditEmployeeForm from './EditEmployeeForm.vue';
 
 const props = defineProps<{
   modelValue: boolean
@@ -100,12 +104,12 @@ watch(
             transition
             duration-100
             active:scale-90
-            bg-[url('/assets/images/edit.png')] w-7 h-7 bg-cover bg-center invert
+            bg-[url('/assets/images/edit.png')] w-7 h-7 bg-cover bg-center invert-[1] [html.light_&]:invert-0
           "/>
         </form>
       </section>
       <hr>
-        <div class="flex justify-around h-[60%] mt-2">
+        <div class="flex justify-around h-[60%] overflow-auto mt-2">
           <div class="flex flex-col items-center border rounded w-[30%] h-full">
             <h4 class="pb-2">{{ $t('ui.employees') }}</h4>
             <ul>

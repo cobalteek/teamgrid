@@ -66,7 +66,6 @@ const handleSubmit = async () => {
       return
   }
   if(advancedSettings.value) {
-    console.log(template.value)
     if(!template.value.endDate ||
        !template.value.restDays ||
        !template.value.workDays

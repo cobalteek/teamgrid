@@ -66,7 +66,6 @@ const errorModal = useErrorModal()
 const handleSubmit = async () => {
   if(
     employee.value.name === '' ||
-    employee.value.surname === '' ||
     employee.value.position === '' ||
     employee.value.email === ''
   ) {
@@ -77,7 +76,7 @@ const handleSubmit = async () => {
     errorModal.showError('error.auth.emailInvalid')
     return
   }
-  if (!isValidName(employee.value.name) || !isValidName(employee.value.surname) || (employee.value.middlename.length > 0 && !isValidName(employee.value.middlename))) {
+  if (!isValidName(employee.value.name) || (employee.value.surname.length > 0 && !isValidName(employee.value.surname)) || (employee.value.middlename.length > 0 && !isValidName(employee.value.middlename))) {
     errorModal.showError('error.auth.fullNameLength')
     return
   }
@@ -88,17 +87,34 @@ const handleSubmit = async () => {
   try{
     await employeeStore.createEmployee(employee.value as CreateEmployee)
     resetEmployee()
-  } catch (e) {
-    const error = e as {statusCode?: number; status?: number; response?: {status?: number}}
-    const status = error.statusCode || error.status || error.response?.status
-    if (status === 401) {
-      errorModal.showError('error.createEmployee')
+    emit('submit')
+    emit('close')
+  } catch (e: unknown) {
+  const error = e as {
+    statusCode?: number
+    status?: number
+    data?: {
+      statusCode?: number
+      statusMessage?: string
+      message?: string
     }
+  }
+
+  const status =
+    error.statusCode ??
+    error.status ??
+    error.data?.statusCode
+
+  if (status === 409) {
+    errorModal.showError(
+      error.data?.statusMessage ?? 'error.createEmployee'
+    )
+  } else {
+    errorModal.showError('error.createEmployee')
+  }
   } finally {
     await useInit.init()
   }
-  emit('submit')
-  emit('close')
 }
 
 watch(

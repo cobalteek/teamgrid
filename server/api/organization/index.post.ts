@@ -9,6 +9,28 @@ export default defineEventHandler(async (event) => {
   const {userId} = await requireUser(event)
   const body = await readBody(event)
   const {name} = body
+
+  if(!name) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: t('validation.organization.requiredFields')
+    })
+  }
+  
+  if(!isValidName(name)) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: t('error.auth.nameLength')
+    })
+  }
+
+  if(!userId) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: t('error.user.notFound')
+    })
+  }
+
   try {
     const newOrganization = await prisma.organization.create({
       data: {

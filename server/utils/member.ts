@@ -1,4 +1,4 @@
-export async function isOwnerOrganization(userId: string, organizationId: number) {
+export async function isManagerOrganization(userId: string, organizationId: number) {
   const member = await prisma.organizationMember.findUnique({
     where: {
       userId_organizationId: {
@@ -11,5 +11,5 @@ export async function isOwnerOrganization(userId: string, organizationId: number
     }
   })
 
-  return member?.role.name === 'owner'
+  return member?.role.name === 'owner' || member?.role.name === 'admin'
 }

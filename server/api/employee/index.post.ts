@@ -2,6 +2,7 @@ import { prisma } from '~~/server/utils/prisma'
 import {requireUser} from '~~/server/utils/auth'
 import {isValidEmail, isValidName} from '~~/shared/utils/validation'
 import { EMPLOYEE_COLORS, POSITION_COLORS } from '~~/shared/utils/defaultColors'
+import { isManagerOrganization } from '~~/server/utils/member'
 
 
 export default defineEventHandler(async (event) => {
@@ -11,26 +12,14 @@ export default defineEventHandler(async (event) => {
     const {organizationId} = body
 
     try {
-        const owner = await prisma.organizationMember.findUnique({
-        where: {
-            userId_organizationId: {
-                userId,
-                organizationId
-            }
-        },
-        include: {
-            role: true
+        const isManager = await isManagerOrganization(userId, organizationId)
+
+        if (!isManager) {
+            throw createError({
+                statusCode: 403,
+                statusMessage: t('error.user.onlyManager')
+            })
         }
-    })
-
-    const canCreateEmployee = owner?.role.name === 'owner'
-
-    if (!canCreateEmployee) {
-        throw createError({
-            statusCode: 403,
-            statusMessage: t('error.user.onlyOwner')
-        })
-    }
 
     const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : ''
     const name = typeof body?.name === 'string' ? body.name.trim() : ''
@@ -38,7 +27,7 @@ export default defineEventHandler(async (event) => {
     const middlename = typeof body?.middlename === 'string' ? body.middlename.trim() : ''
     const position = typeof body?.position === 'string' ? body.position.trim() : ''
 
-    if (!name || !surname || !email || !position) {
+    if (!name || !email || !position) {
         throw createError({
             statusCode: 400,
             statusMessage: t('validation.employee.requiredFields')
@@ -47,18 +36,20 @@ export default defineEventHandler(async (event) => {
     if (!isValidEmail(email)) {
           throw createError({statusCode: 400, statusMessage: t('error.auth.invalidEmail')})
     }
-    if (!isValidName(name) || !isValidName(surname) || (middlename.length > 0 && !isValidName(middlename))) {
+    if (!isValidName(name) || (surname.length > 0 && !isValidName(surname)) || (middlename.length > 0 && !isValidName(middlename))) {
         throw createError({statusCode: 400, statusMessage: t('error.auth.nameLength')})
     }
 
     const exists = await prisma.employee.findUnique({
-        where: { email },
+        where: { email_organizationId: { email, organizationId } },
     })
 
     if (exists) {
+        console.log('Employee with this email already exists:', email)
+        console.log('Organization ID:', organizationId)
         throw createError({
             statusCode: 409,
-            statusMessage: t('error.auth.emailExist'),
+            statusMessage: t('error.auth.emailExistAnEmployee'),
         })
     }
 
@@ -77,7 +68,7 @@ export default defineEventHandler(async (event) => {
 
     if(!colorPosition) {
         throw createError({
-            statusCode: 409,
+            statusCode: 404,
             statusMessage: t('error.color.notFound'),
         })
     }
@@ -85,8 +76,8 @@ export default defineEventHandler(async (event) => {
     const positionRecord = await prisma.position.upsert({
         where: {
             organizationId_name: {
-                organizationId: organizationId,
-                name: name
+                organizationId,
+                name: position
             }
         },
         update: {},
@@ -113,7 +104,7 @@ export default defineEventHandler(async (event) => {
 
     if(!colorEmployee) {
         throw createError({
-            statusCode: 409,
+            statusCode: 404,
             statusMessage: t('error.color.notFound'),
         })
     }

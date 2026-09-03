@@ -47,7 +47,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function signIn(payload: { email: string; password: string }) {
+  async function login(payload: { email: string; password: string }) {
     isLoading.value = true
     error.value = null
     try {
@@ -60,7 +60,7 @@ export const useAuthStore = defineStore('auth', () => {
       await fetchMe()
     } catch (e: unknown) {
       const requestError = asRequestError(e)
-      error.value = requestError.data?.message ?? requestError.message ?? $t('error.auth.signIn')
+      error.value = requestError.data?.message ?? requestError.message ?? $t('error.auth.login')
       throw e
     } finally {
       isLoading.value = false
@@ -94,7 +94,7 @@ export const useAuthStore = defineStore('auth', () => {
     error,
     init,
     fetchMe,
-    signIn,
+    login,
     signUp,
     logout,
   }

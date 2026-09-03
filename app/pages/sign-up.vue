@@ -53,7 +53,7 @@ async function onRegister() {
     const {confirmPassword, ...payload} = form.value
     await auth.signUp(payload)
 
-    await auth.signIn(form.value)
+    await auth.login(form.value)
 
     await navigateTo('/dashboard')
   } catch (e: unknown) {
@@ -81,7 +81,7 @@ definePageMeta({
     :sex="true"
     :btn-name="$t('auth.signUp')"
     :disc="$t('auth.haveAccount')"
-    :text-link="$t('auth.signIn')"
+    :text-link="$t('auth.login')"
     link="/sign-in"
     v-model="form"
     @submit="onRegister"/>

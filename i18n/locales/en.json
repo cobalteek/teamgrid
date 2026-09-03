@@ -23,12 +23,13 @@
     "edit": "Edit"
   },
   "auth": {
-    "signIn": "Sign In",
+    "login": "Login",
     "signUp": "Sign Up",
     "noAccount": "No account?",
     "haveAccount": "Have an account?",
     "email": "Email",
-    "password": "Password"
+    "password": "Password",
+    "logout": "Log out"
   },
   "form": {
     "placeholder": {
@@ -130,7 +131,7 @@
     },
     "auth": {
       "credentials": "Invalid credentials",
-      "signIn": "Sign in error",
+      "login": "Login error",
       "passwordLength": "Password must be between 8 and 128 characters.",
       "invalidEmail": "Enter a valid email address.",
       "tooManyAttempts": "Too many attempts. Try again later.",
@@ -145,7 +146,8 @@
       "register": "Register failed.",
       "fullNameLength": "Full name length must be from 2 to 80 characters",
       "emailInvalid": "Invalid email",
-      "positionLength": "Invalid position length"
+      "positionLength": "Invalid position length",
+      "emailExistAnEmployee": "This email is already registered among employees"
     },
     "user": {
       "notFound": "User not found",

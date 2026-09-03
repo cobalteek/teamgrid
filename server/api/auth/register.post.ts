@@ -69,14 +69,21 @@ export default defineEventHandler(async (event) => {
       })
 
       const role = await tx.role.findFirst({
-            where: { name: 'owner' } // или 'admin'
-          })
+        where: { name: 'owner' } // или 'admin'
+      })
+
+      if(!role) {
+        throw createError({
+          statusCode: 500,
+          statusMessage: t('error.auth.register'),
+        })
+      }
 
       const membership = await tx.organizationMember.create({
         data: {
           userId: user.id,
           organizationId: organization.id,
-          roleId: 1,
+          roleId: role.id,
         },
         include: {
           organization: true,
