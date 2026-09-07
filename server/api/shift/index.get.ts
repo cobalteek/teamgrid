@@ -27,12 +27,7 @@ export default defineEventHandler(async (event) => {
       statusMessage: t('error.onlyManager')
     })
   }
-  if (employeeId && isNaN(Number(employeeId))) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: t('error.employeeId.notFound')
-    })
-  }
+  
   try {
     const where = {
       organizationId,

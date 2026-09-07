@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import {useInitializeApp} from "~/composables/appInit";
 const useInit = useInitializeApp()
 await useInit.init()
 </script>

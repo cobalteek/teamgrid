@@ -44,6 +44,10 @@ export const useOrganizationStore = defineStore('organization', () => {
                 headers
             })
 
+            if (!currentOrganization.value) {
+                currentOrganization.value = organizations.value[0] ?? null
+            }
+
             if(import.meta.client) {
                 const savedId = localStorage.getItem('currentOrganizationId')
                 if (savedId) {
@@ -167,7 +171,12 @@ export const useOrganizationStore = defineStore('organization', () => {
             }
 
             currentOrganization.value = organization
-            localStorage.setItem('currentOrganizationId', String(organization.id))
+            if (import.meta.client) {
+                localStorage.setItem(
+                    'currentOrganizationId',
+                    String(organization.id)
+                )
+            }
 
 
         } catch (e) {
