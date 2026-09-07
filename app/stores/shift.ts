@@ -1,6 +1,7 @@
 import { defineStore } from "pinia"
 import type { CreateShift, ShiftWithRelations } from "~~/types/shift"
 import { formatDateStr } from "~~/shared/utils/formatDate" 
+import { useOrganizationStore } from "~/stores/organization"
 
 type RequestError = {
   data?: { message?: string }
@@ -38,13 +39,13 @@ export const useShiftStore = defineStore('shift', () => {
               statusMessage: 'error.organization.getId'
             })
           }
-    
+
           shifts.value = await $fetch<ShiftWithRelations[]>('/api/shift', {
             credentials: 'include',
             method: 'GET',
             headers,
             query: {
-              organizationId,
+              organizationId: organizationId,
               employeeId
             }
           })

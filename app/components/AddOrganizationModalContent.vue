@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useOrganizationStore } from '~/stores/organization'
 import type { Organization } from '~~/types/organization';
 
 const newOrganization = ref<Organization>({

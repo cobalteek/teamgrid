@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { useOrganizationStore } from '~/stores/organization'
 import type { CreateEmployee, Employee } from '~~/types/employee'
 
 type RequestError = {
