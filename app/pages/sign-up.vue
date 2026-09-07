@@ -82,7 +82,7 @@ definePageMeta({
     :btn-name="$t('auth.signUp')"
     :disc="$t('auth.haveAccount')"
     :text-link="$t('auth.login')"
-    link="/sign-in"
+    link="/login"
     v-model="form"
     @submit="onRegister"/>
   <ErrorModalContent
