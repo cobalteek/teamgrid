@@ -3,6 +3,6 @@ export default defineNuxtRouteMiddleware(async () => {
   await auth.init()
 
   if (!auth.isAuthed) {
-    return navigateTo('/sign-in')
+    return navigateTo('/login')
   }
 })
