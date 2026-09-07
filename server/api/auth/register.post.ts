@@ -109,9 +109,6 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    throw createError({
-      statusCode: 500,
-      statusMessage: t('error.auth.register'),
-    })
+    throw error
   }
 })
