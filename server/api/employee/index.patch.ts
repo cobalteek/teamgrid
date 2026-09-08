@@ -55,6 +55,44 @@ export default defineEventHandler(async (event) => {
             })
         }
 
+        const user = await prisma.user.findFirst({
+            where: {email},
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                gender: true
+            }
+        })
+
+        if(user) {
+            try {
+                const memberOrganization = await prisma.organizationMember.create({
+                    data: {
+                        userId: user.id,
+                        organizationId: organizationId,
+                        roleId: 3
+                    }
+                })
+            } catch (error: any) {
+                if (error.code === 'P2025') {
+                    throw createError({
+                        statusCode: 404,
+                        statusMessage: 'error.notFound'
+                    })
+                }
+                
+                if (error.code === 'P2002') {
+                    throw createError({
+                        statusCode: 409,
+                        statusMessage: 'error.user.alreadyInOrganization'
+                    })
+                }
+
+                throw error
+            }
+        }
+
         const updateData = {
         name,
         surname,
