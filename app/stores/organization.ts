@@ -202,6 +202,34 @@ export const useOrganizationStore = defineStore('organization', () => {
             }))
     )
 
+    async function isManager() {
+        isLoading.value = true
+        error.value = null
+        try {
+            const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
+
+            const orgId = typeof currentOrganizationId === 'object' && currentOrganizationId !== null
+            ? (currentOrganizationId.value || currentOrganizationId) 
+            : currentOrganizationId;
+
+            const isManager = await $fetch('/api/organization', {
+                credentials: 'include',
+                method: 'GET',
+                headers,
+                query: {
+                    organizationId: Number(orgId)
+                }
+            })
+
+            return isManager
+        } catch(e: any) {
+            error.value = String(e.message)
+            throw e
+        } finally {
+            isLoading.value = false
+        }
+    }
+
     return {
         error,
         isLoading,
@@ -213,6 +241,7 @@ export const useOrganizationStore = defineStore('organization', () => {
         options,
         initialize,
         changeName,
-        changeOrganization
+        changeOrganization,
+        isManager
     }
 })

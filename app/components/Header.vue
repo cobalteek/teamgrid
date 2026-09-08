@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 
 const auth = useAuthStore()
 const { user } = storeToRefs(auth)
@@ -19,13 +22,15 @@ async function goDashboard() {
     await navigateTo('/dashboard')
 }
 
+const isDashboard = computed(() => route.name === 'dashboard')
+
 </script>
 
 <template>
     <header class="flex items-center justify-between bg-[var(--bg-header)] px-4 py-3">
       <NuxtLink to="/" class="font-semibold">TeamGrid</NuxtLink>
       <ClientOnly>
-        <OrganizationSwitcher v-if="user" @addOrganization="openModal"/>
+        <OrganizationSwitcher v-if="user && isDashboard" @addOrganization="openModal"/>
       </ClientOnly>
       <nav class="flex items-center gap-3">
         <select :value="locale" class="select" @change="setLocale(($event.target as HTMLSelectElement).value as 'ru' | 'en')">
@@ -39,7 +44,7 @@ async function goDashboard() {
         </template>
         <template v-else>
           <NuxtLink to="/login">{{ $t('auth.login') }}</NuxtLink>
-          <NuxtLink to="/sign-up">{{ $t('auth.signUp') }}</NuxtLink>
+          <NuxtLink to="/sign-up" class="btn">{{ $t('auth.signUp') }}</NuxtLink>
         </template>
       </nav>
     </header>

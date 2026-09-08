@@ -53,12 +53,6 @@ export default defineEventHandler(async (event) => {
 
     await prisma.$transaction(async (tx) => {
 
-      const organization = await tx.organization.create({
-        data: {
-          name: `${name}_organization`,
-        },
-      })
-
       const user = await tx.user.create({
         data: {
           email,
@@ -68,40 +62,62 @@ export default defineEventHandler(async (event) => {
         },
       })
 
-      const role = await tx.role.findFirst({
-        where: { name: 'owner' } // или 'admin'
+      const employeeOrganizations = await tx.employee.findMany({
+        where: {email},
+        select: {
+          organizationId: true
+        }
       })
 
-      if(!role) {
-        throw createError({
-          statusCode: 500,
-          statusMessage: t('error.auth.register'),
+      let organization = null
+      let selfMembership = null
+
+      if(employeeOrganizations.length > 0) {
+        await tx.organizationMember.createMany({
+          data: employeeOrganizations.map(emp => ({
+            userId: user.id,
+            organizationId: emp.organizationId,
+            roleId: 3 
+          }))
+        })
+      } else {
+        organization = await tx.organization.create({
+          data: {
+            name: `${name}_organization`,
+          },
+        })
+
+        const role = await tx.role.findFirst({
+          where: { name: 'owner' }
+        })
+
+        if(!role) {
+          throw createError({
+            statusCode: 500,
+            statusMessage: t('error.auth.register'),
+          })
+        }
+
+        selfMembership = await tx.organizationMember.create({
+          data: {
+            userId: user.id,
+            organizationId: organization.id,
+            roleId: role.id,
+          },
+          include: {
+            organization: true,
+            role: true,
+          },
         })
       }
 
-      const membership = await tx.organizationMember.create({
-        data: {
-          userId: user.id,
-          organizationId: organization.id,
-          roleId: role.id,
-        },
-        include: {
-          organization: true,
-          role: true,
-        },
-      })
-
       return {
         user,
-        membership,
+        selfMembership,
         organization
       }
   })
   } catch (error: unknown) {
-    if (typeof error === 'object' && error !== null && 'statusCode' in error) {
-      throw error
-    }
-
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       throw createError({
         statusCode: 409,
@@ -109,9 +125,6 @@ export default defineEventHandler(async (event) => {
       })
     }
 
-    throw createError({
-      statusCode: 500,
-      statusMessage: t('error.auth.register'),
-    })
+    throw error
   }
 })

@@ -5,6 +5,15 @@ export default defineNuxtConfig({
 
   app: {
     baseURL: process.env.NUXT_APP_BASE_URL || '/teamgrid/',
+    head: {
+      link: [
+        {
+          rel: 'icon',
+          type: 'image/x-icon',
+          href: '/teamgrid/favicon.ico'
+        }
+      ]
+    }
   },
 
   vite: {

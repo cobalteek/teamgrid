@@ -212,7 +212,8 @@
       "create": "Failed to create organization",
       "getId": "Failed to get organization ID",
       "notFoundNotOwner": "Organization not found or you are not the owner"
-    }
+    },
+    "onlyManager": "Only the owner or admin can do this"
   },
   "placeholder": {
     "firstName": "Name",

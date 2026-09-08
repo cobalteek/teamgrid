@@ -16,6 +16,7 @@
   --text-main: #f5f7fa;
   --text-soft: #c9ced6;
   --text-muted: #9aa3b2;
+  --text-blue: #bfdbfe;
 
   --border-main: #3a3a44;
   --input-bg: #22222c;
@@ -87,6 +88,7 @@ html.light {
   --text-main: #172033;
   --text-soft: #475569;
   --text-muted: #64748b;
+  --text-blue: #3b82f6;
 
   --border-main: #d5dbe6;
 

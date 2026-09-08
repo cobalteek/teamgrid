@@ -87,7 +87,7 @@ function setValue(key: string, value: string) {
         <NuxtLink
           v-if="textLink"
           :to="link"
-          class="text-blue-200 hover:bg-gray-600 transition duration-300"
+          class="text-[var(--text-blue)] hover:bg-gray-600 transition duration-300"
         >
           {{ textLink }}
         </NuxtLink>
