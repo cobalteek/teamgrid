@@ -52,7 +52,6 @@ const handleCancel = () => {
   emit('close')
 }
 
-
 function onUpdateModelValue(value: boolean) {
   emit('update:modelValue', value)
 

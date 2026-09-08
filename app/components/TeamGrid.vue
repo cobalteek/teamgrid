@@ -41,6 +41,7 @@ const events = computed(() => {
   })
 })
 
+const isManager = ref()
 const isAddEmployeeModalOpen = ref(false)
 const isEditOrganizationModalOpen = ref(false)
 const organizationStore = useOrganizationStore()
@@ -69,6 +70,9 @@ const calendarOptions = computed(() => ({
   locale: locale.value === 'ru' ? ruBetterLocale : enBetterLocale,
   firstDay: 1,
   dateClick: function(info: any) {
+    if(!isManager.value) {
+      return
+    }
     selectedEmployeeId.value = null
     selectedPositionId.value = null
 
@@ -79,6 +83,7 @@ const calendarOptions = computed(() => ({
       isAddShiftModalOpen.value = true
     }
     infoDate.value = info
+    return
   },
   moreLinkClick: 'popover',
   customButtons: {
@@ -99,7 +104,7 @@ const calendarOptions = computed(() => ({
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
-    right: 'addEmployee editOrganization'
+    right: isManager.value ? 'addEmployee editOrganization' : ''
   },
 
   titleFormat: (date : any) => {
@@ -169,6 +174,9 @@ function eventDidMount(info: any) {
     )
   `
   info.el.addEventListener('contextmenu', async (e: MouseEvent) => {
+    if(!isManager) {
+      return
+    }
     e.preventDefault()
 
     const confirmed = confirm($t('ui.shiftDeleteConfirm') as string)
@@ -176,6 +184,7 @@ function eventDidMount(info: any) {
     if (confirmed) {
       await shiftStore.deleteShift(info.event.id)
     }
+    return
   })
 
   const eventId = String(info.event.id)
@@ -246,6 +255,16 @@ function updateAllEventsOpacity() {
   })
 }
 
+async function checkManagerStatus() {
+  try {
+    const result = await organizationStore.isManager()
+    isManager.value = Boolean(result)
+  } catch (error) {
+    console.log(error)
+    isManager.value = false
+  }
+}
+
 watch(
   [selectedEmployeeId, selectedPositionId],
   () => {
@@ -253,11 +272,17 @@ watch(
   }
 )
 
-watch(isEditOrganizationModalOpen, () => {
-  organization.value = computed(() => {
-    organizationStore.currentOrganization?.name
-  })
+watch(isEditOrganizationModalOpen, (isOpen) => {
+  if (isOpen) {
+    organization.value = organizationStore.currentOrganization?.name || ''
+  }
 })
+
+watch(() => organizationStore.currentOrganizationId, async () => {
+  checkManagerStatus()
+})
+
+checkManagerStatus()
 </script>
 
 <template>

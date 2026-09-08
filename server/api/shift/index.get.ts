@@ -1,4 +1,5 @@
 import { prisma } from '~~/server/utils/prisma'
+import {isMemberOrganization} from '~~/server/utils/member'
 import {
   defineEventHandler,
   createError,
@@ -19,9 +20,9 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const isManager = await isManagerOrganization(userId, organizationId)
+  const isMember = await isMemberOrganization(userId, organizationId)
 
-  if (!isManager) {
+  if (!isMember) {
     throw createError({
       statusCode: 403,
       statusMessage: t('error.onlyManager')

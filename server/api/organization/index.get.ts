@@ -25,36 +25,33 @@ export default defineEventHandler(async (event) => {
         }
       })
 
-      if(owneredOrganization?.role.name !== 'owner' || !owneredOrganization) {
+      if(!owneredOrganization) {
         throw createError({
           statusCode: 404,
           statusMessage: 'error.organization.notFound.notOwner'
         })
       }
-
-      return owneredOrganization
+      
+      return owneredOrganization?.role.name === 'owner'
     }
 
-    const owneredOrganizations = await prisma.organizationMember.findMany({
+    const memberOrganizations = await prisma.organizationMember.findMany({
       where: {
-        userId,
-        role: {
-          name: 'owner'
-        }
+        userId
       },
       select: {
         organization: true
       }
     })
 
-    if(!owneredOrganizations) {
+    if(!memberOrganizations) {
       throw createError({
         statusCode: 404,
         statusMessage: t('error.organization.notFound')
       })
     }
 
-    return owneredOrganizations.map(({organization}) => organization)
+    return memberOrganizations.map(({organization}) => organization)
 
   } catch (error) {
     console.error(error)
