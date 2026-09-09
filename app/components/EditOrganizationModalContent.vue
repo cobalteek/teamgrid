@@ -111,7 +111,7 @@ watch(
       <hr>
         <div class="flex justify-around mt-2 h-[300px]">
           <div class="flex flex-col items-center border rounded w-[30%] h-[300px] overflow-hidden">
-            <h4 class="pb-2 shrink-0">{{ $t('ui.employees') }}</h4>
+            <h3 class="pb-2 shrink-0 text-lg">{{ $t('ui.employees') }}</h3>
             <ul class="w-full flex-1 overflow-y-auto min-h-0">
               <li
                 v-for="emp in employeeStore.options"
@@ -123,7 +123,7 @@ watch(
             </ul>
           </div>
           <div class="flex flex-col items-center border rounded w-[30%] h-[300px] overflow-hidden">
-            <h4 class="pb-2">{{ $t('ui.positions') }}</h4>
+            <h3 class="pb-2 shrink-0 text-lg">{{ $t('ui.positions') }}</h3>
             <ul class="w-full flex-1 overflow-y-auto min-h-0">
               <li
                 v-for="pos in positionStore.optionsFull"
@@ -134,8 +134,8 @@ watch(
               </li>
             </ul>
           </div>
-          <div class="flex flex-col items-center border rounded w-[30%] h-[300px] overflow-hidden">
-            <h4 class="pb-2">{{ $t('ui.users') }}</h4>
+          <div class="flex flex-col items-center text-center border rounded w-[30%] h-[300px] overflow-hidden">
+            <h3 class="pb-2 shrink-0 text-lg">{{ $t('ui.users') }}</h3>
             <ol class="w-full flex-1 overflow-y-auto min-h-0">
               <li
                 v-for="user in userStore.organizationOptions"
