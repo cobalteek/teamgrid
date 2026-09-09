@@ -27,12 +27,12 @@ function close() {
         <button
           type="button"
           @click="close"
-          class="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border-main)] bg-[var(--btn-bg)]text-lg leading-none transition hover:scale-95"
+          class="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border border-[var(--border-main)] bg-[var(--btn-bg)] text-lg leading-none transition hover:scale-95"
         >
           ×
         </button>
 
-        <div class="flex-1">
+        <div class="flex-1 min-h-0 overflow-hidden">
           <slot />
         </div>
       </div>
