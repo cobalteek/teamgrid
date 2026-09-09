@@ -109,10 +109,10 @@ watch(
         </form>
       </section>
       <hr>
-        <div class="flex justify-around h-[60%] overflow-auto mt-2">
-          <div class="flex flex-col items-center border rounded w-[30%] h-full">
-            <h4 class="pb-2">{{ $t('ui.employees') }}</h4>
-            <ul>
+        <div class="flex justify-around mt-2 h-[300px]">
+          <div class="flex flex-col items-center border rounded w-[30%] h-[300px] overflow-hidden">
+            <h4 class="pb-2 shrink-0">{{ $t('ui.employees') }}</h4>
+            <ul class="w-full flex-1 overflow-y-auto min-h-0">
               <li
                 v-for="emp in employeeStore.options"
                 class="pl-2 cursor-pointer pb-2"
@@ -122,9 +122,9 @@ watch(
               </li>
             </ul>
           </div>
-          <div class="flex flex-col items-center border rounded w-[30%] h-full">
+          <div class="flex flex-col items-center border rounded w-[30%] h-[300px] overflow-hidden">
             <h4 class="pb-2">{{ $t('ui.positions') }}</h4>
-            <ul>
+            <ul class="w-full flex-1 overflow-y-auto min-h-0">
               <li
                 v-for="pos in positionStore.optionsFull"
                 class="pl-2 cursor-pointer pb-2"
@@ -134,9 +134,9 @@ watch(
               </li>
             </ul>
           </div>
-          <div class="flex flex-col items-center border rounded w-[30%] h-full">
-            <h4>{{ $t('ui.users') }}</h4>
-            <ol>
+          <div class="flex flex-col items-center border rounded w-[30%] h-[300px] overflow-hidden">
+            <h4 class="pb-2">{{ $t('ui.users') }}</h4>
+            <ol class="w-full flex-1 overflow-y-auto min-h-0">
               <li
                 v-for="user in userStore.organizationOptions"
               >
