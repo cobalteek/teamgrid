@@ -7,11 +7,13 @@ const props = defineProps<{
   date?: Date
   submitBtnName: string;
   isLoading: boolean
+  delete?: boolean
 }>()
 
 const emit = defineEmits<{
   close: [],
-  submit: []
+  submit: [],
+  delete: []
 }>()
 
 type Select<T> = {
@@ -74,6 +76,10 @@ const handleSubmit = () => {
   emit('submit')
 }
 
+const handleDelete = () => {
+  emit('delete')
+}
+
 const formatedDate = ref()
 
 if(props.date) {
@@ -126,17 +132,28 @@ if(props.date) {
       </select>
       </div>
       <div class="flex justify-between gap-2">
-        <button
-          type="button"
-          @click="handleCancel"
-          class="btn btn-secondary disabled:opacity-10"
-          :disabled="isLoading"
-        >
-          {{ $t('btn.cancel') }}
-        </button>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            @click="handleCancel"
+            class="btn btn-secondary disabled:opacity-10"
+            :disabled="isLoading"
+          >
+            {{ $t('btn.cancel') }}
+          </button>
+          <button
+            v-if="delete"
+            type="button"
+            @click="handleDelete"
+            class="btn btn-secondary hover:bg-[var(--btn-delete-hover-bg)] hover:text-[var(--btn-delete-text)] disabled:opacity-10"
+            :disabled="isLoading"
+          >
+            {{ $t('btn.delete') }}
+          </button>
+        </div>
         <button
           type="submit"
-          class="btn btn-primary bg-[var(--btn-bg)] hover:bg-[var(--btn-hover-bg)] disabled:opacity-10"
+          class="btn btn-primary bg-[var(--btn-bg)] hover:bg-[var(--btn-hover-bg)] hover:text-[var(--btn-save-hover-text)] disabled:opacity-10"
           :disabled="isLoading"
         >
           {{ $t(submitBtnName) }}

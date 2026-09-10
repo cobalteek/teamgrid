@@ -118,6 +118,33 @@ export const usePositionStore = defineStore('position', () => {
         positions.value.map(p => ({value: p.id, label: p.fullName}))
     )
 
+    async function deletePosition(positionId: number) {
+        isLoading.value = true
+        error.value = null
+
+        try {
+          const deletePosition = await $fetch('/api/position/delete', {
+            credentials: 'include',
+            method: 'POST',
+            body: {
+              id: positionId
+            },
+            query: {
+              organizationId: organizationStore.currentOrganizationId
+            }
+          })
+          
+          return deletePosition
+        } catch(e) {
+          error.value = String(e)
+          console.log(e)
+          throw e
+        } finally {
+          await getPositions()
+          isLoading.value = false
+        }
+    }
+
     return {
         positions,
         error,
@@ -125,6 +152,7 @@ export const usePositionStore = defineStore('position', () => {
         getPositions,
         getPositionById,
         changePosition,
+        deletePosition,
         options,
         optionsFull
     }

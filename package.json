@@ -22,6 +22,7 @@
     "@fullcalendar/interaction": "^6.1.21",
     "@fullcalendar/list": "^6.1.21",
     "@fullcalendar/vue3": "^6.1.21",
+    "@nuxt/ui": "^4.11.1",
     "@nuxtjs/i18n": "^10.2.3",
     "@pinia/nuxt": "^0.11.3",
     "@prisma/client": "^5.22.0",
@@ -33,7 +34,8 @@
     "nuxt": "^4.3.1",
     "pinia": "^3.0.4",
     "prisma": "^5.22.0",
-    "tailwindcss": "^4.2.1"
+    "reka-ui": "^2.10.4",
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.17.0",

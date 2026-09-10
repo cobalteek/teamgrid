@@ -12,7 +12,7 @@ const emit = defineEmits<{
 const templateGrid = ref<ScheduleTemplate>({
   workDays: props.modelValue.workDays,
   restDays: props.modelValue.restDays,
-  endDate: new Date()
+  endDate: ''
 })
 
 const formatedDate = ref()

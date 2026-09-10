@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Modal from './Modal.vue'
-import { usePositionStore } from '../stores/position';
+import { usePositionStore } from '~/stores/position';
+import {useOrganizationStore} from '~/stores/organization.ts'
 import type {Position} from '~~/types/position'
 import {isValidPosition} from '~~/shared/utils/validation'
 
@@ -22,7 +23,7 @@ function onUpdateModelValue(value: boolean) {
     emit('close')
   }
 }
-
+const organizationStore = useOrganizationStore()
 const positionStore = usePositionStore()
 const position = ref<Position>({
   id: 0,
@@ -59,6 +60,26 @@ function handleCancel() {
   emit('close')
 }
 
+async function handleDelete() {
+
+  const isManager = await organizationStore.isManager()
+
+  if(!isManager) {
+    showError('error.onlyManager')
+    return
+  }
+
+  try {
+    positionStore.deletePosition(position.value.id)
+    emit('close')
+  } catch(e) {
+    showError(e as string)
+    console.error(e)
+  } finally {
+    await initApp.init()
+  }
+}
+
 watch(
   () => props.modelValue,
   (isOpen) => {
@@ -91,8 +112,10 @@ watch(
       v-model:model-value="position"
       submit-btn-name="btn.save"
       :is-loading="positionStore.isLoading"
+      :delete="true"
       @submit="handleSubmit"
       @close="handleCancel"
+      @delete="handleDelete"
     />
   </Modal>
 </template>

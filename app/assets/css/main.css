@@ -26,7 +26,10 @@
 
   --btn-bg: #1f1f29;
   --btn-text: #f5f7fa;
+  --btn-save-hover-text: #2cb2ff;
   --btn-border: #d1d5db;
+  --btn-delete-text: #ff5656;
+  --btn-delete-hover-bg: #f14e4e;
 
   .btn {
     @apply
@@ -102,6 +105,9 @@ html.light {
   --btn-hover-bg: #f0f3f8;
   --btn-text: #172033;
   --btn-border: #c5ccd8;
+  --btn-delete-text: #ffffff;
+  --btn-delete-bg: #d62828;
+  --btn-delete-hover-bg: #ec2c2c;
 
   --primary: #4f46e5;
   --primary-hover: #4338ca;
