@@ -2,6 +2,7 @@
 import Modal from './Modal.vue'
 import {useEmployeeStore} from '~/stores/employee'
 import {usePositionStore} from '~/stores/position'
+import { useOrganizationStore } from '~/stores/organization';
 import { isValidEmail , isValidName,} from '~~/shared/utils/validation';
 import type { Employee } from '~~/types/employee';
 
@@ -27,6 +28,8 @@ const errorModal = useErrorModal()
 const initApp = useInitializeApp()
 const employeeStore = useEmployeeStore()
 const positionStore = usePositionStore()
+const organizationStore = useOrganizationStore()
+
 const employee = ref<Employee>({
   id: '',
   name: '',
@@ -60,17 +63,37 @@ async function handleSubmit() {
   }
   try {
     await employeeStore.changeEmployee(employee.value)
+
+    emit('submit')
+    emit('close')
   } catch(e) {
     console.log(e)
   } finally {
     await initApp.init()
   }
-  emit('submit')
-  emit('close')
 }
 
 function handleCancel() {
   emit('close')
+}
+
+async function handleDelete() {
+  const isManager = await organizationStore.isManager()
+
+  if(!isManager) {
+    showError('error.onlyManager')
+    return
+  }
+
+  try {
+    employeeStore.deleteEmployee(employee.value.id)
+    emit('close')
+  } catch(e) {
+    showError(e as string)
+    console.error(e)
+  } finally {
+    await initApp.init()
+  }
 }
 
 watch(
@@ -95,6 +118,7 @@ watch(
     @update:model-value="onUpdateModelValue"
   >
     <Form
+    class="max-h-[calc(100vh-10rem)] overflow-y-auto w-[300px]"
       v-if="employee"
       title="ui.employeeEdit"
       :fields="[
@@ -103,17 +127,18 @@ watch(
           { key: 'middlename', type: 'text', placeholder: 'placeholder.middleName' },
           { key: 'email', type: 'email', placeholder: 'placeholder.email' }
         ]"
-        :selects="[{
+        :comboboxes="[{
           key:'position.id',
           placeholder: 'select.position',
-          disabledOption: 'select.position',
-          selectOption: positionStore.optionsFull
+          selectOption: positionStore.options
         }]"
         v-model:modelValue="employee"
-        submitBtnName="btn.editEmployee"
+        submitBtnName="btn.save"
         :is-loading="employeeStore.isLoading"
+        :delete="true"
         @submit="handleSubmit"
         @close="handleCancel"
+        @delete="handleDelete"
     />
   </Modal>
   <ErrorModalContent

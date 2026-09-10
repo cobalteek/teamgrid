@@ -67,11 +67,17 @@ const handleSubmit = async () => {
   }
   if(advancedSettings.value) {
     if(!template.value.endDate ||
-       !template.value.restDays ||
        !template.value.workDays
     ) {
       errorModal.showError('error.form.fieldsEmpty')
       return
+    }
+    if(!template.value.restDays) {
+      const confirmed = confirm('ui.notRestDays')
+      if(!confirmed) {
+        errorModal.showInfo('info.shiftManyCancel')
+        return
+      }
     }
 
     if(template.value.workDays === 0) {
@@ -95,13 +101,13 @@ const handleSubmit = async () => {
   }
   try {
     await shiftStore.createShift(createShift.value)
+    emit('submit')
+    resetModal()
+    emit('close')
   } catch (error: any) {
       errorModal.showError(error.message || 'error.shift.create')
       return
   }
-  emit('submit')
-  resetModal()
-  emit('close')
 }
 
 function toggleAdvancedSettings() {

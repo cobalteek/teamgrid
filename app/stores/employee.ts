@@ -119,6 +119,33 @@ export const useEmployeeStore = defineStore('employee', () => {
     employees.value.map(e => ({value: e.id, label: `${e.surname} ${e.name} ${e.middlename}`}))
   )
 
+  async function deleteEmployee(employeeId: string) {
+        isLoading.value = true
+        error.value = null
+
+        try {
+          const deleteEmployee = await $fetch('/api/employee/delete', {
+            credentials: 'include',
+            method: 'POST',
+            body: {
+              id: employeeId
+            },
+            query: {
+              organizationId: organizationStore.currentOrganizationId
+            }
+          })
+          
+          return deleteEmployee
+        } catch(e) {
+          error.value = String(e)
+          console.log(e)
+          throw e
+        } finally {
+          await getEmployees()
+          isLoading.value = false
+        }
+  }
+
   return {
     employees,
     isLoading,
@@ -127,6 +154,7 @@ export const useEmployeeStore = defineStore('employee', () => {
     createEmployee,
     getEmployeeById,
     changeEmployee,
+    deleteEmployee,
     options
   }
 })
