@@ -300,6 +300,12 @@ watch(() => organizationStore.currentOrganizationId, async () => {
 })
 
 checkManagerStatus()
+
+onMounted(() => {
+  if (window.matchMedia('(min-width: 768px)').matches) {
+    shiftStore.getShifts()
+  }
+})
 </script>
 
 <template>

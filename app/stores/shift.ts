@@ -8,6 +8,12 @@ type RequestError = {
   message?: string
 }
 
+type ShiftRange = {
+  startDate?: string
+  endDate?: string
+  merge?: boolean
+}
+
 function getErrorMessage(error: unknown) {
   if (typeof error !== 'object' || error === null) {
     return $t('error.shift.notFound')
@@ -24,7 +30,7 @@ export const useShiftStore = defineStore('shift', () => {
 
     const organizationStore = useOrganizationStore()
 
-    async function getShifts(employeeId?: string) {
+    async function getShifts(employeeId?: string, range?: ShiftRange) {
         isLoading.value = true
         error.value = null
 
@@ -40,15 +46,25 @@ export const useShiftStore = defineStore('shift', () => {
             })
           }
 
-          shifts.value = await $fetch<ShiftWithRelations[]>('/api/shift', {
+          const fetchedShifts = await $fetch<ShiftWithRelations[]>('/api/shift', {
             credentials: 'include',
             method: 'GET',
             headers,
             query: {
               organizationId: organizationId,
-              employeeId
+              employeeId,
+              startDate: range?.startDate,
+              endDate: range?.endDate
             }
           })
+
+          if (range?.merge) {
+            const shiftsById = new Map(shifts.value.map(shift => [shift.id, shift]))
+            fetchedShifts.forEach(shift => shiftsById.set(shift.id, shift))
+            shifts.value = Array.from(shiftsById.values())
+          } else {
+            shifts.value = fetchedShifts
+          }
     
           return shifts.value
         } catch (e: unknown) {
