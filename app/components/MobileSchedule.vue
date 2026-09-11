@@ -62,6 +62,10 @@ const previousSentinel = ref<HTMLElement | null>(null)
 const nextSentinel = ref<HTMLElement | null>(null)
 const gridPreviousSentinel = ref<HTMLElement | null>(null)
 const gridNextSentinel = ref<HTMLElement | null>(null)
+const previousSentinelInView = ref(false)
+const nextSentinelInView = ref(false)
+const gridPreviousSentinelInView = ref(false)
+const gridNextSentinelInView = ref(false)
 const gridLoadedStart = ref(startOfMonth(startOfToday()))
 const gridLoadedEnd = ref(addMonths(gridLoadedStart.value, 1))
 const selectedGridDay = ref<string | null>(null)
@@ -337,6 +341,10 @@ async function loadNextGridMonth() {
 function observeSentinels() {
   if (!observer) return
   observer.disconnect()
+  previousSentinelInView.value = false
+  nextSentinelInView.value = false
+  gridPreviousSentinelInView.value = false
+  gridNextSentinelInView.value = false
   if (viewMode.value === 'feed') {
     if (previousSentinel.value) observer.observe(previousSentinel.value)
     if (nextSentinel.value) observer.observe(nextSentinel.value)
@@ -362,11 +370,41 @@ onMounted(async () => {
   window.addEventListener('scroll', markFeedScroll, { passive: true })
   observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
-      if (!entry.isIntersecting) return
-      if (entry.target === previousSentinel.value && hasScrolledIntoFeed.value) loadPreviousMonth()
-      if (entry.target === nextSentinel.value) loadNextMonth()
-      if (entry.target === gridPreviousSentinel.value && hasScrolledIntoFeed.value) loadPreviousGridMonth()
-      if (entry.target === gridNextSentinel.value) loadNextGridMonth()
+      if (entry.target === previousSentinel.value) {
+        if (!entry.isIntersecting) {
+          previousSentinelInView.value = false
+        } else if (!previousSentinelInView.value) {
+          previousSentinelInView.value = true
+          if (hasScrolledIntoFeed.value) loadPreviousMonth()
+        }
+      }
+
+      if (entry.target === nextSentinel.value) {
+        if (!entry.isIntersecting) {
+          nextSentinelInView.value = false
+        } else if (!nextSentinelInView.value) {
+          nextSentinelInView.value = true
+          loadNextMonth()
+        }
+      }
+
+      if (entry.target === gridPreviousSentinel.value) {
+        if (!entry.isIntersecting) {
+          gridPreviousSentinelInView.value = false
+        } else if (!gridPreviousSentinelInView.value) {
+          gridPreviousSentinelInView.value = true
+          if (hasScrolledIntoFeed.value) loadPreviousGridMonth()
+        }
+      }
+
+      if (entry.target === gridNextSentinel.value) {
+        if (!entry.isIntersecting) {
+          gridNextSentinelInView.value = false
+        } else if (!gridNextSentinelInView.value) {
+          gridNextSentinelInView.value = true
+          loadNextGridMonth()
+        }
+      }
     })
   }, { rootMargin: '500px 0px' })
   observeSentinels()
