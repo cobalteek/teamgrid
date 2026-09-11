@@ -16,7 +16,11 @@ const props = defineProps<{
 }>()
 
 const isAddShiftModalOpen = ref(false)
-const infoDate = ref()
+const todayKey = new Date().toISOString().split('T')[0] ?? ''
+const infoDate = ref({
+  dateStr: todayKey,
+  date: new Date(`${todayKey}T00:00:00Z`),
+})
 
 const shiftStore = useShiftStore()
 
@@ -53,6 +57,19 @@ const eventElements = new Map<string, HTMLElement[]>()
 
 const calendarRef = ref<InstanceType<typeof FullCalendar> | null>(null)
 
+function openShiftModal(dateKey: string) {
+  if (employeeStore.employees.length === 0) {
+    isAddEmployeeModalOpen.value = true
+    return
+  }
+
+  infoDate.value = {
+    dateStr: dateKey,
+    date: new Date(`${dateKey}T00:00:00Z`),
+  }
+  isAddShiftModalOpen.value = true
+}
+
 function resetSelection(event: MouseEvent) {
   const target = event.target as HTMLElement
 
@@ -65,7 +82,7 @@ function resetSelection(event: MouseEvent) {
 const calendarOptions = computed(() => ({
   plugins: [dayGridPlugin, listPlugin, interactionPlugin],
 
-  initialView: 'dayGridMonth',
+  initialView: props.settings.initialView,
   aspectRatio: 1.2,
   locale: locale.value === 'ru' ? ruBetterLocale : enBetterLocale,
   firstDay: 1,
@@ -80,7 +97,7 @@ const calendarOptions = computed(() => ({
       isAddEmployeeModalOpen.value = true
       return
     } else {
-      isAddShiftModalOpen.value = true
+      openShiftModal(info.dateStr)
     }
     infoDate.value = info
     return
@@ -174,7 +191,7 @@ function eventDidMount(info: any) {
     )
   `
   info.el.addEventListener('contextmenu', async (e: MouseEvent) => {
-    if(!isManager) {
+    if(!isManager.value) {
       return
     }
     e.preventDefault()
@@ -287,6 +304,7 @@ checkManagerStatus()
 
 <template>
   <div
+    class="hidden min-w-0 md:block"
     ref="calendarWrapper"
     @click="resetSelection"
   >
@@ -295,6 +313,11 @@ checkManagerStatus()
       :options="calendarOptions"
     />
   </div>
+  <MobileSchedule
+    class="md:hidden"
+    :is-manager="Boolean(isManager)"
+    @add-shift="openShiftModal"
+  />
   <AddShiftModalContent
     :info="infoDate"
     :model-value="isAddShiftModalOpen"

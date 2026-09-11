@@ -36,7 +36,8 @@ export default defineEventHandler(async (event) => {
 
   const position = await prisma.position.findUnique({
     where: {
-      id: positionId
+      id: positionId, 
+      organizationId
     }
   })
 
@@ -48,7 +49,8 @@ export default defineEventHandler(async (event) => {
   }
     const changePosition = await prisma.position.update({
       where: {
-        id: position.id
+        id: position.id,
+        organizationId
       },
       data: {
         name,

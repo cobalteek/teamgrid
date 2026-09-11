@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const position = await prisma.position.findUnique({
-    where: { id },
+    where: { id, organizationId },
     include: {
       organization: true
     }

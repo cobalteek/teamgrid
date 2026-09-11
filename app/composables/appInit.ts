@@ -14,7 +14,11 @@ export function useInitializeApp() {
   const userStore = useUserStore()
   async function init() {
     await authStore.init()
-    await userStore.getUsers()
+
+    if (!authStore.isAuthed) {
+      return
+    }
+
     await organizationStore.getOrganizations()
     await Promise.all([
         shiftStore.getShifts(),

@@ -34,7 +34,7 @@ export const useShiftStore = defineStore('shift', () => {
           const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
 
           if(!organizationId) {
-            createError({
+            throw createError({
               statusCode: 404,
               statusMessage: 'error.organization.getId'
             })

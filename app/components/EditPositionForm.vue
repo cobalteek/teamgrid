@@ -70,7 +70,7 @@ async function handleDelete() {
   }
 
   try {
-    positionStore.deletePosition(position.value.id)
+    await positionStore.deletePosition(position.value.id)
     emit('close')
   } catch(e) {
     showError(e as string)

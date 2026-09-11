@@ -119,7 +119,7 @@ export default defineEventHandler(async (event) => {
         update: {},
         create: {
             name: position,
-            fullName: `fullName_${position}`,
+            fullName: `${t('ui.fullNamePosition')}_${position}`,
             organizationId: organizationId,
             color: colorPosition
         }

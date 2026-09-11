@@ -18,42 +18,22 @@ function getErrorMessage(error: unknown) {
 }
 
 export const useUserStore = defineStore('user', () => {
-  const users = ref<User[]>([])
   const organizationUsers = ref<User[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
   const organizationStore = useOrganizationStore()
 
-  async function getUsers() {
+  async function getOrganizationUsers() {
     isLoading.value = true
     error.value = null
 
     try {
       const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
 
-      users.value = await $fetch<User[]>('/api/user', {
+      organizationUsers.value = await $fetch<User[]>('/api/user', {
         credentials: 'include',
-        method: 'GET',
         headers,
-      })
-
-      return users.value
-    } catch (e: unknown) {
-      error.value = getErrorMessage(e)
-      throw e
-    } finally {
-      isLoading.value = false
-    }
-  }
-
-  async function getOrganizationUsers() {
-    isLoading.value = true
-    error.value = null
-
-    try {
-      organizationUsers.value = await $fetch('/api/user', {
-        credentials: 'include',
         method: 'GET',
         query: {
           organizationId: organizationStore.currentOrganizationId
@@ -70,21 +50,15 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  const options = computed(() =>
-    users.value.map(u => ({value: u.id, label: u.name}))
-  )
-
   const organizationOptions = computed(() =>
     organizationUsers.value.map(ou => ({value: ou.id, label: ou.name}))
   )
 
   return {
-    users,
     isLoading,
     error,
-    options,
     organizationOptions,
-    getUsers,
+    organizationUsers,
     getOrganizationUsers
   }
 })

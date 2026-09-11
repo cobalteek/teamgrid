@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const employee = await prisma.employee.findUnique({
-    where: { id },
+    where: { id, organizationId },
     include: {
       organization: true
     }

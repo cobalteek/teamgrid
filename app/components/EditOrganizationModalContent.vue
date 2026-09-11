@@ -83,15 +83,15 @@ watch(
     :model-value="modelValue"
     @update:model-value="onUpdateModelValue"
   >
-    <div class="w-[700px] h-[400px]">
-      <section class="inline-flex justify-center text-center font-bold text-lg items-center py-3 w-full">
+    <div class="max-h-[calc(100dvh-1rem)] w-[min(700px,calc(100vw-1rem))] overflow-y-auto p-3 sm:h-[400px] sm:p-0">
+      <section class="flex w-full items-center justify-center py-3 text-center text-lg font-bold">
         <form
-          class="flex justify-center gap-2"
+          class="flex w-full justify-center gap-2 sm:w-auto"
           @submit.prevent="handleSubmit">
           <input
           :disabled=isDisableName
           v-model="organizationName"
-          class="text-center rounded px-2 transition-all outline-none"
+          class="min-h-11 min-w-0 flex-1 rounded px-2 text-center transition-all outline-none sm:min-h-0 sm:flex-none"
           :class="isDisableName 
             ? 'border border-transparent'
             : 'border border-gray-400 focus:border-blue-500'"
@@ -104,13 +104,13 @@ watch(
             transition
             duration-100
             active:scale-90
-            bg-[url('/assets/images/edit.png')] w-7 h-7 bg-cover bg-center invert-[1] [html.light_&]:invert-0
+            bg-[url('/assets/images/edit.png')] min-h-11 min-w-11 w-11 bg-cover bg-center invert-[1] [html.light_&]:invert-0 sm:min-h-0 sm:min-w-0 sm:w-7 sm:h-7
           "/>
         </form>
       </section>
       <hr>
-        <div class="flex justify-around mt-2 h-[300px]">
-          <div class="flex flex-col items-center border rounded w-[30%] h-[300px] overflow-hidden">
+        <div class="mt-2 grid grid-cols-1 gap-3 sm:h-[300px] sm:grid-cols-3 sm:justify-around">
+          <div class="flex min-h-[150px] flex-col items-center overflow-hidden rounded border sm:h-[300px]">
             <h3 class="pb-2 shrink-0 text-lg">{{ $t('ui.employees') }}</h3>
             <ul class="w-full flex-1 overflow-y-auto min-h-0">
               <li
@@ -122,7 +122,7 @@ watch(
               </li>
             </ul>
           </div>
-          <div class="flex flex-col items-center border rounded w-[30%] h-[300px] overflow-hidden">
+          <div class="flex min-h-[150px] flex-col items-center overflow-hidden rounded border sm:h-[300px]">
             <h3 class="pb-2 shrink-0 text-lg">{{ $t('ui.positions') }}</h3>
             <ul class="w-full flex-1 overflow-y-auto min-h-0">
               <li
@@ -134,7 +134,7 @@ watch(
               </li>
             </ul>
           </div>
-          <div class="flex flex-col items-center text-center border rounded w-[30%] h-[300px] overflow-hidden">
+          <div class="flex min-h-[150px] flex-col items-center overflow-hidden rounded border text-center sm:h-[300px]">
             <h3 class="pb-2 shrink-0 text-lg">{{ $t('ui.users') }}</h3>
             <ol class="w-full flex-1 overflow-y-auto min-h-0">
               <li

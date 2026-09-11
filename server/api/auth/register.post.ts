@@ -84,6 +84,7 @@ export default defineEventHandler(async (event) => {
         organization = await tx.organization.create({
           data: {
             name: `${name}_organization`,
+            description: `Description of ${name}_organization`
           },
         })
 

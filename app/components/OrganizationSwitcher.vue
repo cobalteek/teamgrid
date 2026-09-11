@@ -12,7 +12,8 @@ function addOrganization() {
 
 const organization = ref<Organization>({
   id: 1,
-  name: ''
+  name: '',
+  description: ''
 })
 
 const organizationStore = useOrganizationStore()
@@ -42,9 +43,9 @@ watch(organization.value, async () => {
 </script>
 
 <template>
-  <div class="inline-flex gap-3 pl-2 justify-center items-center">
-    <h4 class="block max-sm:hidden">{{$t('ui.currentOrganization') + ':'}}</h4>
-    <select v-model="organization.id">
+  <div class="flex w-full min-w-0 items-center gap-2 md:w-auto md:pl-2">
+    <h4 class="hidden shrink-0 md:block">{{$t('ui.currentOrganization') + ':'}}</h4>
+    <select v-model="organization.id" class="select min-h-11 min-w-0 flex-1 md:min-h-0 md:flex-none">
       <option
         v-for="org in organizationStore.options"
         :key="org.value"
@@ -53,7 +54,13 @@ watch(organization.value, async () => {
         {{ org.label }}
       </option>
     </select>
-    <button @click="addOrganization" class="text-1xl border-1 px-2 rounded-sm">
+    <button
+      type="button"
+      aria-label="Add organization"
+      title="Add organization"
+      @click="addOrganization"
+      class="flex min-h-11 min-w-11 items-center justify-center rounded-md border border-[var(--border-main)] px-2 text-xl md:min-h-0 md:min-w-0"
+    >
       +
     </button>
   </div>
