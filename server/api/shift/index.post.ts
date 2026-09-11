@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const employee = await prisma.employee.findUnique({
-      where: { id: employeeId }
+      where: { id: employeeId, organizationId }
     })
 
     if (!employee) {
@@ -48,7 +48,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const position = await prisma.position.findUnique({
-      where: { id: positionId }
+      where: { id: positionId, organizationId }
     })
 
     if (!position) {
@@ -76,8 +76,8 @@ export default defineEventHandler(async (event) => {
 
     return shift
   } catch (error) {
-        console.error(error)
+    console.error(error)
         
-        throw error
+    throw error
   }
 })

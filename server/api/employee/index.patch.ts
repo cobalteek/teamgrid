@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
     const {organizationId} = body
 
     try {
-        const isManager = isManagerOrganization(userId, organizationId)
+        const isManager = await isManagerOrganization(userId, organizationId)
 
         if (!isManager) {
             throw createError({
@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
                 email,
                 organizationId,
                 id: {
-                not: id
+                    not: id
                 }
             },
         })
@@ -94,14 +94,14 @@ export default defineEventHandler(async (event) => {
         }
 
         const updateData = {
-        name,
-        surname,
-        middlename,
-        email
+            name,
+            surname,
+            middlename,
+            email
         }
 
         const updatedEmployee = await prisma.employee.update({
-            where: {id},
+            where: {id, organizationId},
             data: updateData
         })
 

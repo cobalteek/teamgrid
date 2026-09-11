@@ -1,7 +1,7 @@
 import {defineStore} from 'pinia'
 import type {User} from '~~/types/user'
 
-type RequestError = {
+interface RequestError {
   statusCode?: number
   status?: number
   data?: {message?: string}

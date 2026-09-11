@@ -20,7 +20,8 @@ async function main() {
 
   const organization = await prisma.organization.create({
     data: {
-      name: 'Admin_organization'
+      name: 'Admin_organization',
+      description: 'Description of Admin_organization'
     }
   })
 

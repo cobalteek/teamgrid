@@ -127,3 +127,249 @@ html.light {
   --text-success: #15803d;
   --border-success: #bbf7d0;
 }
+
+html,
+body,
+#__nuxt {
+  min-width: 0;
+  min-height: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  background: var(--bg-back);
+}
+
+.mobile-schedule {
+  width: 100%;
+  min-width: 0;
+  padding: 0.25rem 0 1.5rem;
+}
+
+.mobile-schedule__heading,
+.mobile-schedule__daybar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.mobile-schedule__heading {
+  padding: 0.5rem 0.25rem 1rem;
+}
+
+.mobile-schedule__eyebrow,
+.mobile-schedule__count {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.mobile-schedule__title {
+  margin: 0.2rem 0 0;
+  font-size: 1.55rem;
+  line-height: 1.1;
+}
+
+.mobile-schedule__today,
+.mobile-schedule__arrow,
+.mobile-schedule__add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border: 1px solid var(--border-main);
+  border-radius: 0.65rem;
+  color: var(--text-main);
+  background: var(--bg-context);
+  transition: background-color 120ms ease, transform 120ms ease;
+}
+
+.mobile-schedule__today {
+  padding: 0 0.8rem;
+  font-size: 0.82rem;
+}
+
+.mobile-schedule__today:active,
+.mobile-schedule__arrow:active,
+.mobile-schedule__add:active,
+.mobile-shift__delete:active {
+  transform: scale(0.95);
+}
+
+.mobile-schedule__today:hover,
+.mobile-schedule__arrow:hover,
+.mobile-schedule__add:hover {
+  background: var(--bg-hover-context);
+}
+
+.mobile-schedule__controls {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.mobile-schedule__arrow {
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.mobile-schedule__days {
+  display: flex;
+  gap: 0.4rem;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 0.2rem 0.1rem 0.4rem;
+  scroll-snap-type: x proximity;
+}
+
+.mobile-day {
+  display: flex;
+  flex: 0 0 3.25rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 4.6rem;
+  padding: 0.4rem 0.2rem;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  color: var(--text-muted);
+  scroll-snap-align: center;
+  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.mobile-day__name,
+.mobile-day__month {
+  font-size: 0.68rem;
+  line-height: 1;
+  text-transform: capitalize;
+}
+
+.mobile-day__number {
+  margin: 0.35rem 0;
+  color: var(--text-main);
+  font-size: 1.12rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.mobile-day--active {
+  border-color: var(--primary-border, var(--border-main));
+  color: var(--primary-text, var(--text-blue));
+  background: var(--primary-soft, var(--bg-hover-context));
+}
+
+.mobile-day--active .mobile-day__number {
+  color: currentColor;
+}
+
+.mobile-schedule__daybar {
+  margin-top: 1.1rem;
+  padding: 0.85rem 0;
+  border-top: 1px solid var(--border-main);
+  border-bottom: 1px solid var(--border-main);
+}
+
+.mobile-schedule__dayname {
+  margin: 0 0 0.2rem;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.mobile-schedule__add {
+  border: 0;
+  color: white;
+  background: var(--primary, #4f46e5);
+  font-size: 1.55rem;
+  line-height: 1;
+}
+
+.mobile-schedule__list {
+  display: grid;
+  gap: 0.65rem;
+  padding-top: 0.85rem;
+}
+
+.mobile-shift {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 4.1rem;
+  padding: 0.7rem 0.75rem;
+  border: 1px solid var(--border-main);
+  border-radius: 0.75rem;
+  background: var(--bg-context);
+}
+
+.mobile-shift__color {
+  width: 0.55rem;
+  align-self: stretch;
+  flex: 0 0 0.55rem;
+  border-radius: 999px;
+}
+
+.mobile-shift__content {
+  min-width: 0;
+  flex: 1;
+}
+
+.mobile-shift__position,
+.mobile-shift__employee {
+  overflow: hidden;
+  margin: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobile-shift__position {
+  font-weight: 700;
+}
+
+.mobile-shift__employee {
+  margin-top: 0.25rem;
+  color: var(--text-soft);
+  font-size: 0.88rem;
+}
+
+.mobile-shift__delete {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: 0 0 2.75rem;
+  border-radius: 0.6rem;
+  color: var(--btn-delete-text, #ff5656);
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.mobile-schedule__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 2.5rem 1rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.mobile-schedule__empty-action {
+  min-height: 2.75rem;
+}
+
+@media (max-width: 767px) {
+  .fc {
+    font-size: 0.85rem;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font-size: 1rem;
+  }
+}

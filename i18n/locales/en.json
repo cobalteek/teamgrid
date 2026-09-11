@@ -236,6 +236,13 @@
   },
   "ui": {
     "currentOrganization": "Current organization",
+    "schedule": "Schedule",
+    "scheduleDays": "Schedule days",
+    "today": "Today",
+    "previousWeek": "Previous days",
+    "nextWeek": "Next days",
+    "shifts": "shifts",
+    "noShifts": "No shifts for this day",
     "organization": {
       "add": "Add an organization"
     },

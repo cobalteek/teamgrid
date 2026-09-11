@@ -86,7 +86,7 @@ async function handleDelete() {
   }
 
   try {
-    employeeStore.deleteEmployee(employee.value.id)
+    await employeeStore.deleteEmployee(employee.value.id)
     emit('close')
   } catch(e) {
     showError(e as string)

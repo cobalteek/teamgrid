@@ -66,6 +66,7 @@ model Position {
 model Organization {
   id   Int    @id @default(autoincrement())
   name String @unique
+  description String
 
   members   OrganizationMember[]
   positions Position[]

@@ -92,9 +92,9 @@ if(props.date) {
 </script>
 
 <template>
-  <div class="flex flex-col justify-center items-center gap-4 p-4">
-    <h2 class="text-xl font-bold p-2 pt-6">{{ $t(title) + " " + (formatedDate ? formatedDate : '')}}</h2>
-    <form @submit.prevent="handleSubmit" class="flex flex-col gap-4 w-full">
+  <div class="flex max-h-[calc(100dvh-1rem)] flex-col items-center justify-center gap-4 overflow-y-auto p-4 pt-12 sm:max-h-[calc(100dvh-3rem)] sm:p-6 sm:pt-8">
+    <h2 class="w-full p-1 text-center text-xl font-bold">{{ $t(title) + " " + (formatedDate ? formatedDate : '')}}</h2>
+    <form @submit.prevent="handleSubmit" class="flex w-full flex-col gap-4">
       <input
         v-if="fields"
         v-for="field in fields"
@@ -106,7 +106,7 @@ if(props.date) {
         )"
         :type="field.type"
         :placeholder="$t(field.placeholder)"
-        class="pl-2 p-1 rounded-md active:border-gray-200 text-[var(--input-text)] bg-[var(--input-bg)]"
+        class="min-h-11 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] p-2 pl-3 text-[var(--input-text)]"
         />
       <div
         v-if="selects"
@@ -117,7 +117,7 @@ if(props.date) {
         :key="select.key"
         :value="getDeepValue(modelValue, select.key) ?? ''"
         @input="onSelectChange($event, select)"
-        class="border-1 rounded pl-2"
+        class="min-h-11 rounded border border-[var(--input-border)] bg-[var(--input-bg)] pl-3 text-[var(--input-text)]"
       >
         <option disabled value="">
           {{ $t(select.placeholder) }}
@@ -131,12 +131,12 @@ if(props.date) {
         </option>
       </select>
       </div>
-      <div class="flex justify-between gap-2">
+      <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
         <div class="flex gap-2">
           <button
             type="button"
             @click="handleCancel"
-            class="btn btn-secondary disabled:opacity-10"
+            class="btn min-h-11 flex-1 disabled:opacity-10 sm:min-h-0 sm:flex-none"
             :disabled="isLoading"
           >
             {{ $t('btn.cancel') }}
@@ -145,7 +145,7 @@ if(props.date) {
             v-if="delete"
             type="button"
             @click="handleDelete"
-            class="btn btn-secondary hover:bg-[var(--btn-delete-hover-bg)] hover:text-[var(--btn-delete-text)] disabled:opacity-10"
+            class="btn min-h-11 flex-1 hover:bg-[var(--btn-delete-hover-bg)] hover:text-[var(--btn-delete-text)] disabled:opacity-10 sm:min-h-0 sm:flex-none"
             :disabled="isLoading"
           >
             {{ $t('btn.delete') }}
@@ -153,7 +153,7 @@ if(props.date) {
         </div>
         <button
           type="submit"
-          class="btn btn-primary bg-[var(--btn-bg)] hover:bg-[var(--btn-hover-bg)] hover:text-[var(--btn-save-hover-text)] disabled:opacity-10"
+          class="btn btn-primary min-h-11 flex-1 bg-[var(--btn-bg)] hover:bg-[var(--btn-hover-bg)] hover:text-[var(--btn-save-hover-text)] disabled:opacity-10 sm:min-h-0 sm:flex-none"
           :disabled="isLoading"
         >
           {{ $t(submitBtnName) }}

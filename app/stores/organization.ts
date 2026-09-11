@@ -99,12 +99,12 @@ export const useOrganizationStore = defineStore('organization', () => {
     async function changeName(name: string) {
         isLoading.value = true
         error.value = null
-        if(!isValidName) {
-            createError({
+        if(!isValidName(name)) {
+            console.log(error)
+            throw createError({
                 statusCode: 400,
                 statusMessage: 'error.invalidName'
             })
-            console.log(error)
         }
         try {
             const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
@@ -202,6 +202,21 @@ export const useOrganizationStore = defineStore('organization', () => {
             }))
     )
 
+    const optionsWithDescription = computed(() =>
+        [...organizations.value]
+            .sort((a, b) => {
+                if (a.id === currentOrganization.value?.id) return -1
+                if (b.id === currentOrganization.value?.id) return 1
+                return 0
+            })
+            .map(p => ({
+                value: p.id,
+                label: p.name,
+                description: p.description
+            }))
+    )
+
+
     async function isManager() {
         isLoading.value = true
         error.value = null
@@ -242,6 +257,7 @@ export const useOrganizationStore = defineStore('organization', () => {
         initialize,
         changeName,
         changeOrganization,
-        isManager
+        isManager,
+        optionsWithDescription
     }
 })

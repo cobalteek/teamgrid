@@ -236,6 +236,13 @@
   },
   "ui": {
     "currentOrganization": "Текущая организация",
+    "schedule": "Расписание",
+    "scheduleDays": "Дни расписания",
+    "today": "Сегодня",
+    "previousWeek": "Предыдущие дни",
+    "nextWeek": "Следующие дни",
+    "shifts": "смен",
+    "noShifts": "На этот день смен нет",
     "organization": {
       "add": "Добавить организацию"
     },
@@ -251,7 +258,8 @@
     "restDays": "Выходных",
     "startDate": "Начало цикла",
     "endDate": "Конец цикла",
-    "shiftDeleteConfirm": "Удалить смену?"
+    "shiftDeleteConfirm": "Удалить смену?",
+    "fullNamePosition": "Полное имя"
   },
   "modal": {
     "editOrganization": "Редактировать организацию"

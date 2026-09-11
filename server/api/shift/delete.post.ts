@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const shift = await prisma.shift.findUnique({
-    where: { id },
+    where: { id, organizationId },
     include: {
       organization: true
     }
@@ -51,7 +51,7 @@ export default defineEventHandler(async (event) => {
   }
 
   await prisma.shift.delete({
-    where: { id }
+    where: { id, organizationId }
   })
 
   return {
