@@ -520,7 +520,7 @@ onBeforeUnmount(() => {
                     <span
                       :title="`${shift.employee.name} ${shift.employee.surname} · ${shift.position.name}`"
                     >
-                      {{ initial(shift.employee.name) }} / {{ initial(shift.position.name) }}
+                      {{ initial(shift.position.name) }} / {{ initial(shift.employee.name) }}
                     </span>
                   </div>
                 </div>
