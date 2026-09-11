@@ -12,11 +12,27 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const employeeId = query.employeeId ? String(query.employeeId) : undefined
   const organizationId = query.organizationId ? Number(query.organizationId) : undefined
+  const startDate = query.startDate ? new Date(`${String(query.startDate)}T00:00:00Z`) : undefined
+  const endDate = query.endDate ? new Date(`${String(query.endDate)}T00:00:00Z`) : undefined
   
   if (!organizationId) {
     throw createError({
       statusCode: 400,
       statusMessage: t('error.organization.notFound')
+    })
+  }
+
+  if ((startDate && Number.isNaN(startDate.getTime())) || (endDate && Number.isNaN(endDate.getTime()))) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: t('error.shift.notFound')
+    })
+  }
+
+  if ((startDate && !endDate) || (!startDate && endDate) || (startDate && endDate && startDate >= endDate)) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: t('error.shift.notFound')
     })
   }
 
@@ -32,7 +48,13 @@ export default defineEventHandler(async (event) => {
   try {
     const where = {
       organizationId,
-      ...(employeeId && { employeeId })
+      ...(employeeId && { employeeId }),
+      ...((startDate || endDate) && {
+        date: {
+          ...(startDate && { gte: startDate }),
+          ...(endDate && { lt: endDate })
+        }
+      })
     }
     const shifts = await prisma.shift.findMany({
       where,
