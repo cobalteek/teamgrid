@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useShiftStore } from '~/stores/shift'
+import type { ShiftWithRelations } from '~~/types/shift'
 
 const props = defineProps<{ isManager: boolean }>()
 const emit = defineEmits<{ (e: 'add-shift', dateKey: string): void }>()
@@ -63,6 +64,7 @@ const gridPreviousSentinel = ref<HTMLElement | null>(null)
 const gridNextSentinel = ref<HTMLElement | null>(null)
 const gridLoadedStart = ref(startOfMonth(startOfToday()))
 const gridLoadedEnd = ref(addMonths(gridLoadedStart.value, 1))
+const selectedGridDay = ref<string | null>(null)
 let observer: IntersectionObserver | null = null
 
 const days = computed(() => daysBetween(loadedStart.value, loadedEnd.value).map(({ key, date }) => ({
@@ -91,6 +93,30 @@ const gridMonths = computed(() => monthsBetween(gridLoadedStart.value, gridLoade
 function shiftsForDay(dayKey: string) {
   return shiftStore.shifts.filter(shift => toDateKey(shift.date) === dayKey)
 }
+
+function shiftGradient(shift: ShiftWithRelations) {
+  return `linear-gradient(135deg, ${shift.position.color} 0%, ${shift.employee.color} 100%)`
+}
+
+function initial(value: string) {
+  return value.trim().charAt(0).toUpperCase()
+}
+
+const selectedGridDayShifts = computed(() => selectedGridDay.value
+  ? shiftsForDay(selectedGridDay.value)
+  : [])
+
+const selectedGridDayLabel = computed(() => {
+  if (!selectedGridDay.value) return ''
+  const date = new Date(`${selectedGridDay.value}T00:00:00Z`)
+  const label = new Intl.DateTimeFormat(locale.value === 'ru' ? 'ru-RU' : 'en-US', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(date).replace(' г.', '')
+  return capitalize(label)
+})
 
 function monthLabel(date: Date) {
   const label = new Intl.DateTimeFormat(locale.value === 'ru' ? 'ru-RU' : 'en-US', {
@@ -249,6 +275,21 @@ async function scrollToToday() {
     return
   }
   await scrollToDay(todayKey)
+}
+
+function openGridDay(dayKey: string) {
+  selectedGridDay.value = dayKey
+}
+
+function closeGridDay() {
+  selectedGridDay.value = null
+}
+
+function addShiftFromGridDay() {
+  if (!selectedGridDay.value) return
+  const dayKey = selectedGridDay.value
+  closeGridDay()
+  emit('add-shift', dayKey)
 }
 
 async function setViewMode(mode: 'feed' | 'grid') {
@@ -412,7 +453,7 @@ onBeforeUnmount(() => {
 
         <div v-if="shiftsForDay(day.key).length" class="mobile-schedule__list">
           <article v-for="shift in shiftsForDay(day.key)" :key="shift.id" class="mobile-shift">
-            <span class="mobile-shift__color" :style="{ backgroundColor: shift.position.color }" aria-hidden="true" />
+            <span class="mobile-shift__color" :style="{ background: shiftGradient(shift) }" aria-hidden="true" />
             <div class="mobile-shift__content">
               <p class="mobile-shift__position">{{ shift.position.name }}</p>
               <p class="mobile-shift__employee">{{ shift.employee.surname }} {{ shift.employee.name }}</p>
@@ -456,8 +497,9 @@ onBeforeUnmount(() => {
               v-for="(day, index) in gridDaysForMonth(month)"
               :id="day ? `mobile-day-${day.key}` : undefined"
               :key="day?.key ?? `empty-${toMonthKey(month)}-${index}`"
-              class="mobile-schedule__grid-day"
+              class="mobile-schedule__grid-day cursor-pointer"
               :class="{ 'mobile-schedule__grid-day--today': day?.key === todayKey }"
+              @click="day && openGridDay(day.key)"
             >
               <template v-if="day">
                 <div class="mobile-schedule__grid-day-header">
@@ -469,13 +511,17 @@ onBeforeUnmount(() => {
                     class="mobile-schedule__grid-add"
                     :aria-label="$t('btn.addShift')"
                     :title="$t('btn.addShift')"
-                    @click="emit('add-shift', day.key)"
+                    @click.stop="emit('add-shift', day.key)"
                   >+</button>
                 </div>
                 <div class="mobile-schedule__grid-shifts">
                   <div v-for="shift in shiftsForDay(day.key)" :key="shift.id" class="mobile-schedule__grid-shift">
-                    <span class="mobile-shift__color" :style="{ backgroundColor: shift.position.color }" aria-hidden="true" />
-                    <span>{{ shift.employee.surname }} {{ shift.employee.name }}</span>
+                    <span class="mobile-shift__color" :style="{ background: shiftGradient(shift) }" aria-hidden="true" />
+                    <span
+                      :title="`${shift.employee.name} ${shift.employee.surname} · ${shift.position.name}`"
+                    >
+                      {{ initial(shift.employee.name) }} / {{ initial(shift.position.name) }}
+                    </span>
                   </div>
                 </div>
               </template>
@@ -488,5 +534,49 @@ onBeforeUnmount(() => {
         <span v-if="isLoadingNext" class="mobile-schedule__loading">{{ $t('ui.loading') }}</span>
       </div>
     </template>
+
+    <Modal
+      :model-value="Boolean(selectedGridDay)"
+      @update:model-value="value => !value && closeGridDay()"
+    >
+      <div class="flex max-h-[calc(100dvh-1rem)] min-w-0 flex-col gap-4 overflow-y-auto p-5 sm:min-w-[420px]">
+        <div class="pr-10">
+          <p class="m-0 text-sm text-[var(--text-muted)]">{{ $t('ui.schedule') }}</p>
+          <h2 class="mt-1 text-xl font-bold capitalize">{{ selectedGridDayLabel }}</h2>
+        </div>
+
+        <div v-if="selectedGridDayShifts.length" class="grid gap-2">
+          <article v-for="shift in selectedGridDayShifts" :key="shift.id" class="mobile-shift">
+            <span class="mobile-shift__color" :style="{ background: shiftGradient(shift) }" aria-hidden="true" />
+            <div class="mobile-shift__content">
+              <p class="mobile-shift__position">{{ shift.position.name }}</p>
+              <p class="mobile-shift__employee">
+                {{ shift.employee.name }} {{ shift.employee.surname }}
+              </p>
+            </div>
+            <button
+              v-if="props.isManager"
+              type="button"
+              class="mobile-shift__delete"
+              :aria-label="$t('btn.delete')"
+              :title="$t('btn.delete')"
+              @click="deleteShift(shift.id)"
+            >
+              <span aria-hidden="true">×</span>
+            </button>
+          </article>
+        </div>
+        <p v-else class="m-0 text-[var(--text-muted)]">{{ $t('ui.noShifts') }}</p>
+
+        <button
+          v-if="props.isManager"
+          type="button"
+          class="btn w-full min-h-11"
+          @click="addShiftFromGridDay"
+        >
+          {{ $t('btn.addShift') }}
+        </button>
+      </div>
+    </Modal>
   </section>
 </template>
