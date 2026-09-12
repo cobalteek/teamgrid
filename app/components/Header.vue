@@ -5,11 +5,14 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 
 const auth = useAuthStore()
+const organizationStore = useOrganizationStore()
 const { user } = storeToRefs(auth)
 const { locale, setLocale } = useI18n()
 
 const isOpenOrganizationModal = ref(false)
+const isEditOrganizationModalOpen = ref(false)
 const isMobileMenuOpen = ref(false)
+const canEditOrganization = ref(false)
 
 const openModal = () => {
   isOpenOrganizationModal.value = true
@@ -24,11 +27,39 @@ async function goDashboard() {
   await navigateTo('/dashboard')
 }
 
+function openEditOrganizationModal() {
+  isMobileMenuOpen.value = false
+  isEditOrganizationModalOpen.value = true
+}
+
 const isDashboard = computed(() => route.name === 'dashboard')
+
+async function updateOrganizationAccess() {
+  if (!user.value || !isDashboard.value || !organizationStore.currentOrganizationId) {
+    canEditOrganization.value = false
+    return
+  }
+
+  try {
+    canEditOrganization.value = Boolean(await organizationStore.isManager())
+  } catch {
+    canEditOrganization.value = false
+  }
+}
 
 watch(() => route.fullPath, () => {
   isMobileMenuOpen.value = false
 })
+
+watch(
+  [
+    () => user.value?.id,
+    () => route.name,
+    () => organizationStore.currentOrganizationId,
+  ],
+  updateOrganizationAccess,
+  { immediate: true }
+)
 
 </script>
 
@@ -91,14 +122,23 @@ watch(() => route.fullPath, () => {
           v-if="isMobileMenuOpen"
           class="absolute right-0 top-[calc(100%+0.75rem)] z-50 w-64 rounded-lg border border-[var(--border-main)] bg-[var(--bg-context)] p-2 text-[var(--text-main)] shadow-xl"
         >
-          <NuxtLink
-            v-if="user"
-            to="/dashboard"
-            class="flex min-h-11 items-center rounded-md px-2 font-medium hover:bg-[var(--bg-hover-context)]"
-            @click="goDashboard"
-          >
-            {{ $t('ui.dashboard') }}
-          </NuxtLink>
+          <template v-if="user">
+            <NuxtLink
+              to="/dashboard"
+              class="flex min-h-11 items-center rounded-md px-2 font-medium hover:bg-[var(--bg-hover-context)]"
+              @click="goDashboard"
+            >
+              {{ $t('ui.dashboard') }}
+            </NuxtLink>
+            <button
+              v-if="canEditOrganization"
+              type="button"
+              class="flex min-h-11 w-full items-center rounded-md px-2 text-left font-medium hover:bg-[var(--bg-hover-context)]"
+              @click="openEditOrganizationModal"
+            >
+              {{ $t('modal.editOrganization') }}
+            </button>
+          </template>
           <NuxtLink
             v-else
             to="/login"
@@ -137,5 +177,9 @@ watch(() => route.fullPath, () => {
     <AddOrganizationModalContent
       :model-value="isOpenOrganizationModal"
       @close="isOpenOrganizationModal = false"
+    />
+    <EditOrganizationModalContent
+      :model-value="isEditOrganizationModalOpen"
+      @close="isEditOrganizationModalOpen = false"
     />
 </template>

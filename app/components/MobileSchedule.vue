@@ -94,8 +94,21 @@ const monthOptions = computed(() => Array.from({ length: 25 }, (_, index) => {
 
 const gridMonths = computed(() => monthsBetween(gridLoadedStart.value, gridLoadedEnd.value))
 
+const shiftsByDay = computed(() => {
+  const groupedShifts = new Map<string, ShiftWithRelations[]>()
+
+  shiftStore.shifts.forEach((shift) => {
+    const dayKey = toDateKey(shift.date)
+    const dayShifts = groupedShifts.get(dayKey) ?? []
+    dayShifts.push(shift)
+    groupedShifts.set(dayKey, dayShifts)
+  })
+
+  return groupedShifts
+})
+
 function shiftsForDay(dayKey: string) {
-  return shiftStore.shifts.filter(shift => toDateKey(shift.date) === dayKey)
+  return shiftsByDay.value.get(dayKey) ?? []
 }
 
 function shiftGradient(shift: ShiftWithRelations) {
