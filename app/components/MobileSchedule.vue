@@ -1,63 +1,46 @@
 <script setup lang="ts">
+import MobileScheduleDayModal from './mobile-schedule/MobileScheduleDayModal.vue'
+import MobileScheduleFeed from './mobile-schedule/MobileScheduleFeed.vue'
+import MobileScheduleGrid from './mobile-schedule/MobileScheduleGrid.vue'
+import MobileScheduleToolbar from './mobile-schedule/MobileScheduleToolbar.vue'
 import { useShiftStore } from '~/stores/shift'
+import { useMobileScheduleDates, type MobileScheduleViewMode } from '~/composables/useMobileScheduleDates'
+import type { Ref } from 'vue'
 import type { ShiftWithRelations } from '~~/types/shift'
 
 const props = defineProps<{ isManager: boolean }>()
 const emit = defineEmits<{ (e: 'add-shift', dateKey: string): void }>()
+
 const { locale } = useI18n()
 const shiftStore = useShiftStore()
-
-function toDateKey(value: Date | string) {
-  return new Date(value).toISOString().slice(0, 10)
-}
-
-function startOfToday() {
-  const today = new Date()
-  return new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()))
-}
-
-function startOfMonth(date: Date) {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1))
-}
-
-function addMonths(date: Date, amount: number) {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + amount, 1))
-}
-
-function toMonthKey(date: Date) {
-  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`
-}
-
-function addDays(date: Date, amount: number) {
-  const result = new Date(date)
-  result.setUTCDate(result.getUTCDate() + amount)
-  return result
-}
-
-function daysBetween(start: Date, end: Date) {
-  const days: Array<{ key: string; date: Date }> = []
-  for (let date = new Date(start); date < end; date = addDays(date, 1)) {
-    days.push({ key: toDateKey(date), date })
-  }
-  return days
-}
-
-function monthsBetween(start: Date, end: Date) {
-  const months: Date[] = []
-  for (let date = startOfMonth(start); date < end; date = addMonths(date, 1)) {
-    months.push(new Date(date))
-  }
-  return months
-}
+const {
+  addMonths,
+  daysBetween,
+  feedDay,
+  gridDaysForMonth,
+  monthLabel,
+  monthsBetween,
+  parseMonthKey,
+  selectedDayLabel,
+  startOfMonth,
+  startOfToday,
+  toDateKey,
+  toMonthKey,
+} = useMobileScheduleDates(locale)
 
 const todayKey = toDateKey(startOfToday())
 const selectedMonth = ref(toMonthKey(startOfToday()))
 const loadedStart = ref(startOfToday())
 const loadedEnd = ref(addMonths(loadedStart.value, 1))
-const viewMode = ref<'feed' | 'grid'>('feed')
+const viewMode = ref<MobileScheduleViewMode>('feed')
 const isLoadingPrevious = ref(false)
 const isLoadingNext = ref(false)
-const hasScrolledIntoFeed = ref(false)
+const hasScrolledDown = reactive<Record<MobileScheduleViewMode, boolean>>({
+  feed: false,
+  grid: false,
+})
+const scrollDirection = ref<'up' | 'down' | null>(null)
+const scheduleRoot = ref<HTMLElement | null>(null)
 const previousSentinel = ref<HTMLElement | null>(null)
 const nextSentinel = ref<HTMLElement | null>(null)
 const gridPreviousSentinel = ref<HTMLElement | null>(null)
@@ -66,33 +49,35 @@ const previousSentinelInView = ref(false)
 const nextSentinelInView = ref(false)
 const gridPreviousSentinelInView = ref(false)
 const gridNextSentinelInView = ref(false)
-const gridLoadedStart = ref(startOfMonth(startOfToday()))
-const gridLoadedEnd = ref(addMonths(gridLoadedStart.value, 1))
+const gridLoadedStart = ref(loadedStart.value)
+const gridLoadedEnd = ref(loadedEnd.value)
 const selectedGridDay = ref<string | null>(null)
 let observer: IntersectionObserver | null = null
+let lastScrollY = 0
+let isProgrammaticScroll = false
 
-const days = computed(() => daysBetween(loadedStart.value, loadedEnd.value).map(({ key, date }) => ({
-  key,
-  date,
-  day: new Intl.DateTimeFormat(locale.value === 'ru' ? 'ru-RU' : 'en-US', { weekday: 'short' }).format(date).replace('.', ''),
-  number: date.getUTCDate(),
-  month: new Intl.DateTimeFormat(locale.value === 'ru' ? 'ru-RU' : 'en-US', { month: 'short' }).format(date).replace('.', ''),
-})))
-
-const monthOptions = computed(() => Array.from({ length: 25 }, (_, index) => {
-  const date = addMonths(startOfToday(), index - 12)
-  const label = new Intl.DateTimeFormat(locale.value === 'ru' ? 'ru-RU' : 'en-US', {
-    month: 'long',
-    year: 'numeric',
-  }).format(date).replace(' г.', '')
-
-  return {
-    value: toMonthKey(date),
-    label: capitalize(label),
-  }
-}))
+const days = computed(() => daysBetween(loadedStart.value, loadedEnd.value)
+  .map(({ date }) => feedDay(date)))
 
 const gridMonths = computed(() => monthsBetween(gridLoadedStart.value, gridLoadedEnd.value))
+
+const gridMonthSections = computed(() => gridMonths.value.map(month => ({
+  key: toMonthKey(month),
+  label: monthLabel(month),
+  days: gridDaysForMonth(month),
+})))
+
+const monthOptions = computed(() => {
+  const todayMonth = startOfMonth(startOfToday())
+  const selected = parseMonthKey(selectedMonth.value) ?? todayMonth
+  const start = minDate(addMonths(todayMonth, -12), loadedStart.value, gridLoadedStart.value, selected)
+  const end = maxDate(addMonths(todayMonth, 13), loadedEnd.value, gridLoadedEnd.value, addMonths(selected, 1))
+
+  return monthsBetween(start, end).map(date => ({
+    value: toMonthKey(date),
+    label: monthLabel(date),
+  }))
+})
 
 const shiftsByDay = computed(() => {
   const groupedShifts = new Map<string, ShiftWithRelations[]>()
@@ -107,78 +92,81 @@ const shiftsByDay = computed(() => {
   return groupedShifts
 })
 
-function shiftsForDay(dayKey: string) {
-  return shiftsByDay.value.get(dayKey) ?? []
-}
-
-function shiftGradient(shift: ShiftWithRelations) {
-  return `linear-gradient(135deg, ${shift.position.color} 0%, ${shift.employee.color} 100%)`
-}
-
-function initial(value: string) {
-  return value.trim().charAt(0).toUpperCase()
-}
-
 const selectedGridDayShifts = computed(() => selectedGridDay.value
-  ? shiftsForDay(selectedGridDay.value)
+  ? shiftsByDay.value.get(selectedGridDay.value) ?? []
   : [])
 
-const selectedGridDayLabel = computed(() => {
-  if (!selectedGridDay.value) return ''
-  const date = new Date(`${selectedGridDay.value}T00:00:00Z`)
-  const label = new Intl.DateTimeFormat(locale.value === 'ru' ? 'ru-RU' : 'en-US', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(date).replace(' г.', '')
-  return capitalize(label)
-})
+const selectedGridDayLabel = computed(() => selectedDayLabel(selectedGridDay.value))
 
-function monthLabel(date: Date) {
-  const label = new Intl.DateTimeFormat(locale.value === 'ru' ? 'ru-RU' : 'en-US', {
-    month: 'long',
-    year: 'numeric',
-  }).format(date).replace(' г.', '')
-  return capitalize(label)
+function minDate(...dates: Date[]) {
+  return new Date(Math.min(...dates.map(date => date.getTime())))
 }
 
-function gridDaysForMonth(monthStart: Date) {
-  const offset = (monthStart.getUTCDay() + 6) % 7
-  return [
-    ...Array.from({ length: offset }, () => null),
-    ...daysBetween(monthStart, addMonths(monthStart, 1)).map(({ key, date }) => ({
-      key,
-      date,
-      number: date.getUTCDate(),
-      weekday: new Intl.DateTimeFormat(locale.value === 'ru' ? 'ru-RU' : 'en-US', {
-        weekday: 'short',
-      }).format(date).replace('.', '').replace(/^./, letter => letter.toUpperCase()),
-    })),
-  ]
+function maxDate(...dates: Date[]) {
+  return new Date(Math.max(...dates.map(date => date.getTime())))
 }
 
-function capitalize(value: string) {
-  return value.charAt(0).toUpperCase() + value.slice(1)
+async function fetchMonth(monthStart: Date) {
+  const monthEnd = addMonths(monthStart, 1)
+
+  await shiftStore.getShifts(undefined, {
+    startDate: toDateKey(monthStart),
+    endDate: toDateKey(monthEnd),
+    merge: true,
+  })
 }
 
-function updateVisibleMonth() {
-  const heading = document.querySelector('.mobile-schedule__heading')
-  const headingBottom = heading?.getBoundingClientRect().bottom ?? 0
-  const visibleDay = Array.from(document.querySelectorAll<HTMLElement>('.mobile-schedule__day, .mobile-schedule__grid-month'))
-    .find(day => day.getBoundingClientRect().bottom > headingBottom + 4)
+function isMonthLoaded(monthStart: Date, monthEnd: Date, start: Date, end: Date, requireFullMonth: boolean) {
+  return requireFullMonth
+    ? monthStart >= start && monthEnd <= end
+    : monthStart >= start && monthStart < end
+}
 
-  if (visibleDay) {
-    if (visibleDay.classList.contains('mobile-schedule__grid-month')) {
-      selectedMonth.value = visibleDay.id.replace('mobile-grid-month-', '')
-    } else {
-      const dayKey = visibleDay.id.replace('mobile-day-', '')
-      selectedMonth.value = dayKey.slice(0, 7)
-    }
+async function ensureFeedMonth(monthKey: string, requireFullMonth = false) {
+  const month = parseMonthKey(monthKey)
+  if (!month) return false
+
+  const monthStart = startOfMonth(month)
+  const monthEnd = addMonths(monthStart, 1)
+
+  if (isMonthLoaded(monthStart, monthEnd, loadedStart.value, loadedEnd.value, requireFullMonth)) {
+    return true
+  }
+
+  isLoadingNext.value = true
+  try {
+    await fetchMonth(monthStart)
+    loadedStart.value = monthStart
+    loadedEnd.value = monthEnd
+    return true
+  } finally {
+    isLoadingNext.value = false
   }
 }
 
-async function loadMonth(month: Date, direction: 'previous' | 'next') {
+async function ensureGridMonth(monthKey: string) {
+  const month = parseMonthKey(monthKey)
+  if (!month) return false
+
+  const monthStart = startOfMonth(month)
+  const monthEnd = addMonths(monthStart, 1)
+
+  if (isMonthLoaded(monthStart, monthEnd, gridLoadedStart.value, gridLoadedEnd.value, true)) {
+    return true
+  }
+
+  isLoadingNext.value = true
+  try {
+    await fetchMonth(monthStart)
+    gridLoadedStart.value = monthStart
+    gridLoadedEnd.value = monthEnd
+    return true
+  } finally {
+    isLoadingNext.value = false
+  }
+}
+
+async function loadMonth(month: Date, direction: 'previous' | 'next', target: 'feed' | 'grid') {
   const monthStart = startOfMonth(month)
   const monthEnd = addMonths(monthStart, 1)
   const loading = direction === 'previous' ? isLoadingPrevious : isLoadingNext
@@ -186,13 +174,16 @@ async function loadMonth(month: Date, direction: 'previous' | 'next') {
   loading.value = true
 
   try {
-    await shiftStore.getShifts(undefined, {
-      startDate: toDateKey(monthStart),
-      endDate: toDateKey(monthEnd),
-      merge: true,
-    })
-    if (direction === 'previous') loadedStart.value = monthStart
-    else loadedEnd.value = monthEnd
+    await fetchMonth(monthStart)
+
+    if (target === 'feed') {
+      if (direction === 'previous') loadedStart.value = monthStart
+      else loadedEnd.value = monthEnd
+      return
+    }
+
+    if (direction === 'previous') gridLoadedStart.value = monthStart
+    else gridLoadedEnd.value = monthEnd
   } finally {
     loading.value = false
   }
@@ -215,52 +206,28 @@ async function loadPreviousMonth() {
       isLoadingPrevious.value = false
     }
   } else {
-    await loadMonth(addMonths(currentMonthStart, -1), 'previous')
+    await loadMonth(addMonths(currentMonthStart, -1), 'previous', 'feed')
   }
+
   await nextTick()
   const newTop = previousSentinel.value?.getBoundingClientRect().top ?? oldTop
   window.scrollBy({ top: newTop - oldTop })
 }
 
 async function loadNextMonth() {
-  await loadMonth(loadedEnd.value, 'next')
+  await loadMonth(loadedEnd.value, 'next', 'feed')
 }
 
-async function goToMonth(monthKey: string, requireFullMonth = false) {
-  if (!/^\d{4}-\d{2}$/.test(monthKey)) return
-  const month = new Date(`${monthKey}-01T00:00:00Z`)
-  if (Number.isNaN(month.getTime())) return
+async function loadPreviousGridMonth() {
+  const oldTop = gridPreviousSentinel.value?.getBoundingClientRect().top ?? 0
+  await loadMonth(addMonths(gridLoadedStart.value, -1), 'previous', 'grid')
+  await nextTick()
+  const newTop = gridPreviousSentinel.value?.getBoundingClientRect().top ?? oldTop
+  window.scrollBy({ top: newTop - oldTop })
+}
 
-  selectedMonth.value = monthKey
-
-  const monthStart = startOfMonth(month)
-  const monthEnd = addMonths(monthStart, 1)
-  const isLoaded = month >= loadedStart.value && month < loadedEnd.value
-  const isFullMonthLoaded = monthStart >= loadedStart.value && monthEnd <= loadedEnd.value
-
-  if ((!requireFullMonth && isLoaded) || (requireFullMonth && isFullMonthLoaded)) {
-    await scrollToDay(`${monthKey}-01`)
-    return
-  }
-
-  isLoadingNext.value = true
-  try {
-    await shiftStore.getShifts(undefined, {
-      startDate: toDateKey(monthStart),
-      endDate: toDateKey(addMonths(monthStart, 1)),
-      merge: true,
-    })
-    loadedStart.value = monthStart
-    loadedEnd.value = addMonths(monthStart, 1)
-    if (viewMode.value === 'grid') {
-      gridLoadedStart.value = monthStart
-      gridLoadedEnd.value = addMonths(monthStart, 1)
-    }
-    await nextTick()
-    await scrollToDay(`${monthKey}-01`)
-  } finally {
-    isLoadingNext.value = false
-  }
+async function loadNextGridMonth() {
+  await loadMonth(gridLoadedEnd.value, 'next', 'grid')
 }
 
 async function loadInitialMonth() {
@@ -276,22 +243,76 @@ async function loadInitialMonth() {
   }
 }
 
-async function scrollToDay(dayKey: string) {
+async function scrollToElement(elementId: string, behavior: ScrollBehavior = 'smooth') {
   await nextTick()
-  const element = document.getElementById(`mobile-day-${dayKey}`)
+  const element = document.getElementById(elementId)
   if (!element) return
-  const heading = document.querySelector<HTMLElement>('.mobile-schedule__heading')
+
+  const heading = scheduleRoot.value?.querySelector<HTMLElement>('.mobile-schedule__heading')
   const offset = (heading?.getBoundingClientRect().height ?? 0) + 8
   const top = element.getBoundingClientRect().top + window.scrollY - offset
-  window.scrollTo({ top, behavior: 'smooth' })
+  window.scrollTo({ top, behavior })
+}
+
+async function scrollToDay(dayKey: string) {
+  await scrollToElement(`mobile-day-${dayKey}`)
+}
+
+async function scrollToGridMonth(monthKey: string) {
+  await scrollToElement(`mobile-grid-month-${monthKey}`)
+}
+
+async function goToMonth(monthKey: string) {
+  if (!parseMonthKey(monthKey)) return
+  selectedMonth.value = monthKey
+
+  if (viewMode.value === 'grid') {
+    if (await ensureGridMonth(monthKey)) {
+      await scrollToGridMonth(monthKey)
+    }
+    return
+  }
+
+  if (await ensureFeedMonth(monthKey, true)) {
+    await scrollToDay(`${monthKey}-01`)
+  }
 }
 
 async function scrollToToday() {
-  if (selectedMonth.value !== toMonthKey(startOfToday())) {
-    await goToMonth(toMonthKey(startOfToday()), true)
+  const todayMonth = toMonthKey(startOfToday())
+
+  if (selectedMonth.value !== todayMonth) {
+    await goToMonth(todayMonth)
     return
   }
+
   await scrollToDay(todayKey)
+}
+
+async function setViewMode(mode: MobileScheduleViewMode) {
+  if (mode === viewMode.value) return
+
+  const monthKey = selectedMonth.value
+  isProgrammaticScroll = true
+
+  try {
+    if (mode === 'grid') {
+      await ensureGridMonth(monthKey)
+      viewMode.value = mode
+      await nextTick()
+      await scrollToElement(`mobile-grid-month-${monthKey}`, 'auto')
+      return
+    }
+
+    await ensureFeedMonth(monthKey, true)
+    viewMode.value = mode
+    await nextTick()
+    await scrollToElement(`mobile-day-${monthKey}-01`, 'auto')
+  } finally {
+    lastScrollY = window.scrollY
+    scrollDirection.value = null
+    isProgrammaticScroll = false
+  }
 }
 
 function openGridDay(dayKey: string) {
@@ -309,117 +330,102 @@ function addShiftFromGridDay() {
   emit('add-shift', dayKey)
 }
 
-async function setViewMode(mode: 'feed' | 'grid') {
-  if (mode === 'grid') {
-    await goToMonth(selectedMonth.value, true)
-    const month = new Date(`${selectedMonth.value}-01T00:00:00Z`)
-    gridLoadedStart.value = startOfMonth(month)
-    gridLoadedEnd.value = addMonths(gridLoadedStart.value, 1)
-  }
-  viewMode.value = mode
-}
-
-async function loadGridMonth(month: Date, direction: 'previous' | 'next') {
-  const monthStart = startOfMonth(month)
-  const monthEnd = addMonths(monthStart, 1)
-  const loading = direction === 'previous' ? isLoadingPrevious : isLoadingNext
-  if (loading.value) return
-  loading.value = true
-
-  try {
-    await shiftStore.getShifts(undefined, {
-      startDate: toDateKey(monthStart),
-      endDate: toDateKey(monthEnd),
-      merge: true,
-    })
-    if (direction === 'previous') gridLoadedStart.value = monthStart
-    else gridLoadedEnd.value = monthEnd
-  } finally {
-    loading.value = false
-  }
-}
-
-async function loadPreviousGridMonth() {
-  const oldTop = gridPreviousSentinel.value?.getBoundingClientRect().top ?? 0
-  await loadGridMonth(addMonths(gridLoadedStart.value, -1), 'previous')
-  await nextTick()
-  const newTop = gridPreviousSentinel.value?.getBoundingClientRect().top ?? oldTop
-  window.scrollBy({ top: newTop - oldTop })
-}
-
-async function loadNextGridMonth() {
-  await loadGridMonth(gridLoadedEnd.value, 'next')
-}
-
-function observeSentinels() {
-  if (!observer) return
-  observer.disconnect()
-  previousSentinelInView.value = false
-  nextSentinelInView.value = false
-  gridPreviousSentinelInView.value = false
-  gridNextSentinelInView.value = false
-  if (viewMode.value === 'feed') {
-    if (previousSentinel.value) observer.observe(previousSentinel.value)
-    if (nextSentinel.value) observer.observe(nextSentinel.value)
-  } else {
-    if (gridPreviousSentinel.value) observer.observe(gridPreviousSentinel.value)
-    if (gridNextSentinel.value) observer.observe(gridNextSentinel.value)
-  }
-}
-
 async function deleteShift(shiftId: string) {
   if (!confirm($t('ui.shiftDeleteConfirm') as string)) return
   await shiftStore.deleteShift(shiftId)
 }
 
-function markFeedScroll() {
-  if (window.scrollY > 120) hasScrolledIntoFeed.value = true
+function updateVisibleMonth() {
+  const heading = scheduleRoot.value?.querySelector<HTMLElement>('.mobile-schedule__heading')
+  const headingBottom = heading?.getBoundingClientRect().bottom ?? 0
+  const visibleItem = Array
+    .from(scheduleRoot.value?.querySelectorAll<HTMLElement>('.mobile-schedule__day, .mobile-schedule__grid-month') ?? [])
+    .find(item => item.getBoundingClientRect().bottom > headingBottom + 4)
+
+  if (!visibleItem) return
+
+  selectedMonth.value = visibleItem.classList.contains('mobile-schedule__grid-month')
+    ? visibleItem.id.replace('mobile-grid-month-', '')
+    : visibleItem.id.replace('mobile-day-', '').slice(0, 7)
+}
+
+function observeSentinels() {
+  if (!observer) return
+
+  observer.disconnect()
+  previousSentinelInView.value = false
+  nextSentinelInView.value = false
+  gridPreviousSentinelInView.value = false
+  gridNextSentinelInView.value = false
+
+  if (viewMode.value === 'feed') {
+    if (previousSentinel.value) observer.observe(previousSentinel.value)
+    if (nextSentinel.value) observer.observe(nextSentinel.value)
+    return
+  }
+
+  if (gridPreviousSentinel.value) observer.observe(gridPreviousSentinel.value)
+  if (gridNextSentinel.value) observer.observe(gridNextSentinel.value)
+}
+
+function handleSentinelEntry(
+  entry: IntersectionObserverEntry,
+  sentinel: Ref<HTMLElement | null>,
+  inView: Ref<boolean>,
+  canLoad: () => boolean,
+  load: () => Promise<void>,
+) {
+  if (entry.target !== sentinel.value) return
+
+  if (!entry.isIntersecting) {
+    inView.value = false
+    return
+  }
+
+  if (inView.value || !canLoad()) return
+
+  inView.value = true
+  void load()
+}
+
+function markScheduleScroll() {
+  const currentScrollY = window.scrollY
+
+  if (!isProgrammaticScroll && currentScrollY !== lastScrollY) {
+    scrollDirection.value = currentScrollY > lastScrollY ? 'down' : 'up'
+    if (scrollDirection.value === 'down') hasScrolledDown[viewMode.value] = true
+  }
+
+  lastScrollY = currentScrollY
   updateVisibleMonth()
 }
 
 onMounted(async () => {
   if (!window.matchMedia('(max-width: 767px)').matches) return
+
   await loadInitialMonth()
-  window.addEventListener('scroll', markFeedScroll, { passive: true })
+  lastScrollY = window.scrollY
+  window.addEventListener('scroll', markScheduleScroll, { passive: true })
   observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.target === previousSentinel.value) {
-        if (!entry.isIntersecting) {
-          previousSentinelInView.value = false
-        } else if (!previousSentinelInView.value) {
-          previousSentinelInView.value = true
-          if (hasScrolledIntoFeed.value) loadPreviousMonth()
-        }
-      }
-
-      if (entry.target === nextSentinel.value) {
-        if (!entry.isIntersecting) {
-          nextSentinelInView.value = false
-        } else if (!nextSentinelInView.value) {
-          nextSentinelInView.value = true
-          loadNextMonth()
-        }
-      }
-
-      if (entry.target === gridPreviousSentinel.value) {
-        if (!entry.isIntersecting) {
-          gridPreviousSentinelInView.value = false
-        } else if (!gridPreviousSentinelInView.value) {
-          gridPreviousSentinelInView.value = true
-          if (hasScrolledIntoFeed.value) loadPreviousGridMonth()
-        }
-      }
-
-      if (entry.target === gridNextSentinel.value) {
-        if (!entry.isIntersecting) {
-          gridNextSentinelInView.value = false
-        } else if (!gridNextSentinelInView.value) {
-          gridNextSentinelInView.value = true
-          loadNextGridMonth()
-        }
-      }
+    entries.forEach((entry) => {
+      handleSentinelEntry(
+        entry,
+        previousSentinel,
+        previousSentinelInView,
+        () => hasScrolledDown.feed && scrollDirection.value === 'up' && viewMode.value === 'feed',
+        loadPreviousMonth,
+      )
+      handleSentinelEntry(entry, nextSentinel, nextSentinelInView, () => true, loadNextMonth)
+      handleSentinelEntry(
+        entry,
+        gridPreviousSentinel,
+        gridPreviousSentinelInView,
+        () => hasScrolledDown.grid && scrollDirection.value === 'up' && viewMode.value === 'grid',
+        loadPreviousGridMonth,
+      )
+      handleSentinelEntry(entry, gridNextSentinel, gridNextSentinelInView, () => true, loadNextGridMonth)
     })
-  }, { rootMargin: '500px 0px' })
+  }, { rootMargin: '0px 0px 500px 0px' })
   observeSentinels()
   await nextTick()
   updateVisibleMonth()
@@ -432,98 +438,34 @@ watch(viewMode, async () => {
 
 onBeforeUnmount(() => {
   observer?.disconnect()
-  window.removeEventListener('scroll', markFeedScroll)
+  window.removeEventListener('scroll', markScheduleScroll)
 })
 </script>
 
 <template>
-  <section class="mobile-schedule" aria-label="Mobile schedule">
-    <div class="mobile-schedule__heading">
-      <select
-        v-model="selectedMonth"
-        class="mobile-schedule__month-select mobile-schedule__month-select--title"
-        :aria-label="$t('ui.schedule')"
-        @change="goToMonth(selectedMonth)"
-      >
-        <option v-for="month in monthOptions" :key="month.value" :value="month.value">
-          {{ month.label }}
-        </option>
-      </select>
-      <div class="mobile-schedule__heading-actions">
-        <div class="mobile-schedule__view-toggle" role="group" :aria-label="$t('ui.scheduleView')">
-          <button
-            type="button"
-            :class="{ 'mobile-schedule__view-button--active': viewMode === 'feed' }"
-            @click="setViewMode('feed')"
-          >
-            {{ $t('ui.feedView') }}
-          </button>
-          <button
-            type="button"
-            :class="{ 'mobile-schedule__view-button--active': viewMode === 'grid' }"
-            @click="setViewMode('grid')"
-          >
-            {{ $t('ui.gridView') }}
-          </button>
-        </div>
-        <button type="button" class="mobile-schedule__today" @click="scrollToToday">
-          {{ $t('ui.today') }}
-        </button>
-      </div>
-    </div>
+  <section ref="scheduleRoot" class="mobile-schedule" aria-label="Mobile schedule">
+    <MobileScheduleToolbar
+      :month-options="monthOptions"
+      :selected-month="selectedMonth"
+      :view-mode="viewMode"
+      @select-month="goToMonth"
+      @set-view-mode="setViewMode"
+      @today="scrollToToday"
+    />
 
     <template v-if="viewMode === 'feed'">
       <div ref="previousSentinel" class="mobile-schedule__sentinel" aria-hidden="true">
         <span v-if="isLoadingPrevious" class="mobile-schedule__loading">{{ $t('ui.loading') }}</span>
       </div>
 
-      <div class="mobile-schedule__feed">
-      <article
-        v-for="day in days"
-        :id="`mobile-day-${day.key}`"
-        :key="day.key"
-        class="mobile-schedule__day"
-        :class="{ 'mobile-schedule__day--today': day.key === todayKey }"
-      >
-        <div class="mobile-schedule__daybar">
-          <div>
-            <p class="mobile-schedule__dayname">{{ capitalize(day.day) }}, {{ day.number }} {{ day.month }}</p>
-            <p class="mobile-schedule__count">{{ shiftsForDay(day.key).length }} {{ $t('ui.shifts') }}</p>
-          </div>
-          <button
-            v-if="props.isManager"
-            type="button"
-            class="mobile-schedule__add"
-            :aria-label="$t('btn.addShift')"
-            :title="$t('btn.addShift')"
-            @click="emit('add-shift', day.key)"
-          >
-            <span aria-hidden="true">+</span>
-          </button>
-        </div>
-
-        <div v-if="shiftsForDay(day.key).length" class="mobile-schedule__list">
-          <article v-for="shift in shiftsForDay(day.key)" :key="shift.id" class="mobile-shift">
-            <span class="mobile-shift__color" :style="{ background: shiftGradient(shift) }" aria-hidden="true" />
-            <div class="mobile-shift__content">
-              <p class="mobile-shift__position">{{ shift.position.name }}</p>
-              <p class="mobile-shift__employee">{{ shift.employee.surname }} {{ shift.employee.name }}</p>
-            </div>
-            <button
-              v-if="props.isManager"
-              type="button"
-              class="mobile-shift__delete"
-              :aria-label="$t('btn.delete')"
-              :title="$t('btn.delete')"
-              @click="deleteShift(shift.id)"
-            >
-              <span aria-hidden="true">×</span>
-            </button>
-          </article>
-        </div>
-        <p v-else class="mobile-schedule__empty-day">{{ $t('ui.noShifts') }}</p>
-      </article>
-      </div>
+      <MobileScheduleFeed
+        :days="days"
+        :is-manager="props.isManager"
+        :shifts-by-day="shiftsByDay"
+        :today-key="todayKey"
+        @add-shift="emit('add-shift', $event)"
+        @delete-shift="deleteShift"
+      />
 
       <div ref="nextSentinel" class="mobile-schedule__sentinel" aria-live="polite">
         <span v-if="isLoadingNext" class="mobile-schedule__loading">{{ $t('ui.loading') }}</span>
@@ -535,99 +477,28 @@ onBeforeUnmount(() => {
         <span v-if="isLoadingPrevious" class="mobile-schedule__loading">{{ $t('ui.loading') }}</span>
       </div>
 
-      <div class="mobile-schedule__grid-feed">
-        <section
-          v-for="month in gridMonths"
-          :id="`mobile-grid-month-${toMonthKey(month)}`"
-          :key="toMonthKey(month)"
-          class="mobile-schedule__grid-month"
-        >
-          <h2 class="mobile-schedule__grid-month-title">{{ monthLabel(month) }}</h2>
-          <div class="mobile-schedule__month-grid">
-            <div
-              v-for="(day, index) in gridDaysForMonth(month)"
-              :id="day ? `mobile-day-${day.key}` : undefined"
-              :key="day?.key ?? `empty-${toMonthKey(month)}-${index}`"
-              class="mobile-schedule__grid-day cursor-pointer"
-              :class="{ 'mobile-schedule__grid-day--today': day?.key === todayKey }"
-              @click="day && openGridDay(day.key)"
-            >
-              <template v-if="day">
-                <div class="mobile-schedule__grid-day-header">
-                  <span class="mobile-schedule__grid-weekday">{{ day.weekday }}</span>
-                  <span class="mobile-schedule__grid-number">{{ day.number }}</span>
-                  <button
-                    v-if="props.isManager"
-                    type="button"
-                    class="mobile-schedule__grid-add"
-                    :aria-label="$t('btn.addShift')"
-                    :title="$t('btn.addShift')"
-                    @click.stop="emit('add-shift', day.key)"
-                  >+</button>
-                </div>
-                <div class="mobile-schedule__grid-shifts">
-                  <div v-for="shift in shiftsForDay(day.key)" :key="shift.id" class="mobile-schedule__grid-shift">
-                    <span class="mobile-shift__color" :style="{ background: shiftGradient(shift) }" aria-hidden="true" />
-                    <span
-                      :title="`${shift.employee.name} ${shift.employee.surname} · ${shift.position.name}`"
-                    >
-                      {{ initial(shift.position.name) }} / {{ initial(shift.employee.name) }}
-                    </span>
-                  </div>
-                </div>
-              </template>
-            </div>
-          </div>
-        </section>
-      </div>
+      <MobileScheduleGrid
+        :is-manager="props.isManager"
+        :months="gridMonthSections"
+        :shifts-by-day="shiftsByDay"
+        :today-key="todayKey"
+        @add-shift="emit('add-shift', $event)"
+        @open-day="openGridDay"
+      />
 
       <div ref="gridNextSentinel" class="mobile-schedule__sentinel" aria-live="polite">
         <span v-if="isLoadingNext" class="mobile-schedule__loading">{{ $t('ui.loading') }}</span>
       </div>
     </template>
 
-    <Modal
+    <MobileScheduleDayModal
       :model-value="Boolean(selectedGridDay)"
+      :is-manager="props.isManager"
+      :label="selectedGridDayLabel"
+      :shifts="selectedGridDayShifts"
       @update:model-value="value => !value && closeGridDay()"
-    >
-      <div class="flex max-h-[calc(100dvh-1rem)] min-w-0 flex-col gap-4 overflow-y-auto p-5 sm:min-w-[420px]">
-        <div class="pr-10">
-          <p class="m-0 text-sm text-[var(--text-muted)]">{{ $t('ui.schedule') }}</p>
-          <h2 class="mt-1 text-xl font-bold capitalize">{{ selectedGridDayLabel }}</h2>
-        </div>
-
-        <div v-if="selectedGridDayShifts.length" class="grid gap-2">
-          <article v-for="shift in selectedGridDayShifts" :key="shift.id" class="mobile-shift">
-            <span class="mobile-shift__color" :style="{ background: shiftGradient(shift) }" aria-hidden="true" />
-            <div class="mobile-shift__content">
-              <p class="mobile-shift__position">{{ shift.position.name }}</p>
-              <p class="mobile-shift__employee">
-                {{ shift.employee.name }} {{ shift.employee.surname }}
-              </p>
-            </div>
-            <button
-              v-if="props.isManager"
-              type="button"
-              class="mobile-shift__delete"
-              :aria-label="$t('btn.delete')"
-              :title="$t('btn.delete')"
-              @click="deleteShift(shift.id)"
-            >
-              <span aria-hidden="true">×</span>
-            </button>
-          </article>
-        </div>
-        <p v-else class="m-0 text-[var(--text-muted)]">{{ $t('ui.noShifts') }}</p>
-
-        <button
-          v-if="props.isManager"
-          type="button"
-          class="btn w-full min-h-11"
-          @click="addShiftFromGridDay"
-        >
-          {{ $t('btn.addShift') }}
-        </button>
-      </div>
-    </Modal>
+      @add-shift="addShiftFromGridDay"
+      @delete-shift="deleteShift"
+    />
   </section>
 </template>
