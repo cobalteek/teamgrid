@@ -218,21 +218,13 @@ textarea {
   font-size: 0.78rem;
 }
 
-.mobile-schedule__eyebrow,
 .mobile-schedule__count {
   margin: 0;
   color: var(--text-muted);
   font-size: 0.78rem;
 }
 
-.mobile-schedule__title {
-  margin: 0.2rem 0 0;
-  font-size: 1.55rem;
-  line-height: 1.1;
-}
-
 .mobile-schedule__today,
-.mobile-schedule__arrow,
 .mobile-schedule__add {
   display: inline-flex;
   align-items: center;
@@ -276,77 +268,14 @@ textarea {
 }
 
 .mobile-schedule__today:active,
-.mobile-schedule__arrow:active,
 .mobile-schedule__add:active,
 .mobile-shift__delete:active {
   transform: scale(0.95);
 }
 
 .mobile-schedule__today:hover,
-.mobile-schedule__arrow:hover,
 .mobile-schedule__add:hover {
   background: var(--bg-hover-context);
-}
-
-.mobile-schedule__controls {
-  display: grid;
-  grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.mobile-schedule__arrow {
-  font-size: 1.9rem;
-  line-height: 1;
-}
-
-.mobile-schedule__days {
-  display: flex;
-  gap: 0.4rem;
-  min-width: 0;
-  overflow-x: auto;
-  padding: 0.2rem 0.1rem 0.4rem;
-  scroll-snap-type: x proximity;
-}
-
-.mobile-day {
-  display: flex;
-  flex: 0 0 3.25rem;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 4.6rem;
-  padding: 0.4rem 0.2rem;
-  border: 1px solid transparent;
-  border-radius: 0.75rem;
-  color: var(--text-muted);
-  scroll-snap-align: center;
-  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
-}
-
-.mobile-day__name,
-.mobile-day__month {
-  font-size: 0.68rem;
-  line-height: 1;
-  text-transform: capitalize;
-}
-
-.mobile-day__number {
-  margin: 0.35rem 0;
-  color: var(--text-main);
-  font-size: 1.12rem;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.mobile-day--active {
-  border-color: var(--primary-border, var(--border-main));
-  color: var(--primary-text, var(--text-blue));
-  background: var(--primary-soft, var(--bg-hover-context));
-}
-
-.mobile-day--active .mobile-day__number {
-  color: currentColor;
 }
 
 .mobile-schedule__daybar {
@@ -443,16 +372,6 @@ textarea {
   line-height: 1;
 }
 
-.mobile-schedule__empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.8rem;
-  padding: 2.5rem 1rem;
-  color: var(--text-muted);
-  text-align: center;
-}
-
 .mobile-schedule__empty-day {
   margin: 0;
   padding: 0.65rem 0 0.25rem;
@@ -474,19 +393,10 @@ textarea {
   line-height: 1.2;
 }
 
-.mobile-schedule__weekdays,
 .mobile-schedule__month-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0.25rem;
-}
-
-.mobile-schedule__weekdays {
-  margin-bottom: 0.25rem;
-  color: var(--text-muted);
-  font-size: 0.7rem;
-  text-align: center;
-  text-transform: capitalize;
 }
 
 .mobile-schedule__month-grid {
@@ -566,10 +476,6 @@ textarea {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.mobile-schedule__empty-action {
-  min-height: 2.75rem;
 }
 
 @media (max-width: 767px) {

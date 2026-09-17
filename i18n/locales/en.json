@@ -266,5 +266,8 @@
     "startDate": "Start Date",
     "endDate": "End Date",
     "shiftDeleteConfirm": "Delete a shift?"
+  },
+  "modal": {
+    "editOrganization": "Edit organization"
   }
 }
