@@ -443,7 +443,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section ref="scheduleRoot" class="mobile-schedule" aria-label="Mobile schedule">
+  <section ref="scheduleRoot" class="mobile-schedule w-full min-w-0 pt-1 pb-6" aria-label="Mobile schedule">
     <MobileScheduleToolbar
       :month-options="monthOptions"
       :selected-month="selectedMonth"
@@ -454,8 +454,8 @@ onBeforeUnmount(() => {
     />
 
     <template v-if="viewMode === 'feed'">
-      <div ref="previousSentinel" class="mobile-schedule__sentinel" aria-hidden="true">
-        <span v-if="isLoadingPrevious" class="mobile-schedule__loading">{{ $t('ui.loading') }}</span>
+      <div ref="previousSentinel" class="flex min-h-6 items-center justify-center" aria-hidden="true">
+        <span v-if="isLoadingPrevious" class="text-xs text-[var(--text-muted)]">{{ $t('ui.loading') }}</span>
       </div>
 
       <MobileScheduleFeed
@@ -467,14 +467,14 @@ onBeforeUnmount(() => {
         @delete-shift="deleteShift"
       />
 
-      <div ref="nextSentinel" class="mobile-schedule__sentinel" aria-live="polite">
-        <span v-if="isLoadingNext" class="mobile-schedule__loading">{{ $t('ui.loading') }}</span>
+      <div ref="nextSentinel" class="flex min-h-6 items-center justify-center" aria-live="polite">
+        <span v-if="isLoadingNext" class="text-xs text-[var(--text-muted)]">{{ $t('ui.loading') }}</span>
       </div>
     </template>
 
     <template v-else>
-      <div ref="gridPreviousSentinel" class="mobile-schedule__sentinel" aria-hidden="true">
-        <span v-if="isLoadingPrevious" class="mobile-schedule__loading">{{ $t('ui.loading') }}</span>
+      <div ref="gridPreviousSentinel" class="flex min-h-6 items-center justify-center" aria-hidden="true">
+        <span v-if="isLoadingPrevious" class="text-xs text-[var(--text-muted)]">{{ $t('ui.loading') }}</span>
       </div>
 
       <MobileScheduleGrid
@@ -486,8 +486,8 @@ onBeforeUnmount(() => {
         @open-day="openGridDay"
       />
 
-      <div ref="gridNextSentinel" class="mobile-schedule__sentinel" aria-live="polite">
-        <span v-if="isLoadingNext" class="mobile-schedule__loading">{{ $t('ui.loading') }}</span>
+      <div ref="gridNextSentinel" class="flex min-h-6 items-center justify-center" aria-live="polite">
+        <span v-if="isLoadingNext" class="text-xs text-[var(--text-muted)]">{{ $t('ui.loading') }}</span>
       </div>
     </template>
 
