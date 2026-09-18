@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const organizationId = query.organizationId ? Number(query.organizationId) : undefined
   const body = await readBody(event)
-  const {name} = body
+  const {name, description} = body
   if(!isValidName(name)) {
       throw createError({
         statusCode: 400,
@@ -50,7 +50,8 @@ export default defineEventHandler(async (event) => {
         id: organization.id
       },
       data: {
-        name
+        name,
+        description
       }
     })
 

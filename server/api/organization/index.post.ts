@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   const t = await useTranslation(event)
   const {userId} = await requireUser(event)
   const body = await readBody(event)
-  const {name} = body
+  const {name, description} = body
 
   if(!name) {
     throw createError({
@@ -35,6 +35,7 @@ export default defineEventHandler(async (event) => {
     const newOrganization = await prisma.organization.create({
       data: {
         name,
+        description,
         members: {
           create: {
             userId,
