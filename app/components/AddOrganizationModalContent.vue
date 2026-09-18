@@ -4,7 +4,8 @@ import type { Organization } from '~~/types/organization';
 
 const newOrganization = ref<Organization>({
   id: 0,
-  name: ''
+  name: '',
+  description: ''
 })
 
 const errorModal = useErrorModal()
@@ -39,7 +40,7 @@ const handleSubmit = async () => {
     return
   }
   try {
-    await organizationStore.createOrganization(newOrganization.value.name)
+    await organizationStore.createOrganization(newOrganization.value.name, newOrganization.value.description)
   } catch(error: any) {
     errorModal.showError(error.message || 'error.organization.create')
     return

@@ -10,15 +10,15 @@ export function useInitializeApp() {
   const positionStore = usePositionStore()
   const authStore = useAuthStore()
   const userStore = useUserStore()
+  const shiftStore = useShiftStore()
   async function init() {
     await authStore.init()
-
     if (!authStore.isAuthed) {
       return
     }
-
     await organizationStore.getOrganizations()
     await Promise.all([
+        shiftStore.getShifts(),
         employeeStore.getEmployees(),
         positionStore.getPositions(),
         userStore.getOrganizationUsers()

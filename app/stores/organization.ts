@@ -69,7 +69,7 @@ export const useOrganizationStore = defineStore('organization', () => {
         }
     }
 
-    async function createOrganization(name: string) {
+    async function createOrganization(name: string, description: string) {
         isLoading.value = true
         error.value = null
         
@@ -81,7 +81,8 @@ export const useOrganizationStore = defineStore('organization', () => {
                 method: 'POST',
                 headers,
                 body: {
-                    name
+                    name,
+                    description
                 }
             })
 
