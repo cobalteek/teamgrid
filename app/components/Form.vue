@@ -141,7 +141,7 @@ if(props.date) {
             <button
               type="button"
               @click="handleCancel"
-              class="btn min-h-11 flex-1 disabled:opacity-10 sm:min-h-0 sm:flex-none"
+              class="px-4 py-2 rounded-md bg-[var(--btn-bg)] text-[var(--btn-text)] hover:text-[var(--btn-hover)] {{ isLoading ? 'opacity-50 cursor-not-allowed' : '' }}"
               :disabled="isLoading"
             >
               {{ $t('btn.cancel') }}
@@ -150,7 +150,7 @@ if(props.date) {
               v-if="delete"
               type="button"
               @click="handleDelete"
-              class="btn min-h-11 flex-1 hover:bg-[var(--btn-delete-hover-bg)] hover:text-[var(--btn-delete-text)] disabled:opacity-10 sm:min-h-0 sm:flex-none"
+              class="px-4 py-2 rounded-md bg-[var(--btn-bg)] text-[var(--btn-text)] hover:text-[var(--btn-delete-hover-bg)] {{ isLoading ? 'opacity-50 cursor-not-allowed' : '' }}"
               :disabled="isLoading"
             >
               {{ $t('btn.delete') }}
@@ -158,7 +158,7 @@ if(props.date) {
           </div>
           <button
             type="submit"
-            class="btn btn-primary min-h-11 flex-1 bg-[var(--btn-bg)] hover:bg-[var(--btn-hover-bg)] hover:text-[var(--btn-save-hover-text)] disabled:opacity-10 sm:min-h-0 sm:flex-none"
+            class="px-4 py-2 rounded-md bg-[var(--btn-bg)] text-[var(--btn-text)] hover:text-[var(--btn-save-hover-text)] {{ isLoading ? 'opacity-50 cursor-not-allowed' : '' }}""
             :disabled="isLoading"
           >
             {{ $t(submitBtnName) }}
