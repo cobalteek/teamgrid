@@ -7,6 +7,7 @@ import {ruBetterLocale, enBetterLocale} from '~~/shared/utils/betterLocaleCalend
 import { useShiftStore } from '../stores/shift'
 import { useOrganizationStore } from '../stores/organization'
 import { useEmployeeStore } from '../stores/employee'
+import {formatDateStrLocale, formatDateStr} from '~~/shared/utils/formatDate'
 
 const { locale } = useI18n()
 const props = defineProps<{
@@ -26,6 +27,8 @@ const shiftStore = useShiftStore()
 
 const selectedEmployeeId = ref<number | null>(null)
 const selectedPositionId = ref<number | null>(null)
+const selectedShiftId = ref<string>('')
+const selectedShiftConfirmDelete = ref<string>('')
 const events = computed(() => {
   return shiftStore.shifts.map(shift => {
     return {
@@ -48,8 +51,11 @@ const events = computed(() => {
 const isManager = ref()
 const isAddEmployeeModalOpen = ref(false)
 const isEditOrganizationModalOpen = ref(false)
+const isDeleteShiftConfirmModalOpen = ref(false)
+
 const organizationStore = useOrganizationStore()
 const employeeStore = useEmployeeStore()
+const errorModal = useErrorModal()
 const organization = ref()
 
 const calendarWrapper = ref<HTMLElement | null>(null)
@@ -196,11 +202,10 @@ function eventDidMount(info: any) {
     }
     e.preventDefault()
 
-    const confirmed = confirm($t('ui.shiftDeleteConfirm') as string)
-
-    if (confirmed) {
-      await shiftStore.deleteShift(info.event.id)
-    }
+    const shift = await shiftStore.getShiftById(info.event.id)
+    selectedShiftId.value = shift.id
+    selectedShiftConfirmDelete.value = `${$t('ui.shiftDeleteConfirm')} ${shift.position.name} ${shift.employee.name} ${locale.value === 'ru' ? formatDateStrLocale(shift.date, 'ru-RU') : formatDateStrLocale(shift.date, 'en-US')}?`
+    isDeleteShiftConfirmModalOpen.value = true
     return
   })
 
@@ -282,6 +287,17 @@ async function checkManagerStatus() {
   }
 }
 
+async function deleteShift(shiftId: string) {
+  try {
+    await shiftStore.deleteShift(shiftId)
+  } catch (error) {
+    console.log(error)
+    errorModal.showError('error.shift.delete')
+  } finally {
+    isDeleteShiftConfirmModalOpen.value = false
+  }
+}
+
 watch(
   [selectedEmployeeId, selectedPositionId],
   () => {
@@ -333,8 +349,20 @@ onMounted(() => {
       :model-value="isAddEmployeeModalOpen"
       @close="isAddEmployeeModalOpen = false"
     />
-    <EditOrganizationModalContent
-      :model-value="isEditOrganizationModalOpen"
-      @close="isEditOrganizationModalOpen = false"
-    />
+  <EditOrganizationModalContent
+    :model-value="isEditOrganizationModalOpen"
+    @close="isEditOrganizationModalOpen = false"
+  />
+  <Confirm
+    v-if="isManager"
+    :model-value="isDeleteShiftConfirmModalOpen"
+    :message="selectedShiftConfirmDelete"
+    :is-loading="shiftStore.isLoading"
+    submit-text="btn.delete"
+    @submit="deleteShift(selectedShiftId)"
+    @close="isDeleteShiftConfirmModalOpen = false"
+  />
+  <ErrorModalContent
+    :error="errorModal.error.value"
+  />
 </template>

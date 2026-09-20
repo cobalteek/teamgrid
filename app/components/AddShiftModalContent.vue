@@ -6,7 +6,6 @@ import { useShiftStore } from '../stores/shift';
 import type { CreateShift } from '~~/types/shift';
 import type { ScheduleTemplate } from '~~/types/shift';
 import { formatDateStr } from '~~/shared/utils/formatDate';
-import { createEmptyEventStore } from '@fullcalendar/core/internal';
 const props = defineProps<{
     modelValue: boolean
     info: any
@@ -207,6 +206,7 @@ watch(
         @close="handleCancel"
     />
     <button
+      v-if="!shiftStore.isLoading"
       class="pl-2 pb-2 underline cursor-pointer"
       @click="toggleAdvancedSettings"
     >
@@ -214,13 +214,10 @@ watch(
     </button>
     <ShiftTemplate
       :date="info.date"
-      v-if=advancedSettings
+      v-if="advancedSettings && !shiftStore.isLoading"
       v-model:model-value="template"
       class="pl-2 pb-2"
     />
-    <Loading
-    v-if="shiftStore.isLoading"
-  />
   </Modal>
   <ErrorModalContent
     :error="errorModal.error.value"

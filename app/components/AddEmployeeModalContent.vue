@@ -154,9 +154,6 @@ watch(
         @submit="handleSubmit"
         @close="handleCancel"
       />
-  <Loading
-    v-if="employeeStore.isLoading"
-  />
   </Modal>
   <ErrorModalContent
     :error="errorModal.error.value"

@@ -77,6 +77,117 @@
   }
 }
 
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.45);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+@media (prefers-color-scheme: light) {
+  * {
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+}
+
+
+@theme {
+  --animate-flash: flash 1s ease-in-out;
+}
+
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-alpha-white-25, rgba(255, 255, 255, 0.25)) transparent;
+  }
+
+  @media (prefers-color-scheme: light) {
+    * {
+      scrollbar-color: var(--color-alpha-black-20, rgba(0, 0, 0, 0.2)) transparent;
+    }
+  }
+
+  ::-webkit-scrollbar {
+    @apply w-1.5 h-1.5;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-white/25 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-white/45;
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    @apply bg-white/60;
+  }
+
+  @media (prefers-color-scheme: light) {
+    ::-webkit-scrollbar-thumb {
+      @apply bg-black/20;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      @apply bg-black/40;
+    }
+  }
+
+  select {
+    color-scheme: dark;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://w3.org' fill='none' viewBox='0 0 24 24' stroke='%23ffffff'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    @apply bg-[var(--btn-bg,#1e1e1e)] text-[var(--btn-text,#ffffff)] py-2 pl-3 pr-8 border border-white/15 rounded-md bg-no-repeat bg-[right_12px_center] bg-[length:16px] cursor-pointer;
+  }
+
+  select option {
+    @apply bg-[#1e1e1e] text-white;
+  }
+
+  @media (prefers-color-scheme: light) {
+    select {
+      color-scheme: light;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://w3.org' fill='none' viewBox='0 0 24 24' stroke='%23000000'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+      @apply bg-[var(--btn-bg,#ffffff)] text-[var(--btn-text,#000000)] border-black/15;
+    }
+    select option {
+      @apply bg-white text-black;
+    }
+  }
+}
+
+
 html:not(.light) .theme-logo {
   filter: invert(1);
 }

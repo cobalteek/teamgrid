@@ -161,7 +161,9 @@
       "roleUserNotFound": "Role user not found",
       "positionUserNotFound": "User position not found",
       "onlyAdmin": "Only an admin can do it.",
-      "positions": "Failed to get positions"
+      "positions": "Failed to get positions",
+      "onlyManager": "You are not the manager of the organization",
+      "unauthorized": "Not authorized"
     },
     "role": {
       "idNotFound": "Role ID not found",
@@ -170,7 +172,8 @@
       "creatorForever": "You can’t change your role!",
       "change": "Failed to change role",
       "get": "Failed to get role",
-      "notFound": "Role not found"
+      "notFound": "Role not found",
+      "invalidId": "Invalid role ID"
     },
     "data": {
       "notFound": "Data not found"
@@ -211,9 +214,11 @@
       "invalidName": "Invalid organization name",
       "create": "Failed to create organization",
       "getId": "Failed to get organization ID",
-      "notFoundNotOwner": "Organization not found or you are not the owner"
+      "notFoundNotOwner": "Organization not found or you are not the owner",
+      "invalidId": "Invalid Organization ID"
     },
-    "onlyManager": "Only the owner or admin can do this"
+    "onlyManager": "Only the owner or admin can do this",
+    "onlyMember": "You are not a member of the organization"
   },
   "placeholder": {
     "firstName": "Name",
@@ -232,6 +237,9 @@
     },
     "employee": {
       "requiredFields": "Fill in all required employee fields"
+    },
+    "organization": {
+      "requiredFields": "Required name organization"
     }
   },
   "ui": {
@@ -265,7 +273,14 @@
     "restDays": "Rest Days",
     "startDate": "Start Date",
     "endDate": "End Date",
-    "shiftDeleteConfirm": "Delete a shift?"
+    "shiftDeleteConfirm": "Delete a shift",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "fullNamePosition": "Fullname",
+    "roles": "roles",
+    "shift": {
+      "deleteConfirm": "Delete"
+    }
   },
   "modal": {
     "editOrganization": "Edit organization"

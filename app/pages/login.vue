@@ -53,6 +53,7 @@ definePageMeta({
     :disc="$t('auth.noAccount')"
     :text-link="$t('auth.signUp')"
     link="/sign-up"
+    :is-loading="auth.isLoading"
     v-model="form"
     @submit="onLogin"
   />

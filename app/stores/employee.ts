@@ -52,6 +52,9 @@ export const useEmployeeStore = defineStore('employee', () => {
   }
 
   async function createEmployee(employeeData: Omit<CreateEmployee, 'id'>) {
+    isLoading.value = true
+    error.value = null
+
     try {
       const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
 
@@ -68,6 +71,8 @@ export const useEmployeeStore = defineStore('employee', () => {
     } catch (e: unknown) {
       error.value = getErrorMessage(e)
       throw e
+    } finally {
+      isLoading.value = false
     }
   }
 

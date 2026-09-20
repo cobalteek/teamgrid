@@ -8,6 +8,7 @@ const props = defineProps<{
   link: string;
   textLink: string;
   sex?: boolean;
+  isLoading?: boolean;
 }>();
 
 type Field = { key: string; type: string; placeholder: string }
@@ -27,7 +28,14 @@ function setValue(key: string, value: string) {
 <template>
   <div
     class="w-full max-w-[380px] rounded-xl bg-[var(--bg-modal)] p-5 sm:p-10">
-    <div class="flex mx-auto flex-col justify-between items-center">
+    <Loading
+      v-if="isLoading"
+      class="min-h-[260px] w-full"
+    />
+    <div
+      v-else
+      class="flex mx-auto flex-col justify-between items-center"
+    >
       <h4 class="font-bold text-xl mb-2 ">
         {{ name }}
       </h4>

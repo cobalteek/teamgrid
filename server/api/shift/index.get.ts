@@ -14,6 +14,7 @@ export default defineEventHandler(async (event) => {
   const organizationId = query.organizationId ? Number(query.organizationId) : undefined
   const startDate = query.startDate ? new Date(`${String(query.startDate)}T00:00:00Z`) : undefined
   const endDate = query.endDate ? new Date(`${String(query.endDate)}T00:00:00Z`) : undefined
+  const shiftId = query.shiftId ? String(query.shiftId) : undefined
   
   if (!organizationId) {
     throw createError({
@@ -46,6 +47,56 @@ export default defineEventHandler(async (event) => {
   }
   
   try {
+
+    if(shiftId) {
+      const shift = await prisma.shift.findUnique({
+        where: {
+          id: shiftId,
+          organizationId
+        },
+        select: {
+          id: true,
+          date: true,
+          employeeId: true,
+          positionId: true,
+
+          employee: {
+            select: {
+              id: true,
+              name: true,
+              surname: true,
+              middlename: true,
+              positionId: true,
+              email: true,
+              color: true
+            }
+          },
+
+          position: {
+            select: {
+              id: true,
+              name: true,
+              color: true
+            }
+          },
+          organization: {
+            select: {
+              id: true,
+              name: true
+            }
+          }
+        }
+      })
+
+      if(!shift) {
+        throw createError({
+          statusCode: 404,
+          statusMessage: t('error.shift.notFound')
+        })
+      }
+
+      return shift
+    }
     const where = {
       organizationId,
       ...(employeeId && { employeeId }),

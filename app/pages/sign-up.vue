@@ -83,6 +83,7 @@ definePageMeta({
     :disc="$t('auth.haveAccount')"
     :text-link="$t('auth.login')"
     link="/login"
+    :is-loading="auth.isLoading"
     v-model="form"
     @submit="onRegister"/>
   <ErrorModalContent
