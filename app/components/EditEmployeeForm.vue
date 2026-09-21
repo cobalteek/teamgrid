@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import Modal from './Modal.vue'
-import {useEmployeeStore} from '~/stores/employee'
-import {usePositionStore} from '~/stores/position'
-import { useOrganizationStore } from '~/stores/organization';
-import { isValidEmail , isValidName,} from '~~/shared/utils/validation';
-import type { Employee } from '~~/types/employee';
+import { useEmployeeStore } from '~/stores/employee'
+import { usePositionStore } from '~/stores/position'
+import { useOrganizationStore } from '~/stores/organization'
+import { isValidEmail, isValidName } from '~~/shared/utils/validation'
+import type { Employee } from '~~/types/employee'
 
 const props = defineProps<{
   modelValue: boolean
@@ -40,24 +40,25 @@ const employee = ref<Employee>({
   position: {
     id: 0,
     name: '',
-    fullName: ''
+    fullName: '',
   },
   organization: {
     id: 0,
-    name: ''
-  }
+    name: '',
+  },
 })
 
 async function handleSubmit() {
-  if(employee.value.id &&
+  if (
+    employee.value.id &&
     (!isValidName(employee.value.name) ||
-    (employee.value.surname && !isValidName(employee.value.surname)) ||
-    (employee.value.middlename && !isValidName(employee.value.middlename)))
-    ) {
+      (employee.value.surname && !isValidName(employee.value.surname)) ||
+      (employee.value.middlename && !isValidName(employee.value.middlename)))
+  ) {
     errorModal.showError('error.invalidName')
     return
   }
-  if(employee.value && !isValidEmail(employee.value.email)) {
+  if (employee.value && !isValidEmail(employee.value.email)) {
     errorModal.showError('error.invalidEmail')
     return
   }
@@ -66,7 +67,7 @@ async function handleSubmit() {
 
     emit('submit')
     emit('close')
-  } catch(e) {
+  } catch (e) {
     console.log(e)
   } finally {
     await initApp.init()
@@ -80,7 +81,7 @@ function handleCancel() {
 async function handleDelete() {
   const isManager = await organizationStore.isManager()
 
-  if(!isManager) {
+  if (!isManager) {
     showError('error.onlyManager')
     return
   }
@@ -88,7 +89,7 @@ async function handleDelete() {
   try {
     await employeeStore.deleteEmployee(employee.value.id)
     emit('close')
-  } catch(e) {
+  } catch (e) {
     showError(e as string)
     console.error(e)
   } finally {
@@ -99,50 +100,44 @@ async function handleDelete() {
 watch(
   () => props.modelValue,
   (isOpen) => {
-    if(isOpen) {
-      const _employee = employeeStore.employees.find(
-        employee => employee.id === props.employeeId
-      )
+    if (isOpen) {
+      const _employee = employeeStore.employees.find((employee) => employee.id === props.employeeId)
 
-      if(_employee) {
+      if (_employee) {
         employee.value = _employee
       }
     }
-  }
+  },
 )
 </script>
 
 <template>
-  <Modal
-    :model-value="modelValue"
-    @update:model-value="onUpdateModelValue"
-  >
+  <Modal :model-value="modelValue" @update:model-value="onUpdateModelValue">
     <Form
-    class="max-h-[calc(100vh-10rem)] overflow-y-auto w-[300px]"
+      class="max-h-[calc(100vh-10rem)] w-[300px] overflow-y-auto"
       v-if="employee"
       title="ui.employeeEdit"
       :fields="[
-          { key: 'name', type: 'text', placeholder: 'placeholder.firstName' },
-          { key: 'surname', type: 'text', placeholder: 'placeholder.lastName' },
-          { key: 'middlename', type: 'text', placeholder: 'placeholder.middleName' },
-          { key: 'email', type: 'email', placeholder: 'placeholder.email' }
-        ]"
-        :comboboxes="[{
-          key:'position.id',
+        { key: 'name', type: 'text', placeholder: 'placeholder.firstName' },
+        { key: 'surname', type: 'text', placeholder: 'placeholder.lastName' },
+        { key: 'middlename', type: 'text', placeholder: 'placeholder.middleName' },
+        { key: 'email', type: 'email', placeholder: 'placeholder.email' },
+      ]"
+      :comboboxes="[
+        {
+          key: 'position.id',
           placeholder: 'select.position',
-          selectOption: positionStore.options
-        }]"
-        v-model:modelValue="employee"
-        submitBtnName="btn.save"
-        :is-loading="employeeStore.isLoading"
-        :delete="true"
-        @submit="handleSubmit"
-        @close="handleCancel"
-        @delete="handleDelete"
+          selectOption: positionStore.options,
+        },
+      ]"
+      v-model:modelValue="employee"
+      submitBtnName="btn.save"
+      :is-loading="employeeStore.isLoading"
+      :delete="true"
+      @submit="handleSubmit"
+      @close="handleCancel"
+      @delete="handleDelete"
     />
   </Modal>
-  <ErrorModalContent
-    :error="errorModal.error.value"
-    @close="errorModal.close"
-  />
+  <ErrorModalContent :error="errorModal.error.value" @close="errorModal.close" />
 </template>

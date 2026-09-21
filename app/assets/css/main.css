@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   margin: 0;
@@ -36,31 +36,11 @@
   --primary-text: var(--text-blue);
 
   .btn {
-    @apply
-    border
-    border-solid
-    border-[var(--btn-border)]
-    rounded-md
-    hover:bg-[var(--bg-hover-context)]
-    disabled:opacity-50
-    disabled:cursor-not-allowed
-    transition
-    transition
-    duration-100
-    active:scale-90
-    p-1
+    @apply rounded-md border border-solid border-[var(--btn-border)] p-1 transition duration-100 hover:bg-[var(--bg-hover-context)] active:scale-90 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .select {
-    @apply
-    text-[var(--text-main)]
-    bg-[var(--bg-context)]
-    rounded-md
-    p-1
-    border
-    border-[var(--border-main)]
-    disabled:opacity-50
-    disabled:cursor-not-allowed
+    @apply rounded-md border border-[var(--border-main)] bg-[var(--bg-context)] p-1 text-[var(--text-main)] disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .fc-event-main {
@@ -116,7 +96,6 @@
   }
 }
 
-
 @theme {
   --animate-flash: flash 1s ease-in-out;
 }
@@ -134,7 +113,7 @@
   }
 
   ::-webkit-scrollbar {
-    @apply w-1.5 h-1.5;
+    @apply h-1.5 w-1.5;
   }
 
   ::-webkit-scrollbar-track {
@@ -142,7 +121,7 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-white/25 rounded-full;
+    @apply rounded-full bg-white/25;
   }
 
   ::-webkit-scrollbar-thumb:hover {
@@ -168,7 +147,7 @@
     -webkit-appearance: none;
     -moz-appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://w3.org' fill='none' viewBox='0 0 24 24' stroke='%23ffffff'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
-    @apply bg-[var(--btn-bg,#1e1e1e)] text-[var(--btn-text,#ffffff)] py-2 pl-3 pr-8 border border-white/15 rounded-md bg-no-repeat bg-[right_12px_center] bg-[length:16px] cursor-pointer;
+    @apply cursor-pointer rounded-md border border-white/15 bg-[var(--btn-bg,#1e1e1e)] bg-[length:16px] bg-[right_12px_center] bg-no-repeat py-2 pr-8 pl-3 text-[var(--btn-text,#ffffff)];
   }
 
   select option {
@@ -179,14 +158,13 @@
     select {
       color-scheme: light;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://w3.org' fill='none' viewBox='0 0 24 24' stroke='%23000000'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
-      @apply bg-[var(--btn-bg,#ffffff)] text-[var(--btn-text,#000000)] border-black/15;
+      @apply border-black/15 bg-[var(--btn-bg,#ffffff)] text-[var(--btn-text,#000000)];
     }
     select option {
       @apply bg-white text-black;
     }
   }
 }
-
 
 html:not(.light) .theme-logo {
   filter: invert(1);

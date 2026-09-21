@@ -89,7 +89,9 @@ export function useMobileScheduleDates(locale: Ref<string>) {
     const label = new Intl.DateTimeFormat(localeCode(locale.value), {
       month: 'long',
       year: 'numeric',
-    }).format(date).replace(' г.', '')
+    })
+      .format(date)
+      .replace(' г.', '')
 
     return capitalize(label)
   }
@@ -103,7 +105,9 @@ export function useMobileScheduleDates(locale: Ref<string>) {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
-    }).format(date).replace(' г.', '')
+    })
+      .format(date)
+      .replace(' г.', '')
 
     return capitalize(label)
   }
@@ -134,7 +138,7 @@ export function useMobileScheduleDates(locale: Ref<string>) {
         weekday: new Intl.DateTimeFormat(localeCode(locale.value), { weekday: 'short' })
           .format(date)
           .replace('.', '')
-          .replace(/^./, letter => letter.toUpperCase()),
+          .replace(/^./, (letter) => letter.toUpperCase()),
       })),
     ]
   }

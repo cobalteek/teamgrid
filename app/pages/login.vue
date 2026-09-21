@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import {useAuthStore} from "~/stores/auth";
-import {useErrorModal} from '../composables/useErrorModal'
+import { useAuthStore } from '~/stores/auth'
+import { useErrorModal } from '../composables/useErrorModal'
 
 const auth = useAuthStore()
 const fields = [
-  {key: 'email', type: 'email', placeholder: 'form.placeholder.email'},
-  {key: 'password', type: 'password', placeholder: 'form.placeholder.password'},
+  { key: 'email', type: 'email', placeholder: 'form.placeholder.email' },
+  { key: 'password', type: 'password', placeholder: 'form.placeholder.password' },
 ] as const
 
 const form = ref({
@@ -16,7 +16,6 @@ const form = ref({
 const errorModal = useErrorModal()
 
 async function onLogin() {
-
   if (form.value.email === '' || form.value.password === '') {
     errorModal.showError('error.form.fieldsEmpty')
     return
@@ -30,7 +29,7 @@ async function onLogin() {
 
     await navigateTo('/dashboard')
   } catch (e: unknown) {
-    const error = e as {statusCode?: number; status?: number; response?: {status?: number}}
+    const error = e as { statusCode?: number; status?: number; response?: { status?: number } }
     const status = error.statusCode || error.status || error.response?.status
     if (status === 401) {
       errorModal.showError('error.auth.loginOrPasswordInvalid')
@@ -39,9 +38,7 @@ async function onLogin() {
 }
 
 definePageMeta({
-  middleware: [
-    'guest',
-  ],
+  middleware: ['guest'],
 })
 </script>
 
@@ -60,6 +57,6 @@ definePageMeta({
   <ErrorModalContent
     :error="errorModal.error.value"
     @close="errorModal.close"
-    class="w-[300px] h-[200px] top-1/4"
+    class="top-1/4 h-[200px] w-[300px]"
   />
 </template>

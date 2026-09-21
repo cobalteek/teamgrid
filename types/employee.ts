@@ -5,13 +5,13 @@ export type Employee = {
   middlename: string
   position: {
     id: number
-    name: string,
+    name: string
     fullName: string
   }
   email: string
   organization: {
-      id: number
-      name: string
+    id: number
+    name: string
   }
   color: string
 }

@@ -1,76 +1,71 @@
 import { prisma } from '~~/server/utils/prisma'
-import {isMemberOrganization} from '~~/server/utils/member'
-import {
-  defineEventHandler,
-  createError,
-  getQuery
-} from 'h3'
+import { isMemberOrganization } from '~~/server/utils/member'
+import { defineEventHandler, createError, getQuery } from 'h3'
 
 export default defineEventHandler(async (event) => {
-  const {userId} = await requireUser(event)
+  const { userId } = await requireUser(event)
   const t = await useTranslation(event)
   const query = getQuery(event)
   const positionId = query.positionId ? Number(query.positionId) : undefined
   const organizationId = query.organizationId ? Number(query.organizationId) : undefined
- 
-  if(!organizationId) {
+
+  if (!organizationId) {
     throw createError({
       statusCode: 400,
-      statusMessage: t('error.organization.get')
+      statusMessage: t('error.organization.get'),
     })
   }
 
-  const isMember= await isMemberOrganization(userId, organizationId)
+  const isMember = await isMemberOrganization(userId, organizationId)
 
-  if(!isMember) {
+  if (!isMember) {
     throw createError({
       statusCode: 403,
-      statusMessage: t('error.onlyManager')
+      statusMessage: t('error.onlyManager'),
     })
   }
 
   const selectedFields = {
-      id: true,
-      name: true,
-      fullName: true
+    id: true,
+    name: true,
+    fullName: true,
   }
-  
-  try {
 
-    if(positionId) {
+  try {
+    if (positionId) {
       const position = await prisma.position.findUnique({
         where: {
           id: positionId,
-          organizationId: organizationId
+          organizationId: organizationId,
         },
-        select: selectedFields
+        select: selectedFields,
       })
 
-      if(!position) {
+      if (!position) {
         throw createError({
           statusCode: 404,
-          statusMessage: t('error.position.notFound')
+          statusMessage: t('error.position.notFound'),
         })
       }
 
       return {
         id: position.id,
         name: position.name,
-        fullName: position.fullName
+        fullName: position.fullName,
       }
     }
 
     const positions = await prisma.position.findMany({
       where: {
-        organizationId: organizationId
+        organizationId: organizationId,
       },
-      select: selectedFields
+      select: selectedFields,
     })
 
     if (!positions) {
       throw createError({
         statusCode: 404,
-        statusMessage: t('error.position.notFound')
+        statusMessage: t('error.position.notFound'),
       })
     }
 
@@ -78,7 +73,7 @@ export default defineEventHandler(async (event) => {
       id: position.id,
       name: position.name,
       fullName: position.fullName,
-      organizationId: organizationId
+      organizationId: organizationId,
     }))
   } catch (error) {
     console.log(error)

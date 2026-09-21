@@ -1,15 +1,15 @@
 <script setup lang="ts">
 const props = defineProps<{
-  name: string,
-  inputs: readonly Field[];
-  modelValue: Model;
-  btnName: string;
-  disc: string;
-  link: string;
-  textLink: string;
-  sex?: boolean;
-  isLoading?: boolean;
-}>();
+  name: string
+  inputs: readonly Field[]
+  modelValue: Model
+  btnName: string
+  disc: string
+  link: string
+  textLink: string
+  sex?: boolean
+  isLoading?: boolean
+}>()
 
 type Field = { key: string; type: string; placeholder: string }
 type Model = Record<string, string>
@@ -26,40 +26,36 @@ const handleSubmit = async () => {
   emit('submit')
   await nextTick()
   isClosing.value = true
-  if(!props.isLoading) {
+  if (!props.isLoading) {
     emit('close')
   }
 }
 
 function setValue(key: string, value: string) {
-  emit('update:modelValue', {...props.modelValue, [key]: value})
+  emit('update:modelValue', { ...props.modelValue, [key]: value })
 }
 
-watch(() => props.modelValue, (isOpen) => {
-  if (isOpen) {
-    isClosing.value = false 
-  }
-})
-
+watch(
+  () => props.modelValue,
+  (isOpen) => {
+    if (isOpen) {
+      isClosing.value = false
+    }
+  },
+)
 </script>
 
 <template>
-  <div
-    class="w-full max-w-[380px] rounded-xl bg-[var(--bg-modal)] p-5 sm:p-10">
-    <Loading
-      v-if="isLoading || isClosing"
-      class="min-h-[260px] w-full"
-    />
-    <div
-      v-else
-      class="flex mx-auto flex-col justify-between items-center"
-    >
-      <h4 class="font-bold text-xl mb-2 ">
+  <div class="w-full max-w-[380px] rounded-xl bg-[var(--bg-modal)] p-5 sm:p-10">
+    <Loading v-if="isLoading || isClosing" class="min-h-[260px] w-full" />
+    <div v-else class="mx-auto flex flex-col items-center justify-between">
+      <h4 class="mb-2 text-xl font-bold">
         {{ name }}
       </h4>
       <form
         @submit.prevent="handleSubmit"
-        class="flex mx-auto flex-col justify-between items-center">
+        class="mx-auto flex flex-col items-center justify-between"
+      >
         <input
           v-for="field in inputs"
           :key="field.key"
@@ -70,29 +66,23 @@ watch(() => props.modelValue, (isOpen) => {
           class="mb-4 min-h-11 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] p-2 pl-3 text-[var(--input-text)] sm:mb-5"
         />
         <div v-if="sex" class="flex gap-6">
-          <label class="flex items-center gap-2 cursor-pointer">
+          <label class="flex cursor-pointer items-center gap-2">
             <input
               type="radio"
               name="gender"
               value="male"
-              class="w-3 h-3 rounded-full border-2 border-gray-500
-            peer-checked:border-gray-300
-            peer-checked:bg-gray-600
-            transition"
+              class="h-3 w-3 rounded-full border-2 border-gray-500 transition peer-checked:border-gray-300 peer-checked:bg-gray-600"
               :checked="modelValue.gender === 'male'"
               @change="setValue('gender', 'male')"
             />
             <span>{{ $t('user.male') }}</span>
           </label>
-          <label class="flex items-center gap-2 cursor-pointer">
+          <label class="flex cursor-pointer items-center gap-2">
             <input
               type="radio"
               name="gender"
               value="female"
-              class="w-3 h-3 rounded-full border-2 border-gray-500
-             peer-checked:border-gray-300
-            peer-checked:bg-gray-600
-            transition"
+              class="h-3 w-3 rounded-full border-2 border-gray-500 transition peer-checked:border-gray-300 peer-checked:bg-gray-600"
               :checked="modelValue.gender === 'female'"
               @change="setValue('gender', 'female')"
             />
@@ -101,19 +91,19 @@ watch(() => props.modelValue, (isOpen) => {
         </div>
         <button
           type="submit"
-          class="w-1/2 text-bold bg-[var(--btn-bg)] mt-3 rounded-xl p-1 hover:bg-[var(--btn-hover-bg)] transition duration-300"
+          class="text-bold mt-3 w-1/2 rounded-xl bg-[var(--btn-bg)] p-1 transition duration-300 hover:bg-[var(--btn-hover-bg)]"
         >
           {{ btnName }}
         </button>
       </form>
-      <div class="flex flex-col justify-between items-center pt-3 w-full">
+      <div class="flex w-full flex-col items-center justify-between pt-3">
         <div>
           {{ disc }}
         </div>
         <NuxtLink
           v-if="textLink"
           :to="link"
-          class="text-[var(--text-blue)] hover:bg-gray-600 transition duration-300"
+          class="text-[var(--text-blue)] transition duration-300 hover:bg-gray-600"
         >
           {{ textLink }}
         </NuxtLink>

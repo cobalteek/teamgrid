@@ -6,6 +6,6 @@ export default {
   locale: 'ru',
   messages: {
     ru,
-    en
-  }
+    en,
+  },
 }

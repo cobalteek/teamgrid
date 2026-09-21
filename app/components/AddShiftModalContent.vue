@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { useErrorModal } from '#imports';
-import { useEmployeeStore } from '../stores/employee';
-import { usePositionStore } from '../stores/position';
-import { useShiftStore } from '../stores/shift';
-import type { CreateShift } from '~~/types/shift';
-import type { ScheduleTemplate } from '~~/types/shift';
-import { formatDateStr } from '~~/shared/utils/formatDate';
+import { useErrorModal } from '#imports'
+import { useEmployeeStore } from '../stores/employee'
+import { usePositionStore } from '../stores/position'
+import { useShiftStore } from '../stores/shift'
+import type { CreateShift } from '~~/types/shift'
+import type { ScheduleTemplate } from '~~/types/shift'
+import { formatDateStr } from '~~/shared/utils/formatDate'
 const props = defineProps<{
-    modelValue: boolean
-    info: any
+  modelValue: boolean
+  info: any
 }>()
 
 const employeeStore = useEmployeeStore()
@@ -19,21 +19,21 @@ const errorModal = useErrorModal()
 
 const advancedSettings = ref(false)
 const createShift = ref<CreateShift>({
-    date: '',
-    employeeId: '',
-    positionId: positionStore.positions[0]?.id ? positionStore.positions[0].id : 1
+  date: '',
+  employeeId: '',
+  positionId: positionStore.positions[0]?.id ? positionStore.positions[0].id : 1,
 })
 
 const template = ref<ScheduleTemplate>({
   workDays: 0,
   restDays: 0,
-  endDate: new Date().toISOString().split('T')[0] ?? ''
+  endDate: new Date().toISOString().split('T')[0] ?? '',
 })
 
 const emit = defineEmits<{
   (e: 'update:modelValue', v: boolean): void
-  (e: 'close') : void
-  (e: 'submit') : void
+  (e: 'close'): void
+  (e: 'submit'): void
 }>()
 
 function onUpdateModelValue(value: boolean) {
@@ -60,38 +60,38 @@ const handleCancel = () => {
 
 const handleSubmit = async () => {
   createShift.value.date = props.info.dateStr
-  if(createShift.value.employeeId === '' || createShift.value.positionId === 0) {
-      errorModal.showError('error.form.fieldsEmpty')
-      return
+  if (createShift.value.employeeId === '' || createShift.value.positionId === 0) {
+    errorModal.showError('error.form.fieldsEmpty')
+    return
   }
-  if(advancedSettings.value) {
-    if(!template.value.endDate ||
-       !template.value.workDays
-    ) {
+  if (advancedSettings.value) {
+    if (!template.value.endDate || !template.value.workDays) {
       errorModal.showError('error.form.fieldsEmpty')
       return
     }
-    if(!template.value.restDays) {
+    if (!template.value.restDays) {
       const confirmed = confirm('ui.notRestDays')
-      if(!confirmed) {
+      if (!confirmed) {
         errorModal.showInfo('info.shiftManyCancel')
         return
       }
     }
 
-    if(template.value.workDays === 0) {
+    if (template.value.workDays === 0) {
       errorModal.showError('error.form.workDaysZero')
       return
     }
 
-    if (new Date(`${createShift.value.date}T00:00:00Z`) > new
-    Date(`${template.value.endDate}T00:00:00Z`)) {
+    if (
+      new Date(`${createShift.value.date}T00:00:00Z`) >
+      new Date(`${template.value.endDate}T00:00:00Z`)
+    ) {
       errorModal.showError('error.form.startOlderEnd')
       return
     }
 
     const shifts = generateShifts(createShift.value, template.value)
-    if(!shifts) {
+    if (!shifts) {
       errorModal.showError('error.form.shiftsEmpty')
       return
     }
@@ -104,8 +104,8 @@ const handleSubmit = async () => {
     resetModal()
     emit('close')
   } catch (error: any) {
-      errorModal.showError(error.message || 'error.shift.create')
-      return
+    errorModal.showError(error.message || 'error.shift.create')
+    return
   }
 }
 
@@ -113,10 +113,7 @@ function toggleAdvancedSettings() {
   advancedSettings.value = !advancedSettings.value
 }
 
-function generateShifts(
-  createShift: CreateShift,
-  template: ScheduleTemplate
-) {
+function generateShifts(createShift: CreateShift, template: ScheduleTemplate) {
   const newShifts: CreateShift[] = []
 
   let daysPassed = 0
@@ -124,26 +121,24 @@ function generateShifts(
   let date = new Date(`${createShift.date}T00:00:00Z`)
   const endDate = new Date(`${template.endDate}T00:00:00Z`)
 
-  const cycleLength =
-    template.workDays + template.restDays
+  const cycleLength = template.workDays + template.restDays
 
   while (date <= endDate) {
-    const cyclePosition =
-      daysPassed % cycleLength
+    const cyclePosition = daysPassed % cycleLength
 
     if (cyclePosition < template.workDays) {
       const dateStr = formatDateStr(date)
-      if(!dateStr) {
+      if (!dateStr) {
         throw createError({
           statusCode: 400,
-          statusMessage: 'error.invalidData'
+          statusMessage: 'error.invalidData',
         })
       }
 
       const newShift: CreateShift = {
         date: dateStr,
         employeeId: createShift.employeeId,
-        positionId: createShift.positionId
+        positionId: createShift.positionId,
       }
 
       newShifts.push(newShift)
@@ -160,68 +155,64 @@ function generateShifts(
 watch(
   () => createShift.value.employeeId,
   (employeeId) => {
-    if(!employeeId) {
-      createShift.value.positionId = positionStore.positions[0]?.id ? positionStore.positions[0].id : 1
+    if (!employeeId) {
+      createShift.value.positionId = positionStore.positions[0]?.id
+        ? positionStore.positions[0].id
+        : 1
       return
     }
 
-    const employee = employeeStore.employees.find(
-      employee => employee.id === employeeId
-    )
+    const employee = employeeStore.employees.find((employee) => employee.id === employeeId)
 
-    if(employee) {
+    if (employee) {
       createShift.value.positionId = employee.position.id
     }
-  }
+  },
 )
-
 </script>
 
 <template>
-  <Modal
-    :model-value="modelValue"
-    @update:model-value="onUpdateModelValue"
-  >
+  <Modal :model-value="modelValue" @update:model-value="onUpdateModelValue">
     <Form
-        title="btn.addShift"
-        :date="info.date"
-        :selects="[
+      title="btn.addShift"
+      :date="info.date"
+      :selects="[
         {
           key: 'employeeId',
           placeholder: 'select.employee',
           disabledOption: 'select.employee',
-          selectOption: employeeStore.options
+          selectOption: employeeStore.options,
         },
         {
           key: 'positionId',
           placeholder: 'select.position',
           disabledOption: 'select.position',
-          selectOption: positionStore.options
-        }
-        ]"
-        v-model="createShift"
-        submitBtnName="btn.addShift"
-        :is-loading="shiftStore.isLoading"
-        @submit="handleSubmit"
-        @close="handleCancel"
+          selectOption: positionStore.options,
+        },
+      ]"
+      v-model="createShift"
+      submitBtnName="btn.addShift"
+      :is-loading="shiftStore.isLoading"
+      @submit="handleSubmit"
+      @close="handleCancel"
     />
     <button
       v-if="!shiftStore.isLoading"
-      class="pl-2 pb-2 underline cursor-pointer"
+      class="cursor-pointer pb-2 pl-2 underline"
       @click="toggleAdvancedSettings"
     >
-      {{$t('ui.advancedSettings')}}
+      {{ $t('ui.advancedSettings') }}
     </button>
     <ShiftTemplate
       :date="info.date"
       v-if="advancedSettings && !shiftStore.isLoading"
       v-model:model-value="template"
-      class="pl-2 pb-2"
+      class="pb-2 pl-2"
     />
   </Modal>
   <ErrorModalContent
     :error="errorModal.error.value"
     @close="errorModal.close"
-    class="w-[300px] h-[200px] top-1/4"
+    class="top-1/4 h-[200px] w-[300px]"
   />
 </template>

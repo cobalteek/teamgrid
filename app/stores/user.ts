@@ -1,9 +1,9 @@
-import {defineStore} from 'pinia'
-import {useOrganizationStore} from '~/stores/organization'
-import type {User} from '~~/types/user'
+import { defineStore } from 'pinia'
+import { useOrganizationStore } from '~/stores/organization'
+import type { User } from '~~/types/user'
 
 type RequestError = {
-  data?: {message?: string}
+  data?: { message?: string }
   message?: string
 }
 
@@ -36,12 +36,12 @@ export const useUserStore = defineStore('user', () => {
         headers,
         method: 'GET',
         query: {
-          organizationId: organizationStore.currentOrganizationId
-        }
+          organizationId: organizationStore.currentOrganizationId,
+        },
       })
 
       return organizationUsers
-    } catch(e) {
+    } catch (e) {
       error.value = String(e)
       console.log(e)
       throw e
@@ -51,7 +51,7 @@ export const useUserStore = defineStore('user', () => {
   }
 
   const organizationOptions = computed(() =>
-    organizationUsers.value.map(ou => ({value: ou.id, label: ou.name}))
+    organizationUsers.value.map((ou) => ({ value: ou.id, label: ou.name })),
   )
 
   return {
@@ -59,6 +59,6 @@ export const useUserStore = defineStore('user', () => {
     error,
     organizationOptions,
     organizationUsers,
-    getOrganizationUsers
+    getOrganizationUsers,
   }
 })

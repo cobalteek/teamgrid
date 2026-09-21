@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import Modal from './Modal.vue'
-import { usePositionStore } from '~/stores/position';
-import {useOrganizationStore} from '~/stores/organization.ts'
-import type {Position} from '~~/types/position'
-import {isValidPosition} from '~~/shared/utils/validation'
+import { usePositionStore } from '~/stores/position'
+import { useOrganizationStore } from '~/stores/organization.ts'
+import type { Position } from '~~/types/position'
+import { isValidPosition } from '~~/shared/utils/validation'
 
 const props = defineProps<{
   modelValue: boolean
@@ -31,28 +31,29 @@ const position = ref<Position>({
   fullName: '',
   organization: {
     id: 0,
-    name: ''
+    name: '',
   },
-  color: ''
+  color: '',
 })
 const errorModal = useErrorModal()
 const initApp = useInitializeApp()
 
 async function handleSubmit() {
-  if(position.value &&
-    (!isValidPosition(position.value.name) ||
-    !isValidPosition(position.value.fullName))) {
+  if (
+    position.value &&
+    (!isValidPosition(position.value.name) || !isValidPosition(position.value.fullName))
+  ) {
     errorModal.showError('error.invalidName')
     return
   }
   try {
     await positionStore.changePosition(position.value)
-  } catch(e) {
+  } catch (e) {
     console.log(e)
   } finally {
     await initApp.init()
   }
-  
+
   emit('close')
 }
 
@@ -61,10 +62,9 @@ function handleCancel() {
 }
 
 async function handleDelete() {
-
   const isManager = await organizationStore.isManager()
 
-  if(!isManager) {
+  if (!isManager) {
     showError('error.onlyManager')
     return
   }
@@ -72,7 +72,7 @@ async function handleDelete() {
   try {
     await positionStore.deletePosition(position.value.id)
     emit('close')
-  } catch(e) {
+  } catch (e) {
     showError(e as string)
     console.error(e)
   } finally {
@@ -83,32 +83,26 @@ async function handleDelete() {
 watch(
   () => props.modelValue,
   (isOpen) => {
-    if(isOpen) {
-      const _position = positionStore.positions.find(
-        position => position.id === props.positionId
-      )
+    if (isOpen) {
+      const _position = positionStore.positions.find((position) => position.id === props.positionId)
 
-      if(_position) {
+      if (_position) {
         position.value = _position
       }
     }
-  }
+  },
 )
-
 </script>
 
 <template>
-  <Modal
-    :model-value="modelValue"
-    @update:model-value="onUpdateModelValue"
-  >
+  <Modal :model-value="modelValue" @update:model-value="onUpdateModelValue">
     <Form
       v-if="position"
       title="ui.positionEdit"
       :fields="[
-        {key: 'name', type: 'text', placeholder: 'placeholder.positionName'},
-        {key: 'fullName', type: 'text', placeholder: 'placeholder.positionFullName'},
-        ]"
+        { key: 'name', type: 'text', placeholder: 'placeholder.positionName' },
+        { key: 'fullName', type: 'text', placeholder: 'placeholder.positionFullName' },
+      ]"
       v-model:model-value="position"
       submit-btn-name="btn.save"
       :is-loading="positionStore.isLoading"

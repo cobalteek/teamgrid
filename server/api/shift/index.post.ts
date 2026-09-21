@@ -1,11 +1,8 @@
 import { prisma } from '~~/server/utils/prisma'
-import {
-  defineEventHandler,
-  createError
-} from 'h3'
+import { defineEventHandler, createError } from 'h3'
 
 export default defineEventHandler(async (event) => {
-  const {userId} = await requireUser(event)
+  const { userId } = await requireUser(event)
   const t = await useTranslation(event)
   const body = await readBody(event)
   const query = getQuery(event)
@@ -13,71 +10,70 @@ export default defineEventHandler(async (event) => {
 
   const { date, employeeId, positionId } = body
 
-    if (!date || !employeeId || !positionId) {
-      throw createError({
-        statusCode: 400,
-        statusMessage: t('validation.shift.requiredFields')
-      })
-    }
-
-    if(!organizationId) {
-      throw createError({
-        statusCode: 400,
-        statusMessage: t('error.organization.get')
-      })
-    }
-
-    const isManager = await isManagerOrganization(userId, organizationId)
-
-    if(!isManager) {
-      throw createError({
-        statusCode: 403,
-        statusMessage: t('error.onlyManager')
-      })
-    }
-
-    const employee = await prisma.employee.findUnique({
-      where: { id: employeeId, organizationId }
+  if (!date || !employeeId || !positionId) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: t('validation.shift.requiredFields'),
     })
+  }
 
-    if (!employee) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: t('error.employee.notFound')
-      })
-    }
-
-    const position = await prisma.position.findUnique({
-      where: { id: positionId, organizationId }
+  if (!organizationId) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: t('error.organization.get'),
     })
+  }
 
-    if (!position) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: t('error.position.notFound')
-      })
-    }
+  const isManager = await isManagerOrganization(userId, organizationId)
+
+  if (!isManager) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: t('error.onlyManager'),
+    })
+  }
+
+  const employee = await prisma.employee.findUnique({
+    where: { id: employeeId, organizationId },
+  })
+
+  if (!employee) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: t('error.employee.notFound'),
+    })
+  }
+
+  const position = await prisma.position.findUnique({
+    where: { id: positionId, organizationId },
+  })
+
+  if (!position) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: t('error.position.notFound'),
+    })
+  }
 
   try {
-
     const shift = await prisma.shift.create({
       data: {
         date,
         employeeId,
         positionId,
-        organizationId
+        organizationId,
       },
       include: {
         employee: true,
         position: true,
-        organization: true
-      }
+        organization: true,
+      },
     })
 
     return shift
   } catch (error) {
     console.error(error)
-        
+
     throw error
   }
 })

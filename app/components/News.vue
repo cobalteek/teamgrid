@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {marked} from 'marked'
+import { marked } from 'marked'
 
 const news = [
   `
@@ -37,7 +37,7 @@ const news = [
 ]
 
 const currentIndex = ref(news.length - 1)
-const html = computed(() => marked.parse(news[currentIndex.value] ?? '', {async: false}))
+const html = computed(() => marked.parse(news[currentIndex.value] ?? '', { async: false }))
 
 function showPrevious() {
   currentIndex.value = (currentIndex.value - 1 + news.length) % news.length
@@ -50,15 +50,12 @@ function showNext() {
 
 <template>
   <section class="w-full max-w-2xl border-t border-[var(--border-main)] pt-6">
-    <div class="mb-5 flex items-center justify-between gap-4">
+    <div class="mb-5 flex items-center justify-start">
       <h2 class="text-2xl font-bold text-[var(--text-main)]">Что нового</h2>
-      <span class="text-sm tabular-nums text-[var(--text-muted)]">
-        {{ currentIndex + 1 }} / {{ news.length }}
-      </span>
     </div>
     <article
       :key="currentIndex"
-      class="min-h-52 text-left text-[var(--text-soft)] [&_h3]:mb-3 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-[var(--text-main)] [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-5 [&_code]:rounded [&_code]:bg-[var(--bg-context)] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-sm [&_code]:text-[var(--text-main)]"
+      class="min-h-52 text-left text-[var(--text-soft)] [&_code]:rounded [&_code]:bg-[var(--bg-context)] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-sm [&_code]:text-[var(--text-main)] [&_h3]:mb-3 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-[var(--text-main)] [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-5"
       v-html="html"
     />
     <nav class="flex items-center justify-between" aria-label="Переключение новостей">

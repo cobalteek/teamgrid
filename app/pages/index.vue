@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import News from '~/components/news.vue'
+import News from '~/components/News.vue'
 
 const auth = useAuthStore()
 </script>

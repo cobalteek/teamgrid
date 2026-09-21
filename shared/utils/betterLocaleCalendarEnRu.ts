@@ -2,7 +2,7 @@ export const ruBetterLocale = {
   code: 'ru',
   week: {
     dow: 1,
-    doy: 7
+    doy: 7,
   },
   buttonText: {
     prev: 'Пред',
@@ -11,22 +11,22 @@ export const ruBetterLocale = {
     month: 'Месяц',
     week: 'Неделя',
     day: 'День',
-    list: 'Повестка дня'
+    list: 'Повестка дня',
   },
   weekText: 'Неделя',
   allDayText: 'Весь день',
-  moreLinkText(n : number) {
+  moreLinkText(n: number) {
     return '+ ещё ' + n
   },
-  
-  noEventsText: 'Нет событий для отображения'
+
+  noEventsText: 'Нет событий для отображения',
 }
 
 export const enBetterLocale = {
   code: 'en',
   week: {
     dow: 1,
-    doy: 7
+    doy: 7,
   },
   buttonText: {
     prev: 'Prev',
@@ -35,13 +35,13 @@ export const enBetterLocale = {
     month: 'Month',
     week: 'Week',
     day: 'Day',
-    list: 'List'
+    list: 'List',
   },
   weekText: 'Wk',
   allDayText: 'All-day',
-  moreLinkText(n : number) {
+  moreLinkText(n: number) {
     return '+ more ' + n
   },
-  
-  noEventsText: 'No events to display'
+
+  noEventsText: 'No events to display',
 }
