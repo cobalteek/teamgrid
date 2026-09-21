@@ -14,14 +14,32 @@ const props = defineProps<{
 type Field = { key: string; type: string; placeholder: string }
 type Model = Record<string, string>
 
+const isClosing = ref(false)
+
 const emit = defineEmits<{
   (e: 'update:modelValue', v: Model): void
   (e: 'submit'): void
+  (e: 'close'): void
 }>()
+
+const handleSubmit = async () => {
+  emit('submit')
+  await nextTick()
+  isClosing.value = true
+  if(!props.isLoading) {
+    emit('close')
+  }
+}
 
 function setValue(key: string, value: string) {
   emit('update:modelValue', {...props.modelValue, [key]: value})
 }
+
+watch(() => props.modelValue, (isOpen) => {
+  if (isOpen) {
+    isClosing.value = false 
+  }
+})
 
 </script>
 
@@ -29,7 +47,7 @@ function setValue(key: string, value: string) {
   <div
     class="w-full max-w-[380px] rounded-xl bg-[var(--bg-modal)] p-5 sm:p-10">
     <Loading
-      v-if="isLoading"
+      v-if="isLoading || isClosing"
       class="min-h-[260px] w-full"
     />
     <div
@@ -40,7 +58,7 @@ function setValue(key: string, value: string) {
         {{ name }}
       </h4>
       <form
-        @submit.prevent="emit('submit')"
+        @submit.prevent="handleSubmit"
         class="flex mx-auto flex-col justify-between items-center">
         <input
           v-for="field in inputs"
