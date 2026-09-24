@@ -55,6 +55,9 @@ const gridNextSentinelInView = ref(false)
 const gridLoadedStart = ref(loadedStart.value)
 const gridLoadedEnd = ref(loadedEnd.value)
 const selectedGridDay = ref<string | null>(null)
+const isOpenDeleteConfirm = ref(false)
+const selectedShiftConfirmDelete = ref('')
+const selectedShiftId = ref('')
 let observer: IntersectionObserver | null = null
 let lastScrollY = 0
 let isProgrammaticScroll = false
@@ -352,8 +355,18 @@ function addShiftFromGridDay() {
   emit('add-shift', dayKey)
 }
 
+async function openDeleteConfirm(shiftId: string) {
+  const shift = await shiftStore.getShiftById(shiftId)
+  if(!shift) {
+    return
+  }
+  selectedShiftId.value = shift.id
+  selectedShiftConfirmDelete.value = `${$t('ui.shiftDeleteConfirm')} ${shift.position.name} ${shift.employee.name} ${locale.value === 'ru' ? formatDateStrLocale(shift.date, 'ru-RU') : formatDateStrLocale(shift.date, 'en-US')}?`
+  isOpenDeleteConfirm.value = true
+  return
+}
+
 async function deleteShift(shiftId: string) {
-  if (!confirm($t('ui.shiftDeleteConfirm') as string)) return
   await shiftStore.deleteShift(shiftId)
 }
 
@@ -481,6 +494,16 @@ onBeforeUnmount(() => {
     class="mobile-schedule w-full min-w-0 pt-1 pb-6"
     aria-label="Mobile schedule"
   >
+  <Confirm
+      v-if="isManager"
+      :model-value="isOpenDeleteConfirm"
+      :message="selectedShiftConfirmDelete"
+      :is-loading="shiftStore.isLoading"
+      submit-text="btn.delete"
+      @submit="deleteShift(selectedShiftId)"
+      @close="isOpenDeleteConfirm = false"
+      class="absolute my-auto"
+    />
     <MobileScheduleToolbar
       :month-options="monthOptions"
       :selected-month="selectedMonth"
@@ -555,7 +578,7 @@ onBeforeUnmount(() => {
       :shifts="selectedGridDayShifts"
       @update:model-value="(value) => !value && closeGridDay()"
       @add-shift="addShiftFromGridDay"
-      @delete-shift="deleteShift"
+      @delete-shift="openDeleteConfirm"
     />
   </section>
 </template>
