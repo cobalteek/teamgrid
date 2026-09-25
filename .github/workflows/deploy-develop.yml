@@ -13,6 +13,9 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: development
+      url: https://cobalteek.tech/teamgrid-dev 
 
     steps:
       - name: Deploy to develop
