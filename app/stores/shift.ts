@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
-import type { CreateShift, ShiftWithRelations } from '~~/types/shift'
+import type { CreateShift, DeleteShiftFilters, ShiftWithRelations } from '~~/types/shift'
 import { formatDateStr } from '~~/shared/utils/formatDate'
 import { useOrganizationStore } from '~/stores/organization'
-import { sleep } from '~~/shared/utils/devTools'
 
 type RequestError = {
   data?: { message?: string }
@@ -225,7 +224,34 @@ export const useShiftStore = defineStore('shift', () => {
       throw e
     } finally {
       await getShifts()
-      await sleep(1000)
+      isLoading.value = false
+    }
+  }
+
+  async function deleteManyShifts(filters: DeleteShiftFilters) {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const deleteShifts = await $fetch<{ success: boolean; deletedCount: number }>(
+        '/api/shift/manyDelete',
+        {
+          credentials: 'include',
+          method: 'POST',
+          body: filters,
+          query: {
+            organizationId: organizationStore.currentOrganizationId,
+          },
+        },
+      )
+
+      return deleteShifts
+    } catch (e) {
+      error.value = String(e)
+      console.log(e)
+      throw e
+    } finally {
+      await getShifts()
       isLoading.value = false
     }
   }
@@ -239,5 +265,6 @@ export const useShiftStore = defineStore('shift', () => {
     createShift,
     createManyShifts,
     deleteShift,
+    deleteManyShifts,
   }
 })
