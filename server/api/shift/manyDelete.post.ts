@@ -5,14 +5,14 @@ import { defineEventHandler, createError, getQuery } from 'h3'
 
 export default defineEventHandler(async (event) => {
   const { userId } = await requireUser(event)
-  const { id } = await readBody(event)
+  const { startDate, endDate, employeeIds, positionIds, deleteAll } = await readBody(event)
   const query = getQuery(event)
   const organizationId = query.organizationId ? Number(query.organizationId) : undefined
 
-  if (!id) {
+  if (!userId) {
     throw createError({
-      statusCode: 400,
-      statusMessage: 'error.employeeId.notReceived',
+      statusCode: 401,
+      statusMessage: 'error.auth.unAuth',
     })
   }
 
@@ -32,41 +32,27 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const employee = await prisma.employee.findUnique({
-    where: { id, organizationId },
-    include: {
-      organization: true,
+  const _endDate = new Date(endDate)
+
+  const dayAfterEndDate = new Date(_endDate.getTime() + 24 * 60 * 60 * 1000)
+
+  await prisma.shift.deleteMany({
+    where: {
+      organizationId,
+      ...(startDate &&
+        endDate && {
+          date: {
+            gte: startDate,
+            lt: dayAfterEndDate,
+          },
+        }),
+      ...(employeeIds?.length && {
+        employeeId: { in: employeeIds },
+      }),
+      ...(positionIds?.length && {
+        positionId: { in: positionIds },
+      }),
     },
-  })
-
-  if (!employee) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'error.employee.notFound',
-    })
-  }
-
-  const shifts = await prisma.shift.findMany({
-    where: { employeeId: id },
-  })
-
-  if (!shifts) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'error.shift.infoNotReceived',
-    })
-  }
-
-  if (shifts.length > 0) {
-    await prisma.shift.deleteMany({
-      where: {
-        employeeId: id,
-      },
-    })
-  }
-
-  await prisma.employee.delete({
-    where: { id },
   })
 
   return {

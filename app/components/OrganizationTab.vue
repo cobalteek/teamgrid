@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useOrganizationStore } from '~/stores/organization';
+import { useOrganizationStore } from '~/stores/organization'
 
 const organizationStore = useOrganizationStore()
 function goToOrganization() {
@@ -11,7 +11,7 @@ function goToOrganization() {
   <div class="flex flex-col items-center gap-3 text-center">
     <div
       v-for="org in organizationStore.optionsWithDescription"
-      class="w-[200px] h-[100px] border rounded-xl"
+      class="h-[100px] w-[200px] rounded-xl border"
       @click="goToOrganization()"
     >
       <h3 class="pt-2">{{ org.label }}</h3>

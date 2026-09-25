@@ -1,6 +1,6 @@
-import {PrismaClient} from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 
-const prismaClient = globalThis as typeof globalThis & {prisma?: PrismaClient}
+const prismaClient = globalThis as typeof globalThis & { prisma?: PrismaClient }
 
 const prisma = prismaClient.prisma ?? new PrismaClient()
 

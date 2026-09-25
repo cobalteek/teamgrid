@@ -1,8 +1,8 @@
-import { useOrganizationStore } from "~/stores/organization"
-import { useEmployeeStore } from "~/stores/employee"
-import { usePositionStore } from "~/stores/position"
-import { useAuthStore } from "~/stores/auth"
-import { useUserStore } from "~/stores/user"
+import { useOrganizationStore } from '~/stores/organization'
+import { useEmployeeStore } from '~/stores/employee'
+import { usePositionStore } from '~/stores/position'
+import { useAuthStore } from '~/stores/auth'
+import { useUserStore } from '~/stores/user'
 
 export function useInitializeApp() {
   const organizationStore = useOrganizationStore()
@@ -18,13 +18,13 @@ export function useInitializeApp() {
     }
     await organizationStore.getOrganizations()
     await Promise.all([
-        shiftStore.getShifts(),
-        employeeStore.getEmployees(),
-        positionStore.getPositions(),
-        userStore.getOrganizationUsers()
+      shiftStore.getShifts(),
+      employeeStore.getEmployees(),
+      positionStore.getPositions(),
+      userStore.getOrganizationUsers(),
     ])
   }
   return {
-    init
+    init,
   }
 }

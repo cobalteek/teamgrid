@@ -1,15 +1,15 @@
-import {defineStore} from 'pinia'
-import type {User} from '~~/types/user'
+import { defineStore } from 'pinia'
+import type { User } from '~~/types/user'
 
 interface RequestError {
   statusCode?: number
   status?: number
-  data?: {message?: string}
+  data?: { message?: string }
   message?: string
 }
 
 function asRequestError(error: unknown): RequestError {
-  return typeof error === 'object' && error !== null ? error as RequestError : {}
+  return typeof error === 'object' && error !== null ? (error as RequestError) : {}
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -67,7 +67,12 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function signUp(payload: { name: string; email: string; password: string; gender: string }) {
+  async function signUp(payload: {
+    name: string
+    email: string
+    password: string
+    gender: string
+  }) {
     isLoading.value = true
     error.value = null
     try {
@@ -83,7 +88,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function logout() {
     user.value = null
-    await $fetch('/api/auth/logout', {method: 'POST', credentials: 'include'})
+    await $fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
   }
 
   return {

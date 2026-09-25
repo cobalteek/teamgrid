@@ -1,8 +1,8 @@
 import bcrypt from 'bcryptjs'
 import { prisma } from '~~/server/utils/prisma'
 import { Prisma } from '@prisma/client'
-import {enforceRateLimit} from '~~/server/utils/rate-limit'
-import {isValidEmail, isValidName, isValidPassword} from '~~/shared/utils/validation'
+import { enforceRateLimit } from '~~/server/utils/rate-limit'
+import { isValidEmail, isValidName, isValidPassword } from '~~/shared/utils/validation'
 
 export default defineEventHandler(async (event) => {
   const t = await useTranslation(event)
@@ -23,19 +23,19 @@ export default defineEventHandler(async (event) => {
     }
 
     if (!isValidEmail(email)) {
-      throw createError({statusCode: 400, statusMessage: t('error.auth.invalidEmail')})
+      throw createError({ statusCode: 400, statusMessage: t('error.auth.invalidEmail') })
     }
 
     if (!isValidPassword(password)) {
-      throw createError({statusCode: 400, statusMessage: t('error.auth.passwordLength')})
+      throw createError({ statusCode: 400, statusMessage: t('error.auth.passwordLength') })
     }
 
     if (!isValidName(name)) {
-      throw createError({statusCode: 400, statusMessage: t('error.auth.nameLength')})
+      throw createError({ statusCode: 400, statusMessage: t('error.auth.nameLength') })
     }
 
     if (!['male', 'female'].includes(gender)) {
-      throw createError({statusCode: 400, statusMessage: t('error.auth.selectGender')})
+      throw createError({ statusCode: 400, statusMessage: t('error.auth.selectGender') })
     }
 
     const exists = await prisma.user.findUnique({
@@ -52,7 +52,6 @@ export default defineEventHandler(async (event) => {
     const hash = await bcrypt.hash(password, 10)
 
     await prisma.$transaction(async (tx) => {
-
       const user = await tx.user.create({
         data: {
           email,
@@ -63,36 +62,36 @@ export default defineEventHandler(async (event) => {
       })
 
       const employeeOrganizations = await tx.employee.findMany({
-        where: {email},
+        where: { email },
         select: {
-          organizationId: true
-        }
+          organizationId: true,
+        },
       })
 
       let organization = null
       let selfMembership = null
 
-      if(employeeOrganizations.length > 0) {
+      if (employeeOrganizations.length > 0) {
         await tx.organizationMember.createMany({
-          data: employeeOrganizations.map(emp => ({
+          data: employeeOrganizations.map((emp) => ({
             userId: user.id,
             organizationId: emp.organizationId,
-            roleId: 3 
-          }))
+            roleId: 3,
+          })),
         })
       } else {
         organization = await tx.organization.create({
           data: {
             name: `${name}_organization`,
-            description: `Description of ${name}_organization`
+            description: `Description of ${name}_organization`,
           },
         })
 
         const role = await tx.role.findFirst({
-          where: { name: 'owner' }
+          where: { name: 'owner' },
         })
 
-        if(!role) {
+        if (!role) {
           throw createError({
             statusCode: 500,
             statusMessage: t('error.auth.register'),
@@ -115,9 +114,9 @@ export default defineEventHandler(async (event) => {
       return {
         user,
         selfMembership,
-        organization
+        organization,
       }
-  })
+    })
   } catch (error: unknown) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       throw createError({

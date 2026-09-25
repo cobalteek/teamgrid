@@ -1,6 +1,4 @@
-<script setup lang="ts">
-
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <Transition
@@ -11,6 +9,6 @@
     leave-from-class="opacity-100 scale-100"
     leave-to-class="opacity-0 scale-90"
   >
-    <slot/>
+    <slot />
   </Transition>
 </template>

@@ -1,15 +1,15 @@
-import type { Employee } from "./employee"
-import type { Organization } from "./organization"
-import type { Position } from "./position"
+import type { Employee } from './employee'
+import type { Organization } from './organization'
+import type { Position } from './position'
 export type Shift = {
-    id: string
-    date: Date
-    employeeId: string
-    positionId: number
-    organization: {
-        id: number
-        name: string
-    }
+  id: string
+  date: Date
+  employeeId: string
+  positionId: number
+  organization: {
+    id: number
+    name: string
+  }
 }
 
 export type ShiftWithRelations = Shift & {
@@ -19,9 +19,9 @@ export type ShiftWithRelations = Shift & {
 }
 
 export type CreateShift = {
-    date: string
-    employeeId: string
-    positionId: number
+  date: string
+  employeeId: string
+  positionId: number
 }
 
 export type ScheduleTemplate = {

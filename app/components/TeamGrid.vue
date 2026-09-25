@@ -3,10 +3,11 @@ import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import listPlugin from '@fullcalendar/list'
-import {ruBetterLocale, enBetterLocale} from '~~/shared/utils/betterLocaleCalendarEnRu'
+import { ruBetterLocale, enBetterLocale } from '~~/shared/utils/betterLocaleCalendarEnRu'
 import { useShiftStore } from '../stores/shift'
 import { useOrganizationStore } from '../stores/organization'
 import { useEmployeeStore } from '../stores/employee'
+import { formatDateStrLocale, formatDateStr } from '~~/shared/utils/formatDate'
 
 const { locale } = useI18n()
 const props = defineProps<{
@@ -26,8 +27,10 @@ const shiftStore = useShiftStore()
 
 const selectedEmployeeId = ref<number | null>(null)
 const selectedPositionId = ref<number | null>(null)
+const selectedShiftId = ref<string>('')
+const selectedShiftConfirmDelete = ref<string>('')
 const events = computed(() => {
-  return shiftStore.shifts.map(shift => {
+  return shiftStore.shifts.map((shift) => {
     return {
       id: shift.id,
       title: `${shift.position.name} ${shift.employee.name}`,
@@ -35,22 +38,26 @@ const events = computed(() => {
       allDay: true,
 
       extendedProps: {
-      employeeId: shift.employee.id,
-      positionId: shift.position.id,
+        employeeId: shift.employee.id,
+        positionId: shift.position.id,
 
-      employeeColor: shift.employee.color,
-      positionColor: shift.position.color
-      } 
-    } 
+        employeeColor: shift.employee.color,
+        positionColor: shift.position.color,
+      },
+    }
   })
 })
 
 const isManager = ref()
 const isAddEmployeeModalOpen = ref(false)
 const isEditOrganizationModalOpen = ref(false)
+const isDeleteShiftConfirmModalOpen = ref(false)
+
 const organizationStore = useOrganizationStore()
 const employeeStore = useEmployeeStore()
+const errorModal = useErrorModal()
 const organization = ref()
+const isSubmitting = ref(false)
 
 const calendarWrapper = ref<HTMLElement | null>(null)
 const eventElements = new Map<string, HTMLElement[]>()
@@ -86,14 +93,14 @@ const calendarOptions = computed(() => ({
   aspectRatio: 1.2,
   locale: locale.value === 'ru' ? ruBetterLocale : enBetterLocale,
   firstDay: 1,
-  dateClick: function(info: any) {
-    if(!isManager.value) {
+  dateClick: function (info: any) {
+    if (!isManager.value) {
       return
     }
     selectedEmployeeId.value = null
     selectedPositionId.value = null
 
-    if(employeeStore.employees.length === 0) {
+    if (employeeStore.employees.length === 0) {
       isAddEmployeeModalOpen.value = true
       return
     } else {
@@ -108,35 +115,35 @@ const calendarOptions = computed(() => ({
       text: $t('btn.addEmployee') as string,
       click: () => {
         isAddEmployeeModalOpen.value = true
-      }
+      },
     },
     editOrganization: {
       text: $t('btn.edit') as string,
       click: () => {
         isEditOrganizationModalOpen.value = true
-      }
-    }
+      },
+    },
   },
-   
+
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
-    right: isManager.value ? 'addEmployee editOrganization' : ''
+    right: isManager.value ? 'addEmployee editOrganization' : '',
   },
 
-  titleFormat: (date : any) => {
+  titleFormat: (date: any) => {
     const title = date.date.marker.toLocaleDateString(locale.value === 'ru' ? 'ru-RU' : 'en-US', {
       month: 'long',
-      year: 'numeric'
+      year: 'numeric',
     })
     const result = title.replace(' г.', '')
 
     return result.charAt(0).toUpperCase() + result.slice(1)
   },
 
-  dayHeaderContent(arg : any) {
+  dayHeaderContent(arg: any) {
     const text = arg.date.toLocaleDateString(locale.value === 'ru' ? 'ru-RU' : 'en-US', {
-      weekday: 'short'
+      weekday: 'short',
     })
 
     return text.charAt(0).toUpperCase() + text.slice(1)
@@ -152,34 +159,24 @@ const calendarOptions = computed(() => ({
     const employeeId = info.event.extendedProps.employeeId
     const positionId = info.event.extendedProps.positionId
 
-    const diagonalX =
-      rect.width * 0.5 +
-      (y / rect.height - 0.5) * 20
+    const diagonalX = rect.width * 0.5 + (y / rect.height - 0.5) * 20
 
     if (x < diagonalX) {
-      selectedEmployeeId.value =
-        selectedEmployeeId.value === employeeId
-          ? null
-          : employeeId
+      selectedEmployeeId.value = selectedEmployeeId.value === employeeId ? null : employeeId
 
       selectedPositionId.value = null
     } else {
-      selectedPositionId.value =
-        selectedPositionId.value === positionId
-          ? null
-          : positionId
+      selectedPositionId.value = selectedPositionId.value === positionId ? null : positionId
 
       selectedEmployeeId.value = null
     }
-  }
+  },
 }))
 
 function eventDidMount(info: any) {
-  const employeeColor =
-    info.event.extendedProps.employeeColor
+  const employeeColor = info.event.extendedProps.employeeColor
 
-  const positionColor =
-    info.event.extendedProps.positionColor
+  const positionColor = info.event.extendedProps.positionColor
 
   info.el.style.background = `
     linear-gradient(
@@ -191,16 +188,16 @@ function eventDidMount(info: any) {
     )
   `
   info.el.addEventListener('contextmenu', async (e: MouseEvent) => {
-    if(!isManager.value) {
+    if (!isManager.value) {
       return
     }
     e.preventDefault()
 
-    const confirmed = confirm($t('ui.shiftDeleteConfirm') as string)
-
-    if (confirmed) {
-      await shiftStore.deleteShift(info.event.id)
-    }
+    const shift = await shiftStore.getShiftById(info.event.id)
+    isSubmitting.value = false
+    selectedShiftId.value = shift.id
+    selectedShiftConfirmDelete.value = `${$t('ui.shiftDeleteConfirm')} ${shift.position.name} ${shift.employee.name} ${locale.value === 'ru' ? formatDateStrLocale(shift.date, 'ru-RU') : formatDateStrLocale(shift.date, 'en-US')}?`
+    isDeleteShiftConfirmModalOpen.value = true
     return
   })
 
@@ -215,49 +212,32 @@ function eventDidMount(info: any) {
   updateEventOpacity(info.event)
 }
 
-function getEventOpacity(
-  employeeId: number,
-  positionId: number
-) {
-  if (
-    selectedEmployeeId.value === null &&
-    selectedPositionId.value === null
-  ) {
+function getEventOpacity(employeeId: number, positionId: number) {
+  if (selectedEmployeeId.value === null && selectedPositionId.value === null) {
     return 1
   }
 
   if (selectedEmployeeId.value !== null) {
-    return selectedEmployeeId.value === employeeId
-      ? 1
-      : 0.35
+    return selectedEmployeeId.value === employeeId ? 1 : 0.35
   }
 
   if (selectedPositionId.value !== null) {
-    return selectedPositionId.value === positionId
-      ? 1
-      : 0.35
+    return selectedPositionId.value === positionId ? 1 : 0.35
   }
 
   return 1
 }
 
 function updateEventOpacity(event: any) {
-  const employeeId =
-    event.extendedProps.employeeId
+  const employeeId = event.extendedProps.employeeId
 
-  const positionId =
-    event.extendedProps.positionId
+  const positionId = event.extendedProps.positionId
 
-  const opacity = getEventOpacity(
-    employeeId,
-    positionId
-  )
+  const opacity = getEventOpacity(employeeId, positionId)
 
-  const elements = eventElements.get(
-    String(event.id)
-  )
+  const elements = eventElements.get(String(event.id))
 
-  elements?.forEach(element => {
+  elements?.forEach((element) => {
     element.style.opacity = String(opacity)
   })
 }
@@ -282,12 +262,22 @@ async function checkManagerStatus() {
   }
 }
 
-watch(
-  [selectedEmployeeId, selectedPositionId],
-  () => {
-    updateAllEventsOpacity()
+async function deleteShift(shiftId: string) {
+  isSubmitting.value = true
+  try {
+    await shiftStore.deleteShift(shiftId)
+  } catch (error) {
+    isSubmitting.value = false
+    console.log(error)
+    errorModal.showError('error.shift.delete')
+  } finally {
+    isDeleteShiftConfirmModalOpen.value = false
   }
-)
+}
+
+watch([selectedEmployeeId, selectedPositionId], () => {
+  updateAllEventsOpacity()
+})
 
 watch(isEditOrganizationModalOpen, (isOpen) => {
   if (isOpen) {
@@ -295,9 +285,12 @@ watch(isEditOrganizationModalOpen, (isOpen) => {
   }
 })
 
-watch(() => organizationStore.currentOrganizationId, async () => {
-  checkManagerStatus()
-})
+watch(
+  () => organizationStore.currentOrganizationId,
+  async () => {
+    checkManagerStatus()
+  },
+)
 
 checkManagerStatus()
 
@@ -309,32 +302,33 @@ onMounted(() => {
 </script>
 
 <template>
-  <div
-    class="hidden min-w-0 md:block"
-    ref="calendarWrapper"
-    @click="resetSelection"
-  >
-    <FullCalendar
-      ref="calendarRef"
-      :options="calendarOptions"
-    />
+  <div class="hidden min-w-0 md:block" ref="calendarWrapper" @click="resetSelection">
+    <FullCalendar ref="calendarRef" :options="calendarOptions" />
   </div>
-  <MobileSchedule
-    class="md:hidden"
-    :is-manager="Boolean(isManager)"
-    @add-shift="openShiftModal"
-  />
+  <div class="md:hidden">
+    <MobileSchedule :is-manager="Boolean(isManager)" @add-shift="openShiftModal" />
+  </div>
   <AddShiftModalContent
     :info="infoDate"
     :model-value="isAddShiftModalOpen"
     @close="isAddShiftModalOpen = false"
   />
   <AddEmployeeModalContent
-      :model-value="isAddEmployeeModalOpen"
-      @close="isAddEmployeeModalOpen = false"
-    />
-    <EditOrganizationModalContent
-      :model-value="isEditOrganizationModalOpen"
-      @close="isEditOrganizationModalOpen = false"
-    />
+    :model-value="isAddEmployeeModalOpen"
+    @close="isAddEmployeeModalOpen = false"
+  />
+  <EditOrganizationModalContent
+    :model-value="isEditOrganizationModalOpen"
+    @close="isEditOrganizationModalOpen = false"
+  />
+  <Confirm
+    v-if="isManager"
+    :model-value="isDeleteShiftConfirmModalOpen"
+    :message="selectedShiftConfirmDelete"
+    :is-loading="isSubmitting"
+    submit-text="btn.delete"
+    @submit="deleteShift(selectedShiftId)"
+    @close="isDeleteShiftConfirmModalOpen = false"
+  />
+  <ErrorModalContent :error="errorModal.error.value" @close="errorModal.close" />
 </template>

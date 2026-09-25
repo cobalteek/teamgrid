@@ -38,8 +38,8 @@ export const useEmployeeStore = defineStore('employee', () => {
         method: 'GET',
         headers,
         query: {
-          organizationId
-        }
+          organizationId,
+        },
       })
 
       return employees.value
@@ -52,6 +52,9 @@ export const useEmployeeStore = defineStore('employee', () => {
   }
 
   async function createEmployee(employeeData: Omit<CreateEmployee, 'id'>) {
+    isLoading.value = true
+    error.value = null
+
     try {
       const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
 
@@ -59,7 +62,7 @@ export const useEmployeeStore = defineStore('employee', () => {
         credentials: 'include',
         method: 'POST',
         headers,
-        body: employeeData
+        body: employeeData,
       })
 
       employees.value.push(newEmployee)
@@ -68,10 +71,12 @@ export const useEmployeeStore = defineStore('employee', () => {
     } catch (e: unknown) {
       error.value = getErrorMessage(e)
       throw e
+    } finally {
+      isLoading.value = false
     }
   }
 
-  async function getEmployeeById(employeeId:string) {
+  async function getEmployeeById(employeeId: string) {
     isLoading.value = true
     error.value = null
 
@@ -80,7 +85,7 @@ export const useEmployeeStore = defineStore('employee', () => {
 
       const employee = await $fetch<Employee>('/api/employee', {
         query: { employeeId },
-        headers
+        headers,
       })
 
       return employee
@@ -92,7 +97,7 @@ export const useEmployeeStore = defineStore('employee', () => {
     }
   }
 
-  async function changeEmployee(employee:Employee) {
+  async function changeEmployee(employee: Employee) {
     isLoading.value = true
     error.value = null
 
@@ -103,7 +108,7 @@ export const useEmployeeStore = defineStore('employee', () => {
         credentials: 'include',
         method: 'PATCH',
         body: employee,
-        headers
+        headers,
       })
 
       return changedEmployee
@@ -116,34 +121,34 @@ export const useEmployeeStore = defineStore('employee', () => {
   }
 
   const options = computed(() =>
-    employees.value.map(e => ({value: e.id, label: `${e.surname} ${e.name} ${e.middlename}`}))
+    employees.value.map((e) => ({ value: e.id, label: `${e.surname} ${e.name} ${e.middlename}` })),
   )
 
   async function deleteEmployee(employeeId: string) {
-        isLoading.value = true
-        error.value = null
+    isLoading.value = true
+    error.value = null
 
-        try {
-          const deleteEmployee = await $fetch('/api/employee/delete', {
-            credentials: 'include',
-            method: 'POST',
-            body: {
-              id: employeeId
-            },
-            query: {
-              organizationId: organizationStore.currentOrganizationId
-            }
-          })
-          
-          return deleteEmployee
-        } catch(e) {
-          error.value = String(e)
-          console.log(e)
-          throw e
-        } finally {
-          await getEmployees()
-          isLoading.value = false
-        }
+    try {
+      const deleteEmployee = await $fetch('/api/employee/delete', {
+        credentials: 'include',
+        method: 'POST',
+        body: {
+          id: employeeId,
+        },
+        query: {
+          organizationId: organizationStore.currentOrganizationId,
+        },
+      })
+
+      return deleteEmployee
+    } catch (e) {
+      error.value = String(e)
+      console.log(e)
+      throw e
+    } finally {
+      await getEmployees()
+      isLoading.value = false
+    }
   }
 
   return {
@@ -155,6 +160,6 @@ export const useEmployeeStore = defineStore('employee', () => {
     getEmployeeById,
     changeEmployee,
     deleteEmployee,
-    options
+    options,
   }
 })

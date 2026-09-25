@@ -1,37 +1,33 @@
 import { prisma } from '~~/server/utils/prisma'
-import {
-  defineEventHandler,
-  createError,
-  getQuery
-} from 'h3'
+import { defineEventHandler, createError, getQuery } from 'h3'
 import { isMemberOrganization } from '~~/server/utils/member'
 
 export default defineEventHandler(async (event) => {
-  const {userId} = await requireUser(event)
+  const { userId } = await requireUser(event)
   const t = await useTranslation(event)
   const query = getQuery(event)
   const organizationId = query.organizationId ? Number(query.organizationId) : undefined
   const roleId = query.roleId ? Number(query.roleId) : undefined
   const queryUserId = query.userId ? String(query.userId) : undefined
 
-  if(!userId) {
+  if (!userId) {
     throw createError({
       statusCode: 401,
-      message: t('error.user.unauthorized')
+      message: t('error.user.unauthorized'),
     })
   }
 
   if (!organizationId || isNaN(organizationId)) {
     throw createError({
       statusCode: 400,
-      message: t('error.organization.invalidId')
+      message: t('error.organization.invalidId'),
     })
   }
 
-  if(roleId && isNaN(roleId)) {
+  if (roleId && isNaN(roleId)) {
     throw createError({
       statusCode: 400,
-      message: t('error.role.invalidId')
+      message: t('error.role.invalidId'),
     })
   }
 
@@ -41,7 +37,7 @@ export default defineEventHandler(async (event) => {
     if (!isMember) {
       throw createError({
         statusCode: 403,
-        message: t('error.onlyMember')
+        message: t('error.onlyMember'),
       })
     }
 
@@ -52,12 +48,12 @@ export default defineEventHandler(async (event) => {
       gender: true,
       memberships: {
         where: {
-          organizationId
+          organizationId,
         },
         select: {
-          organizationId: true
-        }
-      }
+          organizationId: true,
+        },
+      },
     }
 
     if (queryUserId) {
@@ -67,17 +63,17 @@ export default defineEventHandler(async (event) => {
           memberships: {
             some: {
               organizationId,
-              ...(roleId ? { roleId } : {})
-            }
-          }
+              ...(roleId ? { roleId } : {}),
+            },
+          },
         },
-        select: selectFields
+        select: selectFields,
       })
 
-      if(!user) {
+      if (!user) {
         throw createError({
           statusCode: 404,
-          message: t('error.user.notFound')
+          message: t('error.user.notFound'),
         })
       }
 
@@ -89,14 +85,14 @@ export default defineEventHandler(async (event) => {
         memberships: {
           some: {
             organizationId,
-            ...(roleId ? { roleId } : {})
-          }
-        }
+            ...(roleId ? { roleId } : {}),
+          },
+        },
       },
       select: selectFields,
       orderBy: {
-        name: 'asc'
-      }
+        name: 'asc',
+      },
     })
 
     return users.map(mapUser)
@@ -119,6 +115,6 @@ function mapUser(user: {
     email: user.email,
     name: user.name,
     gender: user.gender,
-    organizationId: user.memberships.map(membership => membership.organizationId)
+    organizationId: user.memberships.map((membership) => membership.organizationId),
   }
 }

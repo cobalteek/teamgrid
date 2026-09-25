@@ -12,7 +12,7 @@ const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
-const head = computed(() => props.error.type === 'error' ? 'Error' : 'Information')
+const head = computed(() => (props.error.type === 'error' ? 'Error' : 'Information'))
 
 function onUpdateModelValue(value: boolean) {
   emit('update:modelValue', value)
@@ -21,37 +21,34 @@ function onUpdateModelValue(value: boolean) {
     emit('close')
   }
 }
-
 </script>
 
 <template>
   <Modal
     :model-value="error.modelValue"
     @update:model-value="onUpdateModelValue"
-    class="w-[320px] h-[200px] fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+    class="fixed top-1/2 left-1/2 h-[200px] w-[320px] -translate-x-1/2 -translate-y-1/2"
   >
-    <div
-      class="inline-flex justify-start gap-5 w-full h-full ml-3 mt-4"
-    >
-      <div class="row-start-1 flex justify-center items-center mt-9">
+    <div class="mt-4 ml-3 inline-flex h-full w-full justify-start gap-5">
+      <div class="row-start-1 mt-9 flex items-center justify-center">
         <div
           v-if="error.type == 'error'"
-          class="w-[30px] h-[30px] bg-[var(--bg-error)] rounded-full border border-[var(--bg-main)] leading-tight text-center text-xl"
+          class="h-[30px] w-[30px] rounded-full border border-[var(--bg-main)] bg-[var(--bg-error)] text-center text-xl leading-tight"
         >
           !
         </div>
         <div
           v-if="error.type == 'info'"
-          class="w-[30px] h-[30px] bg-[var(--bg-info)] text-semibold text-black rounded-full border border-[var(--bg-main)] leading-tight text-center text-xl"
+          class="text-semibold h-[30px] w-[30px] rounded-full border border-[var(--bg-main)] bg-[var(--bg-info)] text-center text-xl leading-tight text-black"
         >
           i
         </div>
       </div>
-      <div class="w-[199px] text-center my-auto">
-        <div class="text-xl font-semibold leading-tight mr-4">
+      <div class="my-auto w-[199px] text-center">
+        <div class="mr-4 text-xl leading-tight font-semibold">
           {{ head }}
         </div>
-        <div class="mx-auto font-mono mt-3">
+        <div class="mx-auto mt-3 font-mono">
           {{ $t(error.text) }}
         </div>
       </div>

@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   margin: 0;
@@ -36,31 +36,11 @@
   --primary-text: var(--text-blue);
 
   .btn {
-    @apply
-    border
-    border-solid
-    border-[var(--btn-border)]
-    rounded-md
-    hover:bg-[var(--bg-hover-context)]
-    disabled:opacity-50
-    disabled:cursor-not-allowed
-    transition
-    transition
-    duration-100
-    active:scale-90
-    p-1
+    @apply rounded-md border border-solid border-[var(--btn-border)] p-1 transition duration-100 hover:bg-[var(--bg-hover-context)] active:scale-90 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .select {
-    @apply
-    text-[var(--text-main)]
-    bg-[var(--bg-context)]
-    rounded-md
-    p-1
-    border
-    border-[var(--border-main)]
-    disabled:opacity-50
-    disabled:cursor-not-allowed
+    @apply rounded-md border border-[var(--border-main)] bg-[var(--bg-context)] p-1 text-[var(--text-main)] disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .fc-event-main {
@@ -74,6 +54,115 @@
   .hide-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.45);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+@media (prefers-color-scheme: light) {
+  * {
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+}
+
+@theme {
+  --animate-flash: flash 1s ease-in-out;
+}
+
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-alpha-white-25, rgba(255, 255, 255, 0.25)) transparent;
+  }
+
+  @media (prefers-color-scheme: light) {
+    * {
+      scrollbar-color: var(--color-alpha-black-20, rgba(0, 0, 0, 0.2)) transparent;
+    }
+  }
+
+  ::-webkit-scrollbar {
+    @apply h-1.5 w-1.5;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-white/25;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-white/45;
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    @apply bg-white/60;
+  }
+
+  @media (prefers-color-scheme: light) {
+    ::-webkit-scrollbar-thumb {
+      @apply bg-black/20;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      @apply bg-black/40;
+    }
+  }
+
+  select {
+    color-scheme: dark;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://w3.org' fill='none' viewBox='0 0 24 24' stroke='%23ffffff'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    @apply cursor-pointer rounded-md border border-white/15 bg-[var(--btn-bg,#1e1e1e)] bg-[length:16px] bg-[right_12px_center] bg-no-repeat py-2 pr-8 pl-3 text-[var(--btn-text,#ffffff)];
+  }
+
+  select option {
+    @apply bg-[#1e1e1e] text-white;
+  }
+
+  @media (prefers-color-scheme: light) {
+    select {
+      color-scheme: light;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://w3.org' fill='none' viewBox='0 0 24 24' stroke='%23000000'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+      @apply border-black/15 bg-[var(--btn-bg,#ffffff)] text-[var(--btn-text,#000000)];
+    }
+    select option {
+      @apply bg-white text-black;
+    }
   }
 }
 

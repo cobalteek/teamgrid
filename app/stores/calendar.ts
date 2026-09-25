@@ -1,5 +1,5 @@
-import { defineStore } from "pinia"
-import type { Shift } from "@@/types/shift"
+import { defineStore } from 'pinia'
+import type { Shift } from '@@/types/shift'
 
 type RequestError = {
   data?: { message?: string }
@@ -15,7 +15,6 @@ function getErrorMessage(error: unknown) {
 
   return requestError.data?.message ?? requestError.message ?? $t('error.candidate.loadCandidates')
 }
-
 
 export const useCalendarStore = defineStore('calendar', () => {
   const isLoading = ref(false)
@@ -52,6 +51,6 @@ export const useCalendarStore = defineStore('calendar', () => {
     initialView,
     setInitialView,
     isLoading,
-    error
+    error,
   }
 })

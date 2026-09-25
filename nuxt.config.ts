@@ -1,4 +1,4 @@
-import tailwindcss from "@tailwindcss/vite";
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
@@ -10,51 +10,44 @@ export default defineNuxtConfig({
         {
           rel: 'icon',
           type: 'image/x-icon',
-          href: '/teamgrid/favicon.ico'
+          href: '/teamgrid/favicon.ico',
         },
         {
           rel: 'apple-touch-icon',
           sizes: '180x180',
-          href: '/teamgrid/apple-touch-icon.png'
-        }
+          href: '/teamgrid/apple-touch-icon.png',
+        },
       ],
       meta: [
         { name: 'apple-mobile-web-app-capable', content: 'yes' },
-        { name: 'apple-mobile-web-app-title', content: 'TeamGrid' }
-      ]
-    }
+        { name: 'apple-mobile-web-app-title', content: 'TeamGrid' },
+      ],
+    },
   },
 
   vite: {
-    plugins: [
-      tailwindcss(),
-    ],
+    plugins: [tailwindcss()],
   },
 
-  modules: [
-    '@pinia/nuxt',
-    '@nuxtjs/i18n',
-    '@nuxt/eslint',
-    '@nuxt/ui'
-  ],
+  modules: ['@pinia/nuxt', '@nuxtjs/i18n', '@nuxt/eslint', '@nuxt/ui'],
 
   i18n: {
     defaultLocale: 'ru',
     locales: [
-      { code: 'ru', name: 'Русский', file: 'ru.json'},
-      { code: 'en', name: 'English', file: 'en.json'},
+      { code: 'ru', name: 'Русский', file: 'ru.json' },
+      { code: 'en', name: 'English', file: 'en.json' },
     ],
     detectBrowserLanguage: {
       useCookie: true,
       cookieKey: 'i18n_locale',
-      redirectOn: 'root'
+      redirectOn: 'root',
     },
     strategy: 'no_prefix',
     experimental: {
       localeDetector: './localeDetector.ts',
     },
-    vueI18n: './i18n.config.ts'
+    vueI18n: './i18n.config.ts',
   },
 
-  compatibilityDate: '2025-01-15'
+  compatibilityDate: '2025-01-15',
 })

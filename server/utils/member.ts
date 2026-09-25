@@ -2,13 +2,13 @@ export async function isManagerOrganization(userId: string, organizationId: numb
   const member = await prisma.organizationMember.findUnique({
     where: {
       userId_organizationId: {
-      userId,
-      organizationId
-    }
+        userId,
+        organizationId,
+      },
     },
     include: {
-      role: true
-    }
+      role: true,
+    },
   })
 
   return member?.role.name === 'owner' || member?.role.name === 'admin'
@@ -18,14 +18,16 @@ export async function isMemberOrganization(userId: string, organizationId: numbe
   const member = await prisma.organizationMember.findUnique({
     where: {
       userId_organizationId: {
-      userId,
-      organizationId
-    }
+        userId,
+        organizationId,
+      },
     },
     include: {
-      role: true
-    }
+      role: true,
+    },
   })
 
-  return member?.role.name === 'user' || member?.role.name === 'owner' || member?.role.name === 'admin'
+  return (
+    member?.role.name === 'user' || member?.role.name === 'owner' || member?.role.name === 'admin'
+  )
 }

@@ -9,3 +9,12 @@ export function formatDateStr(date: Date | string | number) {
   if (!(d instanceof Date) || isNaN(d.getTime())) return ''
   return d.toISOString().split('T')[0]
 }
+
+export function formatDateStrLocale(
+  date: Date | string | number,
+  locale: string = 'ru-RU || en-US',
+) {
+  const d = typeof date === 'string' || typeof date === 'number' ? new Date(date) : date
+  if (!(d instanceof Date) || isNaN(d.getTime())) return ''
+  return d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' })
+}

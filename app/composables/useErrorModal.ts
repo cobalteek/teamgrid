@@ -2,7 +2,7 @@ export function useErrorModal() {
   const error = ref({
     modelValue: false,
     text: '',
-    type: <'error' | 'info'> 'error'
+    type: <'error' | 'info'>'error',
   })
 
   function showError(message: string) {

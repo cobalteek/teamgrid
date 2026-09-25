@@ -2,7 +2,7 @@
 import { onMounted, onBeforeUnmount, ref } from 'vue'
 
 const startText = '<'
-const targetText = "<Loading/>"
+const targetText = '<Loading/>'
 const displayText = ref(startText)
 
 let animationTimeouts: ReturnType<typeof setTimeout>[] = []
@@ -30,18 +30,21 @@ function runAnimation() {
 
       for (let i = 2; i <= targetText.length; i++) {
         animationTimeouts.push(
-          setTimeout(() => {
-            displayText.value = targetText.slice(0, i)
-          }, stepTime * (i - 1))
+          setTimeout(
+            () => {
+              displayText.value = targetText.slice(0, i)
+            },
+            stepTime * (i - 1),
+          ),
         )
       }
 
       animationTimeouts.push(
         setTimeout(() => {
           runAnimation()
-        }, typingDuration + finalPause)
+        }, typingDuration + finalPause),
       )
-    }, initialPause)
+    }, initialPause),
   )
 }
 
@@ -55,7 +58,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="flex items-center justify-center h-full">
+  <div class="flex h-full items-center justify-center">
     <span class="font-mono text-2xl text-[var(--text-main)]">
       {{ displayText }}<span class="animate-pulse">|</span>
     </span>

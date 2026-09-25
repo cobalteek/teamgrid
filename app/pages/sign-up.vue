@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import {useAuthStore} from "~/stores/auth";
-import {isValidEmail, isValidName, isValidPassword} from '~~/shared/utils/validation'
-import {useErrorModal} from '../composables/useErrorModal'
+import { useAuthStore } from '~/stores/auth'
+import { isValidEmail, isValidName, isValidPassword } from '~~/shared/utils/validation'
+import { useErrorModal } from '../composables/useErrorModal'
 const auth = useAuthStore()
 const errorModal = useErrorModal()
-const fields = computed(() => [
-  {key: 'name', type: 'text', placeholder: 'form.placeholder.name'},
-  {key: 'email', type: 'email', placeholder: 'form.placeholder.email'},
-  {key: 'password', type: 'password', placeholder: 'form.placeholder.password'},
-  {key: 'confirmPassword', type: 'password', placeholder: 'form.placeholder.confirmPassword'},
-] as const)
+const fields = computed(
+  () =>
+    [
+      { key: 'name', type: 'text', placeholder: 'form.placeholder.name' },
+      { key: 'email', type: 'email', placeholder: 'form.placeholder.email' },
+      { key: 'password', type: 'password', placeholder: 'form.placeholder.password' },
+      { key: 'confirmPassword', type: 'password', placeholder: 'form.placeholder.confirmPassword' },
+    ] as const,
+)
 
 const form = ref({
   name: '',
@@ -20,7 +23,8 @@ const form = ref({
 })
 
 async function onRegister() {
-  if (form.value.email === '' ||
+  if (
+    form.value.email === '' ||
     form.value.password === '' ||
     form.value.confirmPassword === '' ||
     form.value.name === ''
@@ -50,27 +54,22 @@ async function onRegister() {
   }
 
   try {
-    const {confirmPassword, ...payload} = form.value
+    const { confirmPassword, ...payload } = form.value
     await auth.signUp(payload)
 
     await auth.login(form.value)
 
     await navigateTo('/dashboard')
   } catch (e: unknown) {
-    const error = e as {statusCode?: number; status?: number; response?: {status?: number}}
+    const error = e as { statusCode?: number; status?: number; response?: { status?: number } }
     const status = error.statusCode || error.status || error.response?.status
 
-    errorModal.showError(status === 409
-    ? 'error.auth.emailExist'
-    : 'error.auth.register'
-    )
+    errorModal.showError(status === 409 ? 'error.auth.emailExist' : 'error.auth.register')
   }
 }
 
 definePageMeta({
-  middleware: [
-    'guest',
-  ],
+  middleware: ['guest'],
 })
 </script>
 
@@ -83,11 +82,13 @@ definePageMeta({
     :disc="$t('auth.haveAccount')"
     :text-link="$t('auth.login')"
     link="/login"
+    :is-loading="auth.isLoading"
     v-model="form"
-    @submit="onRegister"/>
+    @submit="onRegister"
+  />
   <ErrorModalContent
     :error="errorModal.error.value"
     @close="errorModal.close"
-    class="w-[300px] h-[200px] top-1/4"
+    class="top-1/4 h-[200px] w-[300px]"
   />
 </template>

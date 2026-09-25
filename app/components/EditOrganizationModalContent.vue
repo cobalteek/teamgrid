@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import Modal from './Modal.vue'
-import { useUserStore } from '~/stores/user';
-import { useOrganizationStore } from '~/stores/organization';
-import { useEmployeeStore } from '~/stores/employee';
-import { usePositionStore } from '~/stores/position';
-import {isValidName} from '~~/shared/utils/validation'
-import EditPositionForm from './EditPositionForm.vue';
-import EditEmployeeForm from './EditEmployeeForm.vue';
+import { useUserStore } from '~/stores/user'
+import { useOrganizationStore } from '~/stores/organization'
+import { useEmployeeStore } from '~/stores/employee'
+import { usePositionStore } from '~/stores/position'
+import { isValidName } from '~~/shared/utils/validation'
+import EditPositionForm from './EditPositionForm.vue'
+import EditEmployeeForm from './EditEmployeeForm.vue'
 
 const props = defineProps<{
   modelValue: boolean
@@ -43,14 +43,14 @@ function onUpdateModelValue(value: boolean) {
 
 async function handleSubmit() {
   isDisableName.value = true
-  if(!isValidName(organizationName.value)) {
-      errorModal.showError('error.invalidOrganizationName')
-      return
-    }
+  if (!isValidName(organizationName.value)) {
+    errorModal.showError('error.invalidOrganizationName')
+    return
+  }
   try {
     await organizationStore.changeName(organizationName.value)
     isDisableName.value = true
-  } catch(e) {
+  } catch (e) {
     console.log(e)
   }
 }
@@ -69,82 +69,110 @@ watch(
   () => props.modelValue,
   async (isOpen) => {
     if (isOpen) {
-      organizationName.value =
-        organizationStore.currentOrganization?.name ?? ''
+      organizationName.value = organizationStore.currentOrganization?.name ?? ''
     }
-  }
+  },
 )
-
-
 </script>
 
 <template>
-  <Modal
-    :model-value="modelValue"
-    @update:model-value="onUpdateModelValue"
-  >
-    <div class="max-h-[calc(100dvh-1rem)] w-[min(700px,calc(100vw-1rem))] overflow-y-auto p-3 sm:h-[400px] sm:p-0">
-      <section class="flex w-full items-center justify-center py-3 text-center text-lg font-bold">
+  <Modal :model-value="modelValue" @update:model-value="onUpdateModelValue">
+    <div
+      class="flex max-h-[calc(100dvh-1rem)] w-full flex-col gap-4 overflow-y-auto p-4 pt-12 sm:max-h-[calc(100dvh-3rem)] sm:w-[700px] sm:p-6 sm:pt-8"
+    >
+      <section class="flex w-full flex-col items-center gap-3 text-center">
         <form
-          class="flex w-full justify-center gap-2 sm:w-auto"
-          @submit.prevent="handleSubmit">
+          class="flex w-full flex-col gap-3 sm:flex-row sm:pr-14"
+          @submit.prevent="handleSubmit"
+        >
           <input
-          :disabled=isDisableName
-          v-model="organizationName"
-          class="min-h-11 min-w-0 flex-1 rounded px-2 text-center transition-all outline-none sm:min-h-0 sm:flex-none"
-          :class="isDisableName 
-            ? 'border border-transparent'
-            : 'border border-gray-400 focus:border-blue-500'"
-        />
-        <button
-          type="button"
-          @click="isDisableName = false"
-          class="
-            transition
-            transition
-            duration-100
-            active:scale-90
-            bg-[url('/assets/images/edit.png')] min-h-11 min-w-11 w-11 bg-cover bg-center invert-[1] [html.light_&]:invert-0 sm:min-h-0 sm:min-w-0 sm:w-7 sm:h-7
-          "/>
+            v-model="organizationName"
+            :disabled="isDisableName"
+            class="min-h-11 min-w-0 flex-1 rounded-md border bg-[var(--input-bg)] p-2 pl-3 text-center text-xl font-bold text-[var(--input-text)] transition-all outline-none"
+            :class="
+              isDisableName
+                ? 'border-transparent'
+                : 'border-[var(--input-border)] focus:border-[var(--btn-save-hover-text)]'
+            "
+          />
+          <div class="flex gap-2 sm:shrink-0">
+            <button
+              type="button"
+              class="flex min-h-11 flex-1 items-center justify-center rounded-md border border-[var(--border-main)] bg-[var(--btn-bg)] px-4 text-[var(--btn-text)] transition duration-100 active:scale-95 sm:w-11 sm:flex-none sm:px-0"
+              :aria-label="$t('btn.edit')"
+              @click="isDisableName = false"
+            >
+              <span
+                aria-hidden="true"
+                class="h-5 w-5 bg-[url('/assets/images/edit.png')] bg-cover bg-center invert-[1] [html.light_&]:invert-0"
+              />
+            </button>
+            <button
+              v-if="!isDisableName"
+              type="submit"
+              class="min-h-11 flex-1 rounded-md bg-[var(--btn-bg)] px-4 py-2 text-[var(--btn-text)] transition hover:text-[var(--btn-save-hover-text)] sm:flex-none"
+            >
+              {{ $t('btn.save') }}
+            </button>
+          </div>
         </form>
       </section>
-      <hr>
-        <div class="mt-2 grid grid-cols-1 gap-3 sm:h-[300px] sm:grid-cols-3 sm:justify-around">
-          <div class="flex min-h-[150px] flex-col items-center overflow-hidden rounded border sm:h-[300px]">
-            <h3 class="pb-2 shrink-0 text-lg">{{ $t('ui.employees') }}</h3>
-            <ul class="w-full flex-1 overflow-y-auto min-h-0">
-              <li
-                v-for="emp in employeeStore.options"
-                class="pl-2 cursor-pointer pb-2"
-                @click="openEditEmployeeForm(emp.value)"
-              >
-                <p>{{ emp.label }}</p>
-              </li>
-            </ul>
-          </div>
-          <div class="flex min-h-[150px] flex-col items-center overflow-hidden rounded border sm:h-[300px]">
-            <h3 class="pb-2 shrink-0 text-lg">{{ $t('ui.positions') }}</h3>
-            <ul class="w-full flex-1 overflow-y-auto min-h-0">
-              <li
-                v-for="pos in positionStore.optionsFull"
-                class="pl-2 cursor-pointer pb-2"
-                @click="openEditPositionForm(pos.value)"
-              >
-                {{ pos.label }}
-              </li>
-            </ul>
-          </div>
-          <div class="flex min-h-[150px] flex-col items-center overflow-hidden rounded border text-center sm:h-[300px]">
-            <h3 class="pb-2 shrink-0 text-lg">{{ $t('ui.users') }}</h3>
-            <ol class="w-full flex-1 overflow-y-auto min-h-0">
-              <li
-                v-for="user in userStore.organizationOptions"
-              >
-                {{ user.label }}
-              </li>
-            </ol>
-          </div>
+      <div class="grid min-h-0 grid-cols-1 gap-3 sm:grid-cols-3">
+        <div
+          class="flex min-h-[170px] flex-col overflow-hidden rounded-md border border-[var(--border-main)] bg-[var(--input-bg)] sm:h-[300px]"
+        >
+          <h3
+            class="shrink-0 border-b border-[var(--border-main)] px-3 py-2 text-center text-lg font-bold"
+          >
+            {{ $t('ui.employees') }}
+          </h3>
+          <ul class="min-h-0 w-full flex-1 overflow-y-auto p-2">
+            <li
+              v-for="emp in employeeStore.options"
+              :key="emp.value"
+              class="cursor-pointer rounded-md px-3 py-2 text-[var(--input-text)] transition hover:bg-[var(--btn-bg)]"
+              @click="openEditEmployeeForm(emp.value)"
+            >
+              <p>{{ emp.label }}</p>
+            </li>
+          </ul>
         </div>
+        <div
+          class="flex min-h-[170px] flex-col overflow-hidden rounded-md border border-[var(--border-main)] bg-[var(--input-bg)] sm:h-[300px]"
+        >
+          <h3
+            class="shrink-0 border-b border-[var(--border-main)] px-3 py-2 text-center text-lg font-bold"
+          >
+            {{ $t('ui.positions') }}
+          </h3>
+          <ul class="min-h-0 w-full flex-1 overflow-y-auto p-2">
+            <li
+              v-for="pos in positionStore.optionsFull"
+              :key="pos.value"
+              class="cursor-pointer rounded-md px-3 py-2 text-[var(--input-text)] transition hover:bg-[var(--btn-bg)]"
+              @click="openEditPositionForm(pos.value)"
+            >
+              {{ pos.label }}
+            </li>
+          </ul>
+        </div>
+        <div
+          class="flex min-h-[170px] flex-col overflow-hidden rounded-md border border-[var(--border-main)] bg-[var(--input-bg)] text-center sm:h-[300px]"
+        >
+          <h3 class="shrink-0 border-b border-[var(--border-main)] px-3 py-2 text-lg font-bold">
+            {{ $t('ui.users') }}
+          </h3>
+          <ol class="min-h-0 w-full flex-1 overflow-y-auto p-2">
+            <li
+              v-for="user in userStore.organizationOptions"
+              :key="user.value"
+              class="rounded-md px-3 py-2 text-[var(--input-text)]"
+            >
+              {{ user.label }}
+            </li>
+          </ol>
+        </div>
+      </div>
     </div>
   </Modal>
   <EditPositionForm
@@ -159,7 +187,7 @@ watch(
   />
   <ErrorModalContent
     :error="errorModal.error.value"
+    class="top-1/4 h-[200px] w-[300px]"
     @close="errorModal.close"
-    class="w-[300px] h-[200px] top-1/4"
   />
 </template>

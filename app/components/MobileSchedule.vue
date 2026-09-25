@@ -4,7 +4,10 @@ import MobileScheduleFeed from './mobile-schedule/MobileScheduleFeed.vue'
 import MobileScheduleGrid from './mobile-schedule/MobileScheduleGrid.vue'
 import MobileScheduleToolbar from './mobile-schedule/MobileScheduleToolbar.vue'
 import { useShiftStore } from '~/stores/shift'
-import { useMobileScheduleDates, type MobileScheduleViewMode } from '~/composables/useMobileScheduleDates'
+import {
+  useMobileScheduleDates,
+  type MobileScheduleViewMode,
+} from '~/composables/useMobileScheduleDates'
 import type { Ref } from 'vue'
 import type { ShiftWithRelations } from '~~/types/shift'
 
@@ -52,28 +55,46 @@ const gridNextSentinelInView = ref(false)
 const gridLoadedStart = ref(loadedStart.value)
 const gridLoadedEnd = ref(loadedEnd.value)
 const selectedGridDay = ref<string | null>(null)
+const isOpenDeleteConfirm = ref(false)
+const selectedShiftConfirmDelete = ref('')
+const isSubmitting = ref(false)
+const errorModal = useErrorModal()
+const selectedShiftId = ref('')
 let observer: IntersectionObserver | null = null
 let lastScrollY = 0
 let isProgrammaticScroll = false
 
-const days = computed(() => daysBetween(loadedStart.value, loadedEnd.value)
-  .map(({ date }) => feedDay(date)))
+const days = computed(() =>
+  daysBetween(loadedStart.value, loadedEnd.value).map(({ date }) => feedDay(date)),
+)
 
 const gridMonths = computed(() => monthsBetween(gridLoadedStart.value, gridLoadedEnd.value))
 
-const gridMonthSections = computed(() => gridMonths.value.map(month => ({
-  key: toMonthKey(month),
-  label: monthLabel(month),
-  days: gridDaysForMonth(month),
-})))
+const gridMonthSections = computed(() =>
+  gridMonths.value.map((month) => ({
+    key: toMonthKey(month),
+    label: monthLabel(month),
+    days: gridDaysForMonth(month),
+  })),
+)
 
 const monthOptions = computed(() => {
   const todayMonth = startOfMonth(startOfToday())
   const selected = parseMonthKey(selectedMonth.value) ?? todayMonth
-  const start = minDate(addMonths(todayMonth, -12), loadedStart.value, gridLoadedStart.value, selected)
-  const end = maxDate(addMonths(todayMonth, 13), loadedEnd.value, gridLoadedEnd.value, addMonths(selected, 1))
+  const start = minDate(
+    addMonths(todayMonth, -12),
+    loadedStart.value,
+    gridLoadedStart.value,
+    selected,
+  )
+  const end = maxDate(
+    addMonths(todayMonth, 13),
+    loadedEnd.value,
+    gridLoadedEnd.value,
+    addMonths(selected, 1),
+  )
 
-  return monthsBetween(start, end).map(date => ({
+  return monthsBetween(start, end).map((date) => ({
     value: toMonthKey(date),
     label: monthLabel(date),
   }))
@@ -92,18 +113,18 @@ const shiftsByDay = computed(() => {
   return groupedShifts
 })
 
-const selectedGridDayShifts = computed(() => selectedGridDay.value
-  ? shiftsByDay.value.get(selectedGridDay.value) ?? []
-  : [])
+const selectedGridDayShifts = computed(() =>
+  selectedGridDay.value ? (shiftsByDay.value.get(selectedGridDay.value) ?? []) : [],
+)
 
 const selectedGridDayLabel = computed(() => selectedDayLabel(selectedGridDay.value))
 
 function minDate(...dates: Date[]) {
-  return new Date(Math.min(...dates.map(date => date.getTime())))
+  return new Date(Math.min(...dates.map((date) => date.getTime())))
 }
 
 function maxDate(...dates: Date[]) {
-  return new Date(Math.max(...dates.map(date => date.getTime())))
+  return new Date(Math.max(...dates.map((date) => date.getTime())))
 }
 
 async function fetchMonth(monthStart: Date) {
@@ -116,7 +137,13 @@ async function fetchMonth(monthStart: Date) {
   })
 }
 
-function isMonthLoaded(monthStart: Date, monthEnd: Date, start: Date, end: Date, requireFullMonth: boolean) {
+function isMonthLoaded(
+  monthStart: Date,
+  monthEnd: Date,
+  start: Date,
+  end: Date,
+  requireFullMonth: boolean,
+) {
   return requireFullMonth
     ? monthStart >= start && monthEnd <= end
     : monthStart >= start && monthStart < end
@@ -330,17 +357,39 @@ function addShiftFromGridDay() {
   emit('add-shift', dayKey)
 }
 
+async function openDeleteConfirm(shiftId: string) {
+  isSubmitting.value = false
+  const shift = await shiftStore.getShiftById(shiftId)
+  if (!shift) {
+    return
+  }
+  selectedShiftId.value = shift.id
+  selectedShiftConfirmDelete.value = `${$t('ui.shiftDeleteConfirm')} ${shift.position.name} ${shift.employee.name} ${locale.value === 'ru' ? formatDateStrLocale(shift.date, 'ru-RU') : formatDateStrLocale(shift.date, 'en-US')}?`
+  isOpenDeleteConfirm.value = true
+  return
+}
+
 async function deleteShift(shiftId: string) {
-  if (!confirm($t('ui.shiftDeleteConfirm') as string)) return
-  await shiftStore.deleteShift(shiftId)
+  isSubmitting.value = true
+  try {
+    await shiftStore.deleteShift(shiftId)
+  } catch (error) {
+    isSubmitting.value = false
+    console.log(error)
+    errorModal.showError('error.shift.delete')
+  } finally {
+    isOpenDeleteConfirm.value = false
+  }
 }
 
 function updateVisibleMonth() {
   const heading = scheduleRoot.value?.querySelector<HTMLElement>('.mobile-schedule__heading')
   const headingBottom = heading?.getBoundingClientRect().bottom ?? 0
-  const visibleItem = Array
-    .from(scheduleRoot.value?.querySelectorAll<HTMLElement>('.mobile-schedule__day, .mobile-schedule__grid-month') ?? [])
-    .find(item => item.getBoundingClientRect().bottom > headingBottom + 4)
+  const visibleItem = Array.from(
+    scheduleRoot.value?.querySelectorAll<HTMLElement>(
+      '.mobile-schedule__day, .mobile-schedule__grid-month',
+    ) ?? [],
+  ).find((item) => item.getBoundingClientRect().bottom > headingBottom + 4)
 
   if (!visibleItem) return
 
@@ -406,26 +455,35 @@ onMounted(async () => {
   await loadInitialMonth()
   lastScrollY = window.scrollY
   window.addEventListener('scroll', markScheduleScroll, { passive: true })
-  observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      handleSentinelEntry(
-        entry,
-        previousSentinel,
-        previousSentinelInView,
-        () => hasScrolledDown.feed && scrollDirection.value === 'up' && viewMode.value === 'feed',
-        loadPreviousMonth,
-      )
-      handleSentinelEntry(entry, nextSentinel, nextSentinelInView, () => true, loadNextMonth)
-      handleSentinelEntry(
-        entry,
-        gridPreviousSentinel,
-        gridPreviousSentinelInView,
-        () => hasScrolledDown.grid && scrollDirection.value === 'up' && viewMode.value === 'grid',
-        loadPreviousGridMonth,
-      )
-      handleSentinelEntry(entry, gridNextSentinel, gridNextSentinelInView, () => true, loadNextGridMonth)
-    })
-  }, { rootMargin: '0px 0px 500px 0px' })
+  observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        handleSentinelEntry(
+          entry,
+          previousSentinel,
+          previousSentinelInView,
+          () => hasScrolledDown.feed && scrollDirection.value === 'up' && viewMode.value === 'feed',
+          loadPreviousMonth,
+        )
+        handleSentinelEntry(entry, nextSentinel, nextSentinelInView, () => true, loadNextMonth)
+        handleSentinelEntry(
+          entry,
+          gridPreviousSentinel,
+          gridPreviousSentinelInView,
+          () => hasScrolledDown.grid && scrollDirection.value === 'up' && viewMode.value === 'grid',
+          loadPreviousGridMonth,
+        )
+        handleSentinelEntry(
+          entry,
+          gridNextSentinel,
+          gridNextSentinelInView,
+          () => true,
+          loadNextGridMonth,
+        )
+      })
+    },
+    { rootMargin: '0px 0px 500px 0px' },
+  )
   observeSentinels()
   await nextTick()
   updateVisibleMonth()
@@ -443,7 +501,21 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section ref="scheduleRoot" class="mobile-schedule w-full min-w-0 pt-1 pb-6" aria-label="Mobile schedule">
+  <section
+    ref="scheduleRoot"
+    class="mobile-schedule w-full min-w-0 pt-1 pb-6"
+    aria-label="Mobile schedule"
+  >
+    <Confirm
+      v-if="isManager"
+      :model-value="isOpenDeleteConfirm"
+      :message="selectedShiftConfirmDelete"
+      :is-loading="isSubmitting"
+      submit-text="btn.delete"
+      @submit="deleteShift(selectedShiftId)"
+      @close="isOpenDeleteConfirm = false"
+      class="absolute my-auto"
+    />
     <MobileScheduleToolbar
       :month-options="monthOptions"
       :selected-month="selectedMonth"
@@ -454,8 +526,14 @@ onBeforeUnmount(() => {
     />
 
     <template v-if="viewMode === 'feed'">
-      <div ref="previousSentinel" class="flex min-h-6 items-center justify-center" aria-hidden="true">
-        <span v-if="isLoadingPrevious" class="text-xs text-[var(--text-muted)]">{{ $t('ui.loading') }}</span>
+      <div
+        ref="previousSentinel"
+        class="flex min-h-6 items-center justify-center"
+        aria-hidden="true"
+      >
+        <span v-if="isLoadingPrevious" class="text-xs text-[var(--text-muted)]">{{
+          $t('ui.loading')
+        }}</span>
       </div>
 
       <MobileScheduleFeed
@@ -468,13 +546,21 @@ onBeforeUnmount(() => {
       />
 
       <div ref="nextSentinel" class="flex min-h-6 items-center justify-center" aria-live="polite">
-        <span v-if="isLoadingNext" class="text-xs text-[var(--text-muted)]">{{ $t('ui.loading') }}</span>
+        <span v-if="isLoadingNext" class="text-xs text-[var(--text-muted)]">{{
+          $t('ui.loading')
+        }}</span>
       </div>
     </template>
 
     <template v-else>
-      <div ref="gridPreviousSentinel" class="flex min-h-6 items-center justify-center" aria-hidden="true">
-        <span v-if="isLoadingPrevious" class="text-xs text-[var(--text-muted)]">{{ $t('ui.loading') }}</span>
+      <div
+        ref="gridPreviousSentinel"
+        class="flex min-h-6 items-center justify-center"
+        aria-hidden="true"
+      >
+        <span v-if="isLoadingPrevious" class="text-xs text-[var(--text-muted)]">{{
+          $t('ui.loading')
+        }}</span>
       </div>
 
       <MobileScheduleGrid
@@ -486,8 +572,14 @@ onBeforeUnmount(() => {
         @open-day="openGridDay"
       />
 
-      <div ref="gridNextSentinel" class="flex min-h-6 items-center justify-center" aria-live="polite">
-        <span v-if="isLoadingNext" class="text-xs text-[var(--text-muted)]">{{ $t('ui.loading') }}</span>
+      <div
+        ref="gridNextSentinel"
+        class="flex min-h-6 items-center justify-center"
+        aria-live="polite"
+      >
+        <span v-if="isLoadingNext" class="text-xs text-[var(--text-muted)]">{{
+          $t('ui.loading')
+        }}</span>
       </div>
     </template>
 
@@ -496,9 +588,13 @@ onBeforeUnmount(() => {
       :is-manager="props.isManager"
       :label="selectedGridDayLabel"
       :shifts="selectedGridDayShifts"
-      @update:model-value="value => !value && closeGridDay()"
+      @update:model-value="(value) => !value && closeGridDay()"
       @add-shift="addShiftFromGridDay"
-      @delete-shift="deleteShift"
+      @delete-shift="openDeleteConfirm"
     />
   </section>
+  <ErrorModalContent
+    :error="errorModal.error.value"
+    @close="errorModal.close"
+  />
 </template>

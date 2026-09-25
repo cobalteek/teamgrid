@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { useOrganizationStore } from '~/stores/organization'
-import type { Organization } from '~~/types/organization';
+import type { Organization } from '~~/types/organization'
 
 const newOrganization = ref<Organization>({
   id: 0,
   name: '',
-  description: ''
+  description: '',
 })
 
 const errorModal = useErrorModal()
 const organizationStore = useOrganizationStore()
+const isSubmitting = ref(false)
 
 const props = defineProps<{
   modelValue: boolean
@@ -35,32 +36,45 @@ const handleCancel = () => {
 }
 
 const handleSubmit = async () => {
-  if(!isValidName(newOrganization.value.name)) {
+  if (!isValidName(newOrganization.value.name)) {
     errorModal.showError('error.organization.invalidName')
     return
   }
+
+  isSubmitting.value = true
+
   try {
-    await organizationStore.createOrganization(newOrganization.value.name, newOrganization.value.description)
-  } catch(error: any) {
+    await organizationStore.createOrganization(
+      newOrganization.value.name,
+      newOrganization.value.description,
+    )
+  } catch (error: any) {
+    isSubmitting.value = false
     errorModal.showError(error.message || 'error.organization.create')
     return
   }
   emit('submit')
   emit('close')
 }
+
+watch(
+  () => props.modelValue,
+  (isOpen) => {
+    if (isOpen) {
+      isSubmitting.value = false
+    }
+  },
+)
 </script>
 
 <template>
-  <Modal
-    :model-value="modelValue"
-    @update:model-value="onUpdateModelValue"
-  >
+  <Modal :model-value="modelValue" @update:model-value="onUpdateModelValue">
     <Form
       title="ui.organization.add"
-      :fields="[{ key: 'name', type: 'text', placeholder: 'placeholder.organizationName'}]"  
+      :fields="[{ key: 'name', type: 'text', placeholder: 'placeholder.organizationName' }]"
       v-model="newOrganization"
       submitBtnName="ui.organization.add"
-      :is-loading="organizationStore.isLoading"
+      :is-loading="isSubmitting"
       @submit="handleSubmit"
       @close="handleCancel"
     />
@@ -68,6 +82,6 @@ const handleSubmit = async () => {
   <ErrorModalContent
     :error="errorModal.error.value"
     @close="errorModal.close"
-    class="w-[300px] h-[200px] top-1/4"
+    class="top-1/4 h-[200px] w-[300px]"
   />
 </template>

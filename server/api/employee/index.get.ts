@@ -1,105 +1,100 @@
 import { prisma } from '~~/server/utils/prisma'
-import {isMemberOrganization} from '~~/server/utils/member'
-import {
-    defineEventHandler,
-    createError,
-    getQuery
-} from 'h3'
+import { isMemberOrganization } from '~~/server/utils/member'
+import { defineEventHandler, createError, getQuery } from 'h3'
 
 export default defineEventHandler(async (event) => {
-    const {userId} = await requireUser(event)
-    const t = await useTranslation(event)
-    const query = getQuery(event)
-    const employeeId = query.employeeId ? String(query.employeeId) : undefined
-    const organizationId = query.organizationId ? Number(query.organizationId) : undefined
-    
-    if (!organizationId) {
+  const { userId } = await requireUser(event)
+  const t = await useTranslation(event)
+  const query = getQuery(event)
+  const employeeId = query.employeeId ? String(query.employeeId) : undefined
+  const organizationId = query.organizationId ? Number(query.organizationId) : undefined
+
+  if (!organizationId) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: t('error.organization.notFound'),
+    })
+  }
+
+  const isMember = await isMemberOrganization(userId, organizationId)
+
+  if (!isMember) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: t('error.onlyMember'),
+    })
+  }
+
+  try {
+    const selectFields = {
+      id: true,
+      name: true,
+      surname: true,
+      middlename: true,
+      position: true,
+      email: true,
+      organizationId: true,
+    }
+
+    if (employeeId) {
+      const employee = await prisma.employee.findUnique({
+        where: { id: employeeId },
+        select: selectFields,
+      })
+
+      if (!employee) {
         throw createError({
-            statusCode: 400,
-            statusMessage: t('error.organization.notFound')
+          statusCode: 404,
+          statusMessage: t('error.employee.notFound'),
         })
+      }
+
+      return {
+        id: employee.id,
+        name: employee.name,
+        surname: employee.surname,
+        middlename: employee.middlename,
+        position: {
+          id: employee.position.id,
+          name: employee.position.name,
+          fullName: employee.position.fullName,
+          organizationId: employee.position.organizationId,
+        },
+        organizationId: employee.organizationId,
+        email: employee.email,
+      }
     }
 
-    const isMember = await isMemberOrganization(userId, organizationId)
+    const employees = await prisma.employee.findMany({
+      where: {
+        organizationId,
+      },
+      select: selectFields,
+    })
 
-    if (!isMember) {
-        throw createError({
-            statusCode: 403,
-            statusMessage: t('error.onlyMember')
-        })
+    if (!employees) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: t('error.employee.notFound'),
+      })
     }
-    
-    try {
-        const selectFields = {
-            id: true,
-            name: true,
-            surname: true,
-            middlename: true,
-            position: true,
-            email: true,
-            organizationId: true
-        }
 
-        if (employeeId) {
-            const employee = await prisma.employee.findUnique({
-                where: { id: employeeId },
-                select: selectFields
-            })
+    return employees.map((employee) => ({
+      id: employee.id,
+      name: employee.name,
+      surname: employee.surname,
+      middlename: employee.middlename,
+      position: {
+        id: employee.position.id,
+        name: employee.position.name,
+        organizationId: employee.position.organizationId,
+      },
+      organizationId: employee.organizationId,
+      email: employee.email,
+    }))
+  } catch (error) {
+    console.error(error)
 
-            if (!employee) {
-                throw createError({
-                    statusCode: 404,
-                    statusMessage: t('error.employee.notFound')
-                })
-            }
-
-            return {
-                id: employee.id,
-                name: employee.name,
-                surname: employee.surname,
-                middlename: employee.middlename,
-                position: {
-                    id: employee.position.id,
-                    name: employee.position.name,
-                    fullName: employee.position.fullName,
-                    organizationId: employee.position.organizationId
-                },
-                organizationId: employee.organizationId,
-                email: employee.email
-            }
-        }
-
-        const employees = await prisma.employee.findMany({
-            where: {
-                organizationId
-            },
-            select: selectFields
-        })
-
-        if (!employees) {
-            throw createError({
-                statusCode: 404,
-                statusMessage: t('error.employee.notFound')
-            })
-        }
-
-        return employees.map((employee) => ({
-            id: employee.id,
-            name: employee.name,
-            surname: employee.surname,
-            middlename: employee.middlename,
-            position: {
-                id: employee.position.id,
-                name: employee.position.name,
-                organizationId: employee.position.organizationId
-            },
-            organizationId: employee.organizationId,
-            email: employee.email
-        }))
-
-    } catch (error) {
-        console.error(error)
-
-        throw error
-    }
+    throw error
+  }
 })

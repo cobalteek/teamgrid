@@ -42,12 +42,19 @@ function initial(value: string) {
           :id="day ? `mobile-day-${day.key}` : undefined"
           :key="day?.key ?? `empty-${month.key}-${index}`"
           class="min-w-0 cursor-pointer overflow-hidden rounded-md border border-[var(--border-main)] bg-[var(--bg-context)] p-1.5"
-          :class="{ 'border-[var(--primary-border)] shadow-[inset_0_0_0_1px_var(--primary-border)]': day?.key === todayKey }"
+          :class="{
+            'border-[var(--primary-border)] shadow-[inset_0_0_0_1px_var(--primary-border)]':
+              day?.key === todayKey,
+          }"
           @click="day && $emit('open-day', day.key)"
         >
           <template v-if="day">
-            <div class="flex items-center justify-between text-xs font-bold text-[var(--text-main)]">
-              <span class="min-w-0 truncate text-[0.62rem] font-medium text-[var(--text-muted)]">{{ day.weekday }}</span>
+            <div
+              class="flex items-center justify-between text-xs font-bold text-[var(--text-main)]"
+            >
+              <span class="min-w-0 truncate text-[0.62rem] font-medium text-[var(--text-muted)]">{{
+                day.weekday
+              }}</span>
               <span class="ml-auto text-xs">{{ day.number }}</span>
               <button
                 v-if="isManager"
@@ -56,7 +63,9 @@ function initial(value: string) {
                 :aria-label="$t('btn.addShift')"
                 :title="$t('btn.addShift')"
                 @click.stop="$emit('add-shift', day.key)"
-              >+</button>
+              >
+                +
+              </button>
             </div>
             <div class="mt-1.5 grid gap-1">
               <div
@@ -69,7 +78,10 @@ function initial(value: string) {
                   :style="{ background: shiftGradient(shift) }"
                   aria-hidden="true"
                 />
-                <span class="truncate" :title="`${shift.employee.name} ${shift.employee.surname} · ${shift.position.name}`">
+                <span
+                  class="truncate"
+                  :title="`${shift.employee.name} ${shift.employee.surname} · ${shift.position.name}`"
+                >
                   {{ initial(shift.position.name) }} / {{ initial(shift.employee.name) }}
                 </span>
               </div>
