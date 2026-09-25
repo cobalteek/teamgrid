@@ -5,6 +5,10 @@ on:
     branches:
       - master
 
+concurrency:
+  group: teamgrid-production-deploy
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -21,13 +25,20 @@ jobs:
           script: |
             set -e
 
+            exec 9>/tmp/teamgrid-production-deploy.lock
+            flock -w 900 9
+
             cd /var/www/teamgrid
 
             echo "Pull latest changes"
             git pull origin master
 
             echo "Install dependencies"
-            npm ci
+            if ! npm ci; then
+              echo "Retry dependency installation after clearing Nuxt cache"
+              rm -rf node_modules/.cache/nuxt
+              npm ci
+            fi
 
             echo "Build application"
             npm run build
