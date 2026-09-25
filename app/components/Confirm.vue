@@ -9,8 +9,6 @@ const props = defineProps<{
   cancelText?: string
 }>()
 
-const isClosing = ref(false)
-
 const emit = defineEmits<{
   (e: 'update:modelValue', v: boolean): void
   (e: 'close'): void
@@ -29,28 +27,14 @@ function handleCancel() {
   emit('close')
 }
 
-async function handleSubmit() {
+function handleSubmit() {
   emit('submit')
-  await nextTick()
-  isClosing.value = true
-  if (!props.isLoading) {
-    emit('close')
-  }
 }
-
-watch(
-  () => props.modelValue,
-  (isOpen) => {
-    if (isOpen) {
-      isClosing.value = false
-    }
-  },
-)
 </script>
 
 <template>
   <Modal :model-value="modelValue" @update:model-value="onUpdateModelValue">
-    <Loading v-if="isLoading || isClosing" class="min-h-[180px] w-full" />
+    <Loading v-if="isLoading" class="min-h-[180px] w-full" />
     <template v-else>
       <div class="px-auto mt-4 flex h-[175px] max-w-[500px] flex-col items-center justify-center">
         <p class="text-lg text-center font-bold p-3 {{ isLoading ? 'opacity-50' : '' }}">

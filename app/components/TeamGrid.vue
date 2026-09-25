@@ -57,6 +57,7 @@ const organizationStore = useOrganizationStore()
 const employeeStore = useEmployeeStore()
 const errorModal = useErrorModal()
 const organization = ref()
+const isSubmitting = ref(false)
 
 const calendarWrapper = ref<HTMLElement | null>(null)
 const eventElements = new Map<string, HTMLElement[]>()
@@ -193,6 +194,7 @@ function eventDidMount(info: any) {
     e.preventDefault()
 
     const shift = await shiftStore.getShiftById(info.event.id)
+    isSubmitting.value = false
     selectedShiftId.value = shift.id
     selectedShiftConfirmDelete.value = `${$t('ui.shiftDeleteConfirm')} ${shift.position.name} ${shift.employee.name} ${locale.value === 'ru' ? formatDateStrLocale(shift.date, 'ru-RU') : formatDateStrLocale(shift.date, 'en-US')}?`
     isDeleteShiftConfirmModalOpen.value = true
@@ -261,9 +263,11 @@ async function checkManagerStatus() {
 }
 
 async function deleteShift(shiftId: string) {
+  isSubmitting.value = true
   try {
     await shiftStore.deleteShift(shiftId)
   } catch (error) {
+    isSubmitting.value = false
     console.log(error)
     errorModal.showError('error.shift.delete')
   } finally {
@@ -301,7 +305,9 @@ onMounted(() => {
   <div class="hidden min-w-0 md:block" ref="calendarWrapper" @click="resetSelection">
     <FullCalendar ref="calendarRef" :options="calendarOptions" />
   </div>
-  <MobileSchedule class="md:hidden" :is-manager="Boolean(isManager)" @add-shift="openShiftModal" />
+  <div class="md:hidden">
+    <MobileSchedule :is-manager="Boolean(isManager)" @add-shift="openShiftModal" />
+  </div>
   <AddShiftModalContent
     :info="infoDate"
     :model-value="isAddShiftModalOpen"
@@ -319,10 +325,10 @@ onMounted(() => {
     v-if="isManager"
     :model-value="isDeleteShiftConfirmModalOpen"
     :message="selectedShiftConfirmDelete"
-    :is-loading="shiftStore.isLoading"
+    :is-loading="isSubmitting"
     submit-text="btn.delete"
     @submit="deleteShift(selectedShiftId)"
     @close="isDeleteShiftConfirmModalOpen = false"
   />
-  <ErrorModalContent :error="errorModal.error.value" />
+  <ErrorModalContent :error="errorModal.error.value" @close="errorModal.close" />
 </template>

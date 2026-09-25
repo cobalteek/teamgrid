@@ -32,8 +32,6 @@ type Field<T> = {
   placeholder: string
 }
 
-const isClosing = ref(false)
-
 function getDeepValue(obj: any, path: string) {
   return path.split('.').reduce((acc, part) => acc && acc[part], obj)
 }
@@ -66,13 +64,8 @@ const handleCancel = () => {
   emit('close')
 }
 
-const handleSubmit = async () => {
+const handleSubmit = () => {
   emit('submit')
-  await nextTick()
-  isClosing.value = true
-  if (!props.isLoading) {
-    emit('close')
-  }
 }
 
 const handleDelete = () => {
@@ -88,22 +81,13 @@ if (props.date) {
 } else {
   formatedDate.value = ''
 }
-
-watch(
-  () => props.modelValue,
-  (isOpen) => {
-    if (isOpen) {
-      isClosing.value = false
-    }
-  },
-)
 </script>
 
 <template>
   <div
     class="flex max-h-[calc(100dvh-1rem)] flex-col items-center justify-center gap-4 overflow-y-auto p-4 pt-12 sm:max-h-[calc(100dvh-3rem)] sm:p-6 sm:pt-8"
   >
-    <Loading v-if="isLoading || isClosing" class="min-h-[180px] w-full" />
+    <Loading v-if="isLoading" class="min-h-[180px] w-full" />
     <template v-else>
       <h2 class="w-full p-1 text-center text-xl font-bold">
         {{ $t(title) + ' ' + (formatedDate ? formatedDate : '') }}

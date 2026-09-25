@@ -18,6 +18,7 @@ const emit = defineEmits<{
 const employeeStore = useEmployeeStore()
 const organizationStore = useOrganizationStore()
 const useInit = useInitializeApp()
+const isSubmitting = ref(false)
 
 const employee = ref<CreateEmployee>({
   name: '',
@@ -82,12 +83,16 @@ const handleSubmit = async () => {
     errorModal.showError('error.auth.positionLength')
     return
   }
+
+  isSubmitting.value = true
+
   try {
     await employeeStore.createEmployee(employee.value as CreateEmployee)
     resetEmployee()
     emit('submit')
     emit('close')
   } catch (e: unknown) {
+    isSubmitting.value = false
     const error = e as {
       statusCode?: number
       status?: number
@@ -114,6 +119,7 @@ watch(
   () => props.modelValue,
   (isOpen) => {
     if (isOpen && organizationStore.currentOrganizationId !== null) {
+      isSubmitting.value = false
       employee.value.organizationId = organizationStore.currentOrganizationId
     }
   },
@@ -141,7 +147,7 @@ watch(
       ]"
       v-model:modelValue="employee"
       submitBtnName="btn.addEmployee"
-      :is-loading="employeeStore.isLoading"
+      :is-loading="isSubmitting"
       @submit="handleSubmit"
       @close="handleCancel"
     />

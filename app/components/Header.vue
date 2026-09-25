@@ -63,7 +63,7 @@ watch(
 
 <template>
   <header
-    class="relative flex flex-wrap items-center gap-3 bg-[var(--bg-header)] px-3 py-3 sm:px-4"
+    class="sticky top-0 z-40 flex flex-wrap items-center gap-3 bg-[var(--bg-header)] px-3 py-3 sm:px-4"
   >
     <NuxtLink to="/" class="shrink-0 font-semibold">TeamGrid</NuxtLink>
     <ClientOnly>

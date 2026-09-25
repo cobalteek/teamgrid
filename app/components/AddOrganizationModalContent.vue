@@ -10,6 +10,7 @@ const newOrganization = ref<Organization>({
 
 const errorModal = useErrorModal()
 const organizationStore = useOrganizationStore()
+const isSubmitting = ref(false)
 
 const props = defineProps<{
   modelValue: boolean
@@ -39,18 +40,31 @@ const handleSubmit = async () => {
     errorModal.showError('error.organization.invalidName')
     return
   }
+
+  isSubmitting.value = true
+
   try {
     await organizationStore.createOrganization(
       newOrganization.value.name,
       newOrganization.value.description,
     )
   } catch (error: any) {
+    isSubmitting.value = false
     errorModal.showError(error.message || 'error.organization.create')
     return
   }
   emit('submit')
   emit('close')
 }
+
+watch(
+  () => props.modelValue,
+  (isOpen) => {
+    if (isOpen) {
+      isSubmitting.value = false
+    }
+  },
+)
 </script>
 
 <template>
@@ -60,7 +74,7 @@ const handleSubmit = async () => {
       :fields="[{ key: 'name', type: 'text', placeholder: 'placeholder.organizationName' }]"
       v-model="newOrganization"
       submitBtnName="ui.organization.add"
-      :is-loading="organizationStore.isLoading"
+      :is-loading="isSubmitting"
       @submit="handleSubmit"
       @close="handleCancel"
     />

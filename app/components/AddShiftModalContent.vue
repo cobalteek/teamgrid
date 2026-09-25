@@ -16,6 +16,7 @@ const positionStore = usePositionStore()
 const shiftStore = useShiftStore()
 
 const errorModal = useErrorModal()
+const isSubmitting = ref(false)
 
 const advancedSettings = ref(false)
 const createShift = ref<CreateShift>({
@@ -95,15 +96,30 @@ const handleSubmit = async () => {
       errorModal.showError('error.form.shiftsEmpty')
       return
     }
-    await shiftStore.createManyShifts(shifts)
+
+    isSubmitting.value = true
+
+    try {
+      await shiftStore.createManyShifts(shifts)
+      emit('submit')
+      resetModal()
+      emit('close')
+    } catch (error: any) {
+      isSubmitting.value = false
+      errorModal.showError(error.message || 'error.shift.create')
+    }
     return
   }
+
+  isSubmitting.value = true
+
   try {
     await shiftStore.createShift(createShift.value)
     emit('submit')
     resetModal()
     emit('close')
   } catch (error: any) {
+    isSubmitting.value = false
     errorModal.showError(error.message || 'error.shift.create')
     return
   }
@@ -169,6 +185,15 @@ watch(
     }
   },
 )
+
+watch(
+  () => props.modelValue,
+  (isOpen) => {
+    if (isOpen) {
+      isSubmitting.value = false
+    }
+  },
+)
 </script>
 
 <template>
@@ -192,12 +217,12 @@ watch(
       ]"
       v-model="createShift"
       submitBtnName="btn.addShift"
-      :is-loading="shiftStore.isLoading"
+      :is-loading="isSubmitting"
       @submit="handleSubmit"
       @close="handleCancel"
     />
     <button
-      v-if="!shiftStore.isLoading"
+      v-if="!isSubmitting"
       class="cursor-pointer pb-2 pl-2 underline"
       @click="toggleAdvancedSettings"
     >
@@ -205,7 +230,7 @@ watch(
     </button>
     <ShiftTemplate
       :date="info.date"
-      v-if="advancedSettings && !shiftStore.isLoading"
+      v-if="advancedSettings && !isSubmitting"
       v-model:model-value="template"
       class="pb-2 pl-2"
     />

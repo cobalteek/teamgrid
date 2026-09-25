@@ -13,8 +13,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update:modelValue', v: boolean): void
-  (e: 'close'): void
-  (e: 'submit'): void
+  (e: 'close' | 'submit'): void
 }>()
 
 function onUpdateModelValue(value: boolean) {
@@ -29,6 +28,7 @@ const initApp = useInitializeApp()
 const employeeStore = useEmployeeStore()
 const positionStore = usePositionStore()
 const organizationStore = useOrganizationStore()
+const isSubmitting = ref(false)
 
 const employee = ref<Employee>({
   id: '',
@@ -62,12 +62,16 @@ async function handleSubmit() {
     errorModal.showError('error.invalidEmail')
     return
   }
+
+  isSubmitting.value = true
+
   try {
     await employeeStore.changeEmployee(employee.value)
 
     emit('submit')
     emit('close')
   } catch (e) {
+    isSubmitting.value = false
     console.log(e)
   } finally {
     await initApp.init()
@@ -79,18 +83,22 @@ function handleCancel() {
 }
 
 async function handleDelete() {
-  const isManager = await organizationStore.isManager()
-
-  if (!isManager) {
-    showError('error.onlyManager')
-    return
-  }
+  isSubmitting.value = true
 
   try {
+    const isManager = await organizationStore.isManager()
+
+    if (!isManager) {
+      isSubmitting.value = false
+      errorModal.showError('error.onlyManager')
+      return
+    }
+
     await employeeStore.deleteEmployee(employee.value.id)
     emit('close')
   } catch (e) {
-    showError(e as string)
+    isSubmitting.value = false
+    errorModal.showError(e as string)
     console.error(e)
   } finally {
     await initApp.init()
@@ -101,10 +109,15 @@ watch(
   () => props.modelValue,
   (isOpen) => {
     if (isOpen) {
+      isSubmitting.value = false
       const _employee = employeeStore.employees.find((employee) => employee.id === props.employeeId)
 
       if (_employee) {
-        employee.value = _employee
+        employee.value = {
+          ..._employee,
+          position: { ..._employee.position },
+          organization: { ..._employee.organization },
+        }
       }
     }
   },
@@ -114,8 +127,8 @@ watch(
 <template>
   <Modal :model-value="modelValue" @update:model-value="onUpdateModelValue">
     <Form
-      class="max-h-[calc(100vh-10rem)] w-[300px] overflow-y-auto"
       v-if="employee"
+      v-model:model-value="employee"
       title="ui.employeeEdit"
       :fields="[
         { key: 'name', type: 'text', placeholder: 'placeholder.firstName' },
@@ -130,14 +143,17 @@ watch(
           selectOption: positionStore.options,
         },
       ]"
-      v-model:modelValue="employee"
-      submitBtnName="btn.save"
-      :is-loading="employeeStore.isLoading"
+      submit-btn-name="btn.save"
+      :is-loading="isSubmitting"
       :delete="true"
       @submit="handleSubmit"
       @close="handleCancel"
       @delete="handleDelete"
     />
   </Modal>
-  <ErrorModalContent :error="errorModal.error.value" @close="errorModal.close" />
+  <ErrorModalContent
+    :error="errorModal.error.value"
+    class="top-1/4 h-[200px] w-[300px]"
+    @close="errorModal.close"
+  />
 </template>

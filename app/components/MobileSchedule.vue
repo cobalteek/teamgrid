@@ -57,6 +57,8 @@ const gridLoadedEnd = ref(loadedEnd.value)
 const selectedGridDay = ref<string | null>(null)
 const isOpenDeleteConfirm = ref(false)
 const selectedShiftConfirmDelete = ref('')
+const isSubmitting = ref(false)
+const errorModal = useErrorModal()
 const selectedShiftId = ref('')
 let observer: IntersectionObserver | null = null
 let lastScrollY = 0
@@ -356,8 +358,9 @@ function addShiftFromGridDay() {
 }
 
 async function openDeleteConfirm(shiftId: string) {
+  isSubmitting.value = false
   const shift = await shiftStore.getShiftById(shiftId)
-  if(!shift) {
+  if (!shift) {
     return
   }
   selectedShiftId.value = shift.id
@@ -367,7 +370,16 @@ async function openDeleteConfirm(shiftId: string) {
 }
 
 async function deleteShift(shiftId: string) {
-  await shiftStore.deleteShift(shiftId)
+  isSubmitting.value = true
+  try {
+    await shiftStore.deleteShift(shiftId)
+  } catch (error) {
+    isSubmitting.value = false
+    console.log(error)
+    errorModal.showError('error.shift.delete')
+  } finally {
+    isOpenDeleteConfirm.value = false
+  }
 }
 
 function updateVisibleMonth() {
@@ -494,11 +506,11 @@ onBeforeUnmount(() => {
     class="mobile-schedule w-full min-w-0 pt-1 pb-6"
     aria-label="Mobile schedule"
   >
-  <Confirm
+    <Confirm
       v-if="isManager"
       :model-value="isOpenDeleteConfirm"
       :message="selectedShiftConfirmDelete"
-      :is-loading="shiftStore.isLoading"
+      :is-loading="isSubmitting"
       submit-text="btn.delete"
       @submit="deleteShift(selectedShiftId)"
       @close="isOpenDeleteConfirm = false"
@@ -581,4 +593,8 @@ onBeforeUnmount(() => {
       @delete-shift="openDeleteConfirm"
     />
   </section>
+  <ErrorModalContent
+    :error="errorModal.error.value"
+    @close="errorModal.close"
+  />
 </template>

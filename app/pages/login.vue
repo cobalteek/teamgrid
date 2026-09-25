@@ -15,6 +15,8 @@ const form = ref({
 
 const errorModal = useErrorModal()
 
+const isSubmitting = ref(false)
+
 async function onLogin() {
   if (form.value.email === '' || form.value.password === '') {
     errorModal.showError('error.form.fieldsEmpty')
@@ -24,11 +26,14 @@ async function onLogin() {
     return
   }
 
+  isSubmitting.value = true
+
   try {
     await auth.login(form.value)
 
     await navigateTo('/dashboard')
   } catch (e: unknown) {
+    isSubmitting.value = false
     const error = e as { statusCode?: number; status?: number; response?: { status?: number } }
     const status = error.statusCode || error.status || error.response?.status
     if (status === 401) {
@@ -50,7 +55,7 @@ definePageMeta({
     :disc="$t('auth.noAccount')"
     :text-link="$t('auth.signUp')"
     link="/sign-up"
-    :is-loading="auth.isLoading"
+    :is-loading="isSubmitting"
     v-model="form"
     @submit="onLogin"
   />
