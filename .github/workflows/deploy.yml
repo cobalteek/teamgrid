@@ -8,7 +8,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    environment:
+      name: production
+      url: https://cobalteek.tech/teamgrid-dev 
     steps:
       - name: Deploy to production
         uses: appleboy/ssh-action@v1
