@@ -1,43 +1,17 @@
 <script setup lang="ts">
-import { marked } from 'marked'
+import newsData from '~/data/news.json'
 
-const news = [
-  `
-### Расписание и состояния загрузки
+type NewsItem = {
+  id: string
+  title: string
+  summary: string
+  items: string[]
+  version: string
+}
 
-- добавлено подтверждение перед удалением сотрудников и смен;
-- формы показывают единый индикатор загрузки и блокируют повторную отправку;
-- массовое создание смен стало стабильнее;
-- исправлено отображение смен и обновление календаря после изменений;
-- улучшены сообщения об ошибках на русском и английском языках.
-
-Техническая версия: \`f7f56da\`
-`,
-  `
-### Новости появились на главной
-
-На главную страницу добавлен раздел с описанием последних изменений в Markdown-формате.
-
-Техническая версия: \`8d0fb03\`
-`,
-  `
-### Новости и кнопки стали удобнее
-
-- на главной можно пролистывать три последних обновления;
-- при открытии сразу показывается самая свежая новость;
-- кнопки сохранения, удаления и отмены получили понятные состояния и единое оформление.
-
-Техническая версия: \`cf8ee7d\`
-`,
-  `
-### Формы закрываются плавнее
-
-После отправки формы индикатор загрузки остаётся на экране до закрытия окна. Теперь между завершением запроса и закрытием формы не появляется её содержимое на долю секунды.
-`,
-]
-
-const currentIndex = ref(news.length - 1)
-const html = computed(() => marked.parse(news[currentIndex.value] ?? '', { async: false }))
+const news = newsData as NewsItem[]
+const currentIndex = ref(0)
+const currentNews = computed(() => news[currentIndex.value])
 
 function showPrevious() {
   currentIndex.value = (currentIndex.value - 1 + news.length) % news.length
@@ -53,11 +27,21 @@ function showNext() {
     <div class="mb-5 flex items-center justify-start">
       <h2 class="text-2xl font-bold text-[var(--text-main)]">Что нового</h2>
     </div>
-    <article
-      :key="currentIndex"
-      class="min-h-52 text-left text-[var(--text-soft)] [&_code]:rounded [&_code]:bg-[var(--bg-context)] [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-sm [&_code]:text-[var(--text-main)] [&_h3]:mb-3 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-[var(--text-main)] [&_p]:mb-4 [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-5"
-      v-html="html"
-    />
+    <article v-if="currentNews" :key="currentNews.id" class="min-h-52 text-left">
+      <h3 class="mb-3 text-lg font-semibold text-[var(--text-main)]">
+        {{ currentNews.title }}
+      </h3>
+      <p class="mb-4 text-[var(--text-soft)]">{{ currentNews.summary }}</p>
+      <ul
+        v-if="currentNews.items.length"
+        class="mb-4 list-disc space-y-2 pl-5 text-[var(--text-soft)]"
+      >
+        <li v-for="item in currentNews.items" :key="item">{{ item }}</li>
+      </ul>
+      <p v-if="currentNews.version" class="text-sm text-[var(--text-muted)]">
+        {{ currentNews.version }}
+      </p>
+    </article>
     <nav class="flex items-center justify-between" aria-label="Переключение новостей">
       <button
         type="button"
