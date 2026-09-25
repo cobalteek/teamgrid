@@ -1,26 +1,30 @@
 import tailwindcss from '@tailwindcss/vite'
 
+const appBaseURL = process.env.NUXT_APP_BASE_URL || '/teamgrid/'
+const appBasePath = appBaseURL.replace(/\/$/, '')
+const isDevApp = appBasePath.endsWith('-dev')
+
 export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
 
   app: {
-    baseURL: process.env.NUXT_APP_BASE_URL || '/teamgrid/',
+    baseURL: appBaseURL,
     head: {
       link: [
         {
           rel: 'icon',
           type: 'image/x-icon',
-          href: '/teamgrid/favicon.ico',
+          href: `${appBasePath}/${isDevApp ? 'favicon-dev.ico' : 'favicon.ico'}`,
         },
         {
           rel: 'apple-touch-icon',
           sizes: '180x180',
-          href: '/teamgrid/apple-touch-icon.png',
+          href: `${appBasePath}/${isDevApp ? 'apple-touch-icon-dev.png' : 'apple-touch-icon.png'}`,
         },
       ],
       meta: [
         { name: 'apple-mobile-web-app-capable', content: 'yes' },
-        { name: 'apple-mobile-web-app-title', content: 'TeamGrid' },
+        { name: 'apple-mobile-web-app-title', content: isDevApp ? 'TeamGrid Dev' : 'TeamGrid' },
       ],
     },
   },

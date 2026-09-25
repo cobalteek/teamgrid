@@ -109,10 +109,11 @@ export const usePositionStore = defineStore('position', () => {
     }
   }
 
-  const options = computed(() => positions.value.map((p) => ({ value: p.id, label: p.name })))
-
+  const options = computed(() =>
+    [...positions.value].sort((a,b) => a.name.localeCompare(b.name)).map((p) => ({ value: p.id, label: p.fullName })),
+  )
   const optionsFull = computed(() =>
-    positions.value.map((p) => ({ value: p.id, label: p.fullName })),
+    [...positions.value].sort((a,b) => a.fullName.localeCompare(b.fullName)).map((p) => ({ value: p.id, label: p.fullName })),
   )
 
   async function deletePosition(positionId: number) {
