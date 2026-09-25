@@ -7,7 +7,7 @@ import { ruBetterLocale, enBetterLocale } from '~~/shared/utils/betterLocaleCale
 import { useShiftStore } from '../stores/shift'
 import { useOrganizationStore } from '../stores/organization'
 import { useEmployeeStore } from '../stores/employee'
-import { formatDateStrLocale, formatDateStr } from '~~/shared/utils/formatDate'
+import { formatDateStrLocale } from '~~/shared/utils/formatDate'
 
 const { locale } = useI18n()
 const props = defineProps<{
@@ -52,6 +52,7 @@ const isManager = ref()
 const isAddEmployeeModalOpen = ref(false)
 const isEditOrganizationModalOpen = ref(false)
 const isDeleteShiftConfirmModalOpen = ref(false)
+const isDeleteShiftsModalOpen = ref(false)
 
 const organizationStore = useOrganizationStore()
 const employeeStore = useEmployeeStore()
@@ -123,12 +124,18 @@ const calendarOptions = computed(() => ({
         isEditOrganizationModalOpen.value = true
       },
     },
+    deleteShifts: {
+      text: $t('btn.deleteShifts') as string,
+      click: () => {
+        isDeleteShiftsModalOpen.value = true
+      },
+    },
   },
 
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
-    right: isManager.value ? 'addEmployee editOrganization' : '',
+    right: isManager.value ? 'addEmployee editOrganization deleteShifts' : '',
   },
 
   titleFormat: (date: any) => {
@@ -302,10 +309,19 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="hidden min-w-0 md:block" ref="calendarWrapper" @click="resetSelection">
+  <div ref="calendarWrapper" class="hidden min-w-0 md:block" @click="resetSelection">
     <FullCalendar ref="calendarRef" :options="calendarOptions" />
   </div>
   <div class="md:hidden">
+    <div v-if="isManager" class="flex justify-end px-1 pt-2">
+      <button
+        type="button"
+        class="min-h-11 rounded-md border border-[var(--border-main)] bg-[var(--bg-context)] px-3 text-sm text-[var(--btn-delete-text)]"
+        @click="isDeleteShiftsModalOpen = true"
+      >
+        {{ $t('btn.deleteShifts') }}
+      </button>
+    </div>
     <MobileSchedule :is-manager="Boolean(isManager)" @add-shift="openShiftModal" />
   </div>
   <AddShiftModalContent
@@ -320,6 +336,11 @@ onMounted(() => {
   <EditOrganizationModalContent
     :model-value="isEditOrganizationModalOpen"
     @close="isEditOrganizationModalOpen = false"
+  />
+  <DeleteShiftsModalContent
+    v-if="isManager"
+    :model-value="isDeleteShiftsModalOpen"
+    @close="isDeleteShiftsModalOpen = false"
   />
   <Confirm
     v-if="isManager"

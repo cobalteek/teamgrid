@@ -32,30 +32,44 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const _endDate = new Date(endDate)
+  const hasDateRange = Boolean(startDate && endDate)
+  const hasEmployees = Array.isArray(employeeIds) && employeeIds.length > 0
+  const hasPositions = Array.isArray(positionIds) && positionIds.length > 0
+  const shouldDeleteAll = deleteAll === true
 
-  const dayAfterEndDate = new Date(_endDate.getTime() + 24 * 60 * 60 * 1000)
+  if (!shouldDeleteAll && !hasDateRange && !hasEmployees && !hasPositions) {
+    throw createError({ statusCode: 400, statusMessage: 'error.bulk.notFound' })
+  }
 
-  await prisma.shift.deleteMany({
-    where: {
-      organizationId,
-      ...(startDate &&
-        endDate && {
-          date: {
-            gte: startDate,
-            lt: dayAfterEndDate,
-          },
-        }),
-      ...(employeeIds?.length && {
-        employeeId: { in: employeeIds },
-      }),
-      ...(positionIds?.length && {
-        positionId: { in: positionIds },
-      }),
-    },
-  })
+  if (Boolean(startDate) !== Boolean(endDate)) {
+    throw createError({ statusCode: 400, statusMessage: 'error.form.dateRangeRequired' })
+  }
+
+  const start = hasDateRange ? new Date(`${startDate}T00:00:00Z`) : null
+  const end = hasDateRange ? new Date(`${endDate}T00:00:00Z`) : null
+
+  if (
+    start &&
+    end &&
+    (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || start > end)
+  ) {
+    throw createError({ statusCode: 400, statusMessage: 'error.form.startOlderEnd' })
+  }
+
+  const dayAfterEndDate = end ? new Date(end.getTime() + 24 * 60 * 60 * 1000) : null
+  const where = {
+    organizationId,
+    ...(!shouldDeleteAll && start && dayAfterEndDate
+      ? { date: { gte: start, lt: dayAfterEndDate } }
+      : {}),
+    ...(!shouldDeleteAll && hasEmployees ? { employeeId: { in: employeeIds } } : {}),
+    ...(!shouldDeleteAll && hasPositions ? { positionId: { in: positionIds } } : {}),
+  }
+
+  const result = await prisma.shift.deleteMany({ where })
 
   return {
     success: true,
+    deletedCount: result.count,
   }
 })

@@ -24,6 +24,14 @@ export type CreateShift = {
   positionId: number
 }
 
+export type DeleteShiftFilters = {
+  startDate?: string
+  endDate?: string
+  employeeIds?: string[]
+  positionIds?: number[]
+  deleteAll?: boolean
+}
+
 export type ScheduleTemplate = {
   workDays: number
   restDays: number
