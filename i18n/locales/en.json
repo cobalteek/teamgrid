@@ -68,7 +68,8 @@
     "edit": "Edit",
     "editEmployee": "Edit Employee",
     "addEvent": "Add an event",
-    "addShift": "Add shift"
+    "addShift": "Add shift",
+    "deleteShifts": "Delete shifts"
   },
   "select": {
     "selectUser": "Select user",
@@ -127,7 +128,8 @@
       "fieldsEmpty": "The fields are empty.",
       "workDaysZero": "The number of working days cannot be zero.",
       "startOlderEnd": "The start date cannot be later than the end date.",
-      "shiftsEmpty": "The shift list cannot be empty."
+      "shiftsEmpty": "The shift list cannot be empty.",
+      "dateRangeRequired": "Select both boundaries of the date range."
     },
     "auth": {
       "credentials": "Invalid credentials",
@@ -280,6 +282,13 @@
     "roles": "roles",
     "shift": {
       "deleteConfirm": "Delete"
+    },
+    "bulkDelete": {
+      "title": "Quick shift deletion",
+      "description": "Select a date range, employees, or positions. Selected filters are applied together.",
+      "deleteAll": "Delete all organization shifts",
+      "confirmAll": "I understand that all organization shifts will be permanently deleted.",
+      "submit": "Delete shifts"
     }
   },
   "modal": {
