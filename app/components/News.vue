@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import newsData from '~/data/news.json'
 
+type NewsBranch = 'master' | 'develop'
+
 type NewsItem = {
   id: string
+  branch: NewsBranch
   title: string
   summary: string
   items: string[]
@@ -11,14 +14,28 @@ type NewsItem = {
 
 const news = newsData as NewsItem[]
 const currentIndex = ref(0)
-const currentNews = computed(() => news[currentIndex.value])
+
+const activeBranch: NewsBranch =
+  process.env.NODE_ENV === 'production' ? 'master' : 'develop'
+
+const visibleNews = computed(() =>
+  news.filter((item) => item.branch === activeBranch),
+)
+
+const currentNews = computed(() => visibleNews.value[currentIndex.value])
 
 function showPrevious() {
-  currentIndex.value = (currentIndex.value - 1 + news.length) % news.length
+  const length = visibleNews.value.length
+  if (!length) return
+
+  currentIndex.value = (currentIndex.value - 1 + length) % length
 }
 
 function showNext() {
-  currentIndex.value = (currentIndex.value + 1) % news.length
+  const length = visibleNews.value.length
+  if (!length) return
+
+  currentIndex.value = (currentIndex.value + 1) % length
 }
 </script>
 
@@ -54,8 +71,8 @@ function showNext() {
       </button>
       <div class="flex items-center gap-2">
         <button
-          v-for="(_, index) in news"
-          :key="index"
+          v-for="(item, index) in visibleNews"
+          :key="item.id"
           type="button"
           class="size-2 rounded-full transition-colors"
           :class="index === currentIndex ? 'bg-[var(--text-main)]' : 'bg-[var(--text-muted)]'"
