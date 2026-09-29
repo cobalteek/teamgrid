@@ -121,7 +121,9 @@ export const useEmployeeStore = defineStore('employee', () => {
   }
 
   const options = computed(() =>
-    [...employees.value].sort((a, b) => a.surname.localeCompare(b.surname)).map((e) => ({ value: e.id, label: `${e.surname} ${e.name} ${e.middlename}` }))
+    [...employees.value]
+      .sort((a, b) => a.surname.localeCompare(b.surname))
+      .map((e) => ({ value: e.id, label: `${e.surname} ${e.name} ${e.middlename}` })),
   )
 
   async function deleteEmployee(employeeId: string) {

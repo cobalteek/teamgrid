@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
+import { activeBranch } from '~~/shared/utils/devTools'
 
 const route = useRoute()
 
 const auth = useAuthStore()
-const organizationStore = useOrganizationStore()
 const { user } = storeToRefs(auth)
+const organizationStore = useOrganizationStore()
 const { locale, setLocale } = useI18n()
 
 const isOpenOrganizationModal = ref(false)
@@ -65,7 +66,7 @@ watch(
   <header
     class="sticky top-0 z-40 flex flex-wrap items-center gap-3 bg-[var(--bg-header)] px-3 py-3 sm:px-4"
   >
-    <NuxtLink to="/" class="shrink-0 font-semibold">TeamGrid</NuxtLink>
+    <NuxtLink to="/" class="shrink-0 font-semibold">{{activeBranch === 'master' ? 'TeamGrid' : 'TeamGrid Dev'}}</NuxtLink>
     <ClientOnly>
       <div v-if="user && isDashboard" class="order-3 w-full min-w-0 md:order-none md:w-auto">
         <OrganizationSwitcher @addOrganization="openModal" />
@@ -115,60 +116,15 @@ watch(
         <span class="h-0.5 w-5 rounded-full bg-current" aria-hidden="true" />
         <span class="h-0.5 w-5 rounded-full bg-current" aria-hidden="true" />
       </button>
-      <div
+      <MobileMenu
         v-if="isMobileMenuOpen"
-        class="absolute top-[calc(100%+0.75rem)] right-0 z-50 w-64 rounded-lg border border-[var(--border-main)] bg-[var(--bg-context)] p-2 text-[var(--text-main)] shadow-xl"
-      >
-        <template v-if="user">
-          <NuxtLink
-            to="/dashboard"
-            class="flex min-h-11 items-center rounded-md px-2 font-medium hover:bg-[var(--bg-hover-context)]"
-            @click="goDashboard"
-          >
-            {{ $t('ui.dashboard') }}
-          </NuxtLink>
-          <button
-            v-if="canEditOrganization"
-            type="button"
-            class="flex min-h-11 w-full items-center rounded-md px-2 text-left font-medium hover:bg-[var(--bg-hover-context)]"
-            @click="openEditOrganizationModal"
-          >
-            {{ $t('modal.editOrganization') }}
-          </button>
-        </template>
-        <NuxtLink
-          v-else
-          to="/login"
-          class="flex min-h-11 items-center rounded-md px-2 font-medium hover:bg-[var(--bg-hover-context)]"
-          @click="isMobileMenuOpen = false"
-        >
-          {{ $t('auth.login') }}
-        </NuxtLink>
-        <div class="flex min-h-11 items-center justify-between gap-3 px-2">
-          <span>{{ $t('ui.language') }}</span>
-          <select
-            :value="locale"
-            class="select min-h-9"
-            :aria-label="$t('ui.language')"
-            @change="setLocale(($event.target as HTMLSelectElement).value as 'ru' | 'en')"
-          >
-            <option value="ru">Ru</option>
-            <option value="en">En</option>
-          </select>
-        </div>
-        <div class="flex min-h-11 items-center justify-between gap-3 px-2">
-          <span>{{ $t('ui.theme') }}</span>
-          <ToggleTheme />
-        </div>
-        <button
-          v-if="user"
-          type="button"
-          class="mt-1 flex min-h-11 w-full items-center rounded-md px-2 text-left text-[var(--btn-delete-text)] hover:bg-[var(--bg-hover-context)]"
-          @click="logout"
-        >
-          {{ $t('auth.logout') }}
-        </button>
-      </div>
+        :locale="locale"
+        :can-edit-organization="canEditOrganization"
+        @open-edit-organization-modal="openEditOrganizationModal"
+        @go-dashboard="goDashboard"
+        @logout="logout"
+        @is-open="isMobileMenuOpen, false"
+      />
     </div>
   </header>
   <AddOrganizationModalContent

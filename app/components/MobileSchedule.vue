@@ -593,8 +593,5 @@ onBeforeUnmount(() => {
       @delete-shift="openDeleteConfirm"
     />
   </section>
-  <ErrorModalContent
-    :error="errorModal.error.value"
-    @close="errorModal.close"
-  />
+  <ErrorModalContent :error="errorModal.error.value" @close="errorModal.close" />
 </template>
