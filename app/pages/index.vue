@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import News from '~/components/News.vue'
-import { activeBranch } from '~~/shared/utils/devTools';
+
+const { activeBranch } = useAppConfig()
 
 const auth = useAuthStore()
 </script>
