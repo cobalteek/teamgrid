@@ -40,6 +40,9 @@ jobs:
               npm ci
             fi
 
+            echo "Update database schema"
+            npx prisma db push
+
             echo "Build application"
             npm run build
 
