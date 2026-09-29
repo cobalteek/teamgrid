@@ -119,6 +119,7 @@ if (props.date) {
             </option>
           </select>
         </div>
+        <slot name="before-actions" />
         <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-between">
           <div class="flex gap-2">
             <button

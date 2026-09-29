@@ -128,6 +128,7 @@
       "fieldsEmpty": "The fields are empty.",
       "workDaysZero": "The number of working days cannot be zero.",
       "startOlderEnd": "The start date cannot be later than the end date.",
+      "invalidShiftTime": "The shift end time must be later than the start time.",
       "shiftsEmpty": "The shift list cannot be empty.",
       "dateRangeRequired": "Select both boundaries of the date range."
     },
@@ -235,7 +236,8 @@
   "validation": {
     "candidate": "Fill in all fields",
     "shift": {
-      "requiredFields": "Fill in all required shift fields"
+      "requiredFields": "Fill in all required shift fields",
+      "invalidTime": "Enter a valid shift start and end time"
     },
     "employee": {
       "requiredFields": "Fill in all required employee fields"
@@ -270,6 +272,10 @@
     "employeeEdit": "Edit Employee",
     "positionEdit": "Edit Position",
     "advancedSettings": "Advanced Settings",
+    "shiftTime": "Shift time",
+    "timeFrom": "Starts",
+    "timeTo": "Ends",
+    "noRestDays": "Create a schedule without days off?",
     "templateGrid": "Grid Template",
     "workDays": "Work Days",
     "restDays": "Rest Days",

@@ -14,21 +14,24 @@ const props = defineProps<{
 const employeeStore = useEmployeeStore()
 const positionStore = usePositionStore()
 const shiftStore = useShiftStore()
+const { t } = useI18n()
 
 const errorModal = useErrorModal()
 const isSubmitting = ref(false)
 
 const advancedSettings = ref(false)
+const templateEnabled = ref(false)
 const createShift = ref<CreateShift>({
   date: '',
   employeeId: '',
   positionId: positionStore.positions[0]?.id ? positionStore.positions[0].id : 1,
+  allDay: true,
 })
 
 const template = ref<ScheduleTemplate>({
   workDays: 0,
   restDays: 0,
-  endDate: new Date().toISOString().split('T')[0] ?? '',
+  endDate: props.info.dateStr ?? new Date().toISOString().split('T')[0] ?? '',
 })
 
 const emit = defineEmits<{
@@ -47,9 +50,15 @@ function onUpdateModelValue(value: boolean) {
 }
 
 function resetModal() {
+  advancedSettings.value = false
+  templateEnabled.value = false
   createShift.value.employeeId = ''
   createShift.value.positionId = 1
-  template.value.endDate = new Date().toISOString().split('T')[0] ?? ''
+  createShift.value.allDay = true
+  createShift.value.startTime = undefined
+  createShift.value.endTime = undefined
+
+  template.value.endDate = props.info.dateStr ?? new Date().toISOString().split('T')[0] ?? ''
   template.value.restDays = 0
   template.value.workDays = 0
 }
@@ -65,15 +74,25 @@ const handleSubmit = async () => {
     errorModal.showError('error.form.fieldsEmpty')
     return
   }
-  if (advancedSettings.value) {
+  if (!createShift.value.allDay) {
+    if (
+      createShift.value.startTime === undefined ||
+      createShift.value.endTime === undefined ||
+      createShift.value.startTime >= createShift.value.endTime
+    ) {
+      errorModal.showError('error.form.invalidShiftTime')
+      return
+    }
+  }
+
+  if (templateEnabled.value) {
     if (!template.value.endDate || !template.value.workDays) {
       errorModal.showError('error.form.fieldsEmpty')
       return
     }
     if (!template.value.restDays) {
-      const confirmed = confirm('ui.notRestDays')
+      const confirmed = confirm(t('ui.noRestDays'))
       if (!confirmed) {
-        errorModal.showInfo('info.shiftManyCancel')
         return
       }
     }
@@ -155,6 +174,9 @@ function generateShifts(createShift: CreateShift, template: ScheduleTemplate) {
         date: dateStr,
         employeeId: createShift.employeeId,
         positionId: createShift.positionId,
+        allDay: createShift.allDay,
+        startTime: createShift.startTime,
+        endTime: createShift.endTime,
       }
 
       newShifts.push(newShift)
@@ -199,6 +221,7 @@ watch(
 <template>
   <Modal :model-value="modelValue" @update:model-value="onUpdateModelValue">
     <Form
+      class="sm:w-[640px]"
       title="btn.addShift"
       :date="info.date"
       :selects="[
@@ -220,20 +243,30 @@ watch(
       :is-loading="isSubmitting"
       @submit="handleSubmit"
       @close="handleCancel"
-    />
-    <button
-      v-if="!isSubmitting"
-      class="cursor-pointer pb-2 pl-2 underline"
-      @click="toggleAdvancedSettings"
     >
-      {{ $t('ui.advancedSettings') }}
-    </button>
-    <ShiftTemplate
-      :date="info.date"
-      v-if="advancedSettings && !isSubmitting"
-      v-model:model-value="template"
-      class="pb-2 pl-2"
-    />
+      <template #before-actions>
+        <div v-if="!isSubmitting" class="border-t border-[var(--border-main)] pt-3">
+          <button
+            type="button"
+            class="flex min-h-11 w-full items-center justify-between text-left font-medium"
+            :aria-expanded="advancedSettings"
+            @click="toggleAdvancedSettings"
+          >
+            <span>{{ $t('ui.advancedSettings') }}</span>
+            <span aria-hidden="true" class="text-xl font-normal">
+              {{ advancedSettings ? '−' : '+' }}
+            </span>
+          </button>
+          <ShiftTemplate
+            v-if="advancedSettings"
+            v-model:model-value="template"
+            v-model:shift="createShift"
+            v-model:template-enabled="templateEnabled"
+            :date="info.date"
+          />
+        </div>
+      </template>
+    </Form>
   </Modal>
   <ErrorModalContent
     :error="errorModal.error.value"

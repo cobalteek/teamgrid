@@ -87,6 +87,9 @@ export default defineEventHandler(async (event) => {
               name: true,
             },
           },
+          allDay: true,
+          startTime: true,
+          endTime: true,
         },
       })
 
@@ -142,6 +145,9 @@ export default defineEventHandler(async (event) => {
             name: true,
           },
         },
+        allDay: true,
+        startTime: true,
+        endTime: true,
       },
     })
 
@@ -157,6 +163,9 @@ export default defineEventHandler(async (event) => {
       date: shift.date,
       employeeId: shift.employeeId,
       positionId: shift.positionId,
+      allDay: shift.allDay,
+      startTime: shift.startTime,
+      endTime: shift.endTime,
       employee: {
         id: shift.employee.id,
         name: shift.employee.name,

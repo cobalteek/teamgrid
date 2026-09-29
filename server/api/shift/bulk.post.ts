@@ -30,15 +30,39 @@ export default defineEventHandler(async (event) => {
         statusMessage: t('validation.shift.requiredFields'),
       })
     }
+
+    const allDay = shift.allDay !== false
+    if (
+      !allDay &&
+      (!Number.isInteger(shift.startTime) ||
+        !Number.isInteger(shift.endTime) ||
+        shift.startTime < 0 ||
+        shift.startTime > 1439 ||
+        shift.endTime < 0 ||
+        shift.endTime > 1439 ||
+        shift.startTime >= shift.endTime)
+    ) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: t('validation.shift.invalidTime'),
+      })
+    }
   }
   try {
     const createdShifts = await prisma.$transaction(
-      shifts.map((shift) =>
-        prisma.shift.create({
-          data: { ...shift, organizationId },
+      shifts.map((shift) => {
+        const allDay = shift.allDay !== false
+        return prisma.shift.create({
+          data: {
+            ...shift,
+            organizationId,
+            allDay,
+            startTime: allDay ? null : shift.startTime,
+            endTime: allDay ? null : shift.endTime,
+          },
           include: { employee: true, position: true, organization: true },
-        }),
-      ),
+        })
+      }),
     )
     return createdShifts
   } catch (error) {
