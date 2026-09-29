@@ -9,11 +9,30 @@ export default defineEventHandler(async (event) => {
   const organizationId = query.organizationId ? Number(query.organizationId) : undefined
 
   const { date, employeeId, positionId } = body
+  const allDay = body.allDay !== false
+  const startTime = allDay ? null : body.startTime
+  const endTime = allDay ? null : body.endTime
 
   if (!date || !employeeId || !positionId) {
     throw createError({
       statusCode: 400,
       statusMessage: t('validation.shift.requiredFields'),
+    })
+  }
+
+  if (
+    !allDay &&
+    (!Number.isInteger(startTime) ||
+      !Number.isInteger(endTime) ||
+      startTime < 0 ||
+      startTime > 1439 ||
+      endTime < 0 ||
+      endTime > 1439 ||
+      startTime >= endTime)
+  ) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: t('validation.shift.invalidTime'),
     })
   }
 
@@ -62,6 +81,9 @@ export default defineEventHandler(async (event) => {
         employeeId,
         positionId,
         organizationId,
+        allDay,
+        startTime,
+        endTime,
       },
       include: {
         employee: true,

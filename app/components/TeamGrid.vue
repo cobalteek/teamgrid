@@ -29,17 +29,40 @@ const selectedEmployeeId = ref<number | null>(null)
 const selectedPositionId = ref<number | null>(null)
 const selectedShiftId = ref<string>('')
 const selectedShiftConfirmDelete = ref<string>('')
+
+function getShiftDateTime(date: Date, minutes: number | null) {
+  const dateKey = new Date(date).toISOString().split('T')[0]
+  if (!dateKey || minutes === null) return dateKey
+
+  const hours = String(Math.floor(minutes / 60)).padStart(2, '0')
+  const restMinutes = String(minutes % 60).padStart(2, '0')
+  return `${dateKey}T${hours}:${restMinutes}:00`
+}
+
+function formatShiftTime(minutes: number) {
+  const hours = String(Math.floor(minutes / 60)).padStart(2, '0')
+  const restMinutes = String(minutes % 60).padStart(2, '0')
+  return `${hours}:${restMinutes}`
+}
+
+function getShiftTimeLabel(startTime: number | null, endTime: number | null) {
+  if (startTime === null || endTime === null) return null
+  return `${formatShiftTime(startTime)}–${formatShiftTime(endTime)}`
+}
+
 const events = computed(() => {
   return shiftStore.shifts.map((shift) => {
     return {
       id: shift.id,
       title: `${shift.position.name} ${shift.employee.name}`,
-      start: new Date(shift.date).toISOString().split('T')[0],
-      allDay: true,
+      start: getShiftDateTime(shift.date, shift.allDay ? null : shift.startTime),
+      allDay: shift.allDay,
+      end: shift.allDay ? undefined : getShiftDateTime(shift.date, shift.endTime),
 
       extendedProps: {
         employeeId: shift.employee.id,
         positionId: shift.position.id,
+        timeLabel: shift.allDay ? null : getShiftTimeLabel(shift.startTime, shift.endTime),
 
         employeeColor: shift.employee.color,
         positionColor: shift.position.color,
@@ -94,6 +117,7 @@ const calendarOptions = computed(() => ({
   aspectRatio: 1.2,
   locale: locale.value === 'ru' ? ruBetterLocale : enBetterLocale,
   firstDay: 1,
+  displayEventTime: false,
   dateClick: function (info: any) {
     if (!isManager.value) {
       return
@@ -189,8 +213,8 @@ function eventDidMount(info: any) {
     linear-gradient(
       110deg,
       ${positionColor} 0%,
-      ${positionColor} 50%,
-      ${employeeColor} 50%,
+      ${positionColor} 35%,
+      ${employeeColor} 65%,
       ${employeeColor} 100%
     )
   `
@@ -310,7 +334,21 @@ onMounted(() => {
 
 <template>
   <div ref="calendarWrapper" class="hidden min-w-0 md:block" @click="resetSelection">
-    <FullCalendar ref="calendarRef" :options="calendarOptions" />
+    <FullCalendar ref="calendarRef" :options="calendarOptions">
+      <template #eventContent="{ event }">
+        <div class="w-full min-w-0 px-1 py-0.5 leading-tight">
+          <time
+            v-if="event.extendedProps.timeLabel"
+            class="mx-auto mb-0.5 block w-fit rounded-sm bg-black/30 px-1.5 py-0.5 text-[11px] font-bold text-white"
+          >
+            {{ event.extendedProps.timeLabel }}
+          </time>
+          <div class="truncate text-center text-xs font-medium text-white" :title="event.title">
+            {{ event.title }}
+          </div>
+        </div>
+      </template>
+    </FullCalendar>
   </div>
   <div class="md:hidden">
     <div v-if="isManager" class="flex justify-end px-1 pt-2">

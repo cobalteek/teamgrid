@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import newsData from '~/data/news.json'
-
-type NewsBranch = 'master' | 'develop'
+import { activeBranch } from '~~/shared/utils/devTools'
+import type { Branch } from '~~/types/utils'
 
 type NewsItem = {
   id: string
-  branch: NewsBranch
+  branch: Branch
   title: string
   summary: string
   items: string[]
@@ -15,12 +15,7 @@ type NewsItem = {
 const news = newsData as NewsItem[]
 const currentIndex = ref(0)
 
-const activeBranch: NewsBranch =
-  process.env.NODE_ENV === 'production' ? 'master' : 'develop'
-
-const visibleNews = computed(() =>
-  news.filter((item) => item.branch === activeBranch),
-)
+const visibleNews = computed(() => news.filter((item) => item.branch === activeBranch))
 
 const currentNews = computed(() => visibleNews.value[currentIndex.value])
 

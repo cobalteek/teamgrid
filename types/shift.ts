@@ -10,6 +10,9 @@ export type Shift = {
     id: number
     name: string
   }
+  allDay: boolean
+  startTime: number | null
+  endTime: number | null
 }
 
 export type ShiftWithRelations = Shift & {
@@ -22,6 +25,9 @@ export type CreateShift = {
   date: string
   employeeId: string
   positionId: number
+  allDay: boolean
+  startTime?: number
+  endTime?: number
 }
 
 export type DeleteShiftFilters = {
