@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
-import { activeBranch } from '~~/shared/utils/devTools'
 
 const route = useRoute()
 
@@ -9,6 +8,7 @@ const auth = useAuthStore()
 const { user } = storeToRefs(auth)
 const organizationStore = useOrganizationStore()
 const { locale, setLocale } = useI18n()
+const { activeBranch } = useAppConfig()
 
 const isOpenOrganizationModal = ref(false)
 const isEditOrganizationModalOpen = ref(false)

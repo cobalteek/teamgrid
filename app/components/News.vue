@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import newsData from '~/data/news.json'
-import { activeBranch } from '~~/shared/utils/devTools'
 import type { Branch } from '~~/types/utils'
 
 type NewsItem = {
@@ -14,6 +13,8 @@ type NewsItem = {
 
 const news = newsData as NewsItem[]
 const currentIndex = ref(0)
+
+const { activeBranch } = useAppConfig()
 
 const visibleNews = computed(() => news.filter((item) => item.branch === activeBranch))
 

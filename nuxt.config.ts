@@ -5,6 +5,9 @@ const appBasePath = appBaseURL.replace(/\/$/, '')
 const isDevApp = appBasePath.endsWith('-dev')
 
 export default defineNuxtConfig({
+  appConfig: {
+    activeBranch: isDevApp ? 'develop' : 'master',
+  },
   css: ['~/assets/css/main.css'],
 
   app: {
