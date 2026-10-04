@@ -3,6 +3,11 @@ import { prisma } from '~~/server/utils/prisma'
 import { Prisma } from '@prisma/client'
 import { enforceRateLimit } from '~~/server/utils/rate-limit'
 import { isValidEmail, isValidName, isValidPassword } from '~~/shared/utils/validation'
+import { sendEmail } from '~~/server/utils/mailer'
+import {
+  buildEmailVerificationUrl,
+  createEmailVerificationToken,
+} from '~~/server/utils/email-verification'
 
 export default defineEventHandler(async (event) => {
   const t = await useTranslation(event)
@@ -51,13 +56,23 @@ export default defineEventHandler(async (event) => {
 
     const hash = await bcrypt.hash(password, 10)
 
-    await prisma.$transaction(async (tx) => {
+    const { rawToken, tokenHash, expiresAt } = createEmailVerificationToken()
+
+    const registration = await prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
         data: {
           email,
           password: hash,
           name,
           gender,
+        },
+      })
+
+      await tx.emailVerificationToken.create({
+        data: {
+          userId: user.id,
+          tokenHash,
+          expiresAt,
         },
       })
 
@@ -116,6 +131,21 @@ export default defineEventHandler(async (event) => {
         selfMembership,
         organization,
       }
+    })
+
+    const verificationUrl = buildEmailVerificationUrl(rawToken)
+
+    await sendEmail({
+      to: registration.user.email,
+      subject: 'Подтвердите электронную почту TeamGrid',
+      text: [
+        `Здравствуйте, ${registration.user.name}!`,
+        '',
+        'Для подтверждения электронной почты перейдите по ссылке:',
+        verificationUrl,
+        '',
+        'Ссылка действительна 24 часа.',
+      ].join('\n'),
     })
   } catch (error: unknown) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
