@@ -36,6 +36,7 @@ export async function sendEmail({ to, subject, text, html }: SendEmailOptions) {
     host: config.host,
     port: config.port,
     secure: config.secure,
+    ignoreTLS: true,
     ...(config.auth ? { auth: config.auth } : {}),
   })
 
