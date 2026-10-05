@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+exec 9>/var/lock/teamgrid-dev-deploy.lock
+flock -n 9 || exit 0
+
+cd /var/www/teamgrid-dev
+
+git fetch origin develop
+target_commit=$(git rev-parse origin/develop)
+
+state_dir=/var/lib/teamgrid-dev-deploy
+state_file="$state_dir/deployed-commit"
+failed_file="$state_dir/failed-commit"
+deployed_commit=$(cat "$state_file" 2>/dev/null || true)
+failed_commit=$(cat "$failed_file" 2>/dev/null || true)
+
+if [[ "$target_commit" == "$deployed_commit" || "$target_commit" == "$failed_commit" ]]; then
+  exit 0
+fi
+
+mkdir -p "$state_dir"
+trap 'printf "%s\n" "$target_commit" > "$failed_file"' ERR
+
+git merge --ff-only origin/develop
+
+set -a
+. ./.env
+set +a
+
+npm ci
+npx prisma db push
+npm run build
+test -f .output/server/index.mjs
+
+PORT=3001 HOST=127.0.0.1 NODE_ENV=production pm2 restart teamgrid-dev --update-env
+pm2 save
+
+printf '%s\n' "$target_commit" > "$state_file"
+rm -f "$failed_file"
+trap - ERR

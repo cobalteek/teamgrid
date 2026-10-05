@@ -55,11 +55,13 @@ jobs:
             . ./.env
             set +a
 
+            echo "Apply database schema"
+            npx prisma db push
+
             echo "Build application"
             npm run build
 
-            echo "Apply database schema"
-            npx prisma db push
+            test -f .output/server/index.mjs
 
             echo "Restart develop application"
             PORT=3001 HOST=127.0.0.1 NODE_ENV=production pm2 restart teamgrid-dev --update-env
