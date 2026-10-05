@@ -297,7 +297,7 @@
       "deleteAll": "Delete all organization shifts",
       "confirmAll": "I understand that all organization shifts will be permanently deleted.",
       "submit": "Delete shifts"
-    },
+    }
   },
   "modal": {
     "editOrganization": "Edit organization"
