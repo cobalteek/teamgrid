@@ -1,0 +1,16 @@
+-- CreateTable
+CREATE TABLE "ConsentRecord" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "consentType" TEXT NOT NULL DEFAULT 'personal_data',
+    "version" TEXT NOT NULL,
+    "acceptedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "ConsentRecord_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE INDEX "ConsentRecord_userId_consentType_idx" ON "ConsentRecord"("userId", "consentType");
+
+-- AddForeignKey
+ALTER TABLE "ConsentRecord" ADD CONSTRAINT "ConsentRecord_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

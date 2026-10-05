@@ -3,6 +3,10 @@ import { prisma } from '~~/server/utils/prisma'
 import { Prisma } from '@prisma/client'
 import { enforceRateLimit } from '~~/server/utils/rate-limit'
 import { isValidEmail, isValidName, isValidPassword } from '~~/shared/utils/validation'
+import {
+  PERSONAL_DATA_CONSENT_VERSION,
+  USER_AGREEMENT_VERSION,
+} from '~~/shared/constants/personalData'
 import { sendEmail } from '~~/server/utils/mailer'
 import {
   createEmailVerificationCode,
@@ -19,11 +23,29 @@ export default defineEventHandler(async (event) => {
     const password = typeof body?.password === 'string' ? body.password : ''
     const name = typeof body?.name === 'string' ? body.name.trim() : ''
     const gender = typeof body?.gender === 'string' ? body.gender : ''
+    const personalDataConsent = body?.personalDataConsent === true
+    const userAgreementAccepted = body?.userAgreementAccepted === true
+    const consentVersion = typeof body?.consentVersion === 'string' ? body.consentVersion : ''
+    const agreementVersion = typeof body?.agreementVersion === 'string' ? body.agreementVersion : ''
 
     if (!email || !password || !name || !gender) {
       throw createError({
         statusCode: 400,
         statusMessage: t('error.form.fieldsEmpty'),
+      })
+    }
+
+    if (!personalDataConsent || consentVersion !== PERSONAL_DATA_CONSENT_VERSION) {
+      throw createError({
+        statusCode: 422,
+        statusMessage: t('error.auth.personalDataConsentRequired'),
+      })
+    }
+
+    if (!userAgreementAccepted || agreementVersion !== USER_AGREEMENT_VERSION) {
+      throw createError({
+        statusCode: 422,
+        statusMessage: t('error.auth.userAgreementRequired'),
       })
     }
 
@@ -74,6 +96,21 @@ export default defineEventHandler(async (event) => {
           userId: user.id,
           codeHash,
           expiresAt,
+        },
+      })
+
+      await tx.consentRecord.create({
+        data: {
+          userId: user.id,
+          version: consentVersion,
+        },
+      })
+
+      await tx.consentRecord.create({
+        data: {
+          userId: user.id,
+          consentType: 'user_agreement',
+          version: agreementVersion,
         },
       })
 

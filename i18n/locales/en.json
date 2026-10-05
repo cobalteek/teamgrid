@@ -144,6 +144,8 @@
       "loginOrPasswordInvalid": "The login or password is incorrect. Please try again.",
       "onlyEnglish": "Only English characters allowed.",
       "selectGender": "Please select a gender.",
+      "personalDataConsentRequired": "Separate consent to personal-data processing is required.",
+      "userAgreementRequired": "Accepting the User Terms is required.",
       "passwordsNotMatch": "Passwords do not match.",
       "nameLength": "The name must be at least 2 characters long.",
       "emailExist": "Email already exists.",
@@ -313,8 +315,12 @@
     "other": "Another",
     "templateInfoDays": "Workday/Day Off",
     "templateInfoWeek": "Days of the Week",
-    "personalData": "I agree with Federal Law No. 152",
-    "employeeConfrimDelete": "Are you sure you want to remove this employee?"
+    "employeeConfrimDelete": "Are you sure you want to remove this employee?",
+    "personalData": "I separately consent to personal-data processing",
+    "personalDataConsentText": "consent text",
+    "privacyPolicy": "Privacy Policy",
+    "userAgreementConsent": "I accept the",
+    "userAgreement": "User Terms"
   },
   "modal": {
     "editOrganization": "Edit organization"

@@ -2,11 +2,14 @@
 import { useAuthStore } from '~/stores/auth'
 import { isValidEmail, isValidName, isValidPassword } from '~~/shared/utils/validation'
 import { useErrorModal } from '../composables/useErrorModal'
+import {
+  PERSONAL_DATA_CONSENT_VERSION,
+  USER_AGREEMENT_VERSION,
+} from '~~/shared/constants/personalData'
 
 useHead({
   title: $t('pages.signup'),
 })
-
 const auth = useAuthStore()
 const errorModal = useErrorModal()
 
@@ -26,6 +29,8 @@ const form = ref({
   password: '',
   confirmPassword: '',
   gender: '',
+  personalDataConsent: false,
+  userAgreementAccepted: false,
 })
 
 async function onRegister() {
@@ -39,6 +44,12 @@ async function onRegister() {
     return
   } else if (form.value.gender === '') {
     errorModal.showError('error.auth.selectGender')
+    return
+  } else if (!form.value.personalDataConsent) {
+    errorModal.showError('error.auth.personalDataConsentRequired')
+    return
+  } else if (!form.value.userAgreementAccepted) {
+    errorModal.showError('error.auth.userAgreementRequired')
     return
   }
   if (form.value.password !== form.value.confirmPassword) {
@@ -58,7 +69,11 @@ async function onRegister() {
 
   try {
     const { confirmPassword, ...payload } = form.value
-    await auth.signUp(payload)
+    await auth.signUp({
+      ...payload,
+      consentVersion: PERSONAL_DATA_CONSENT_VERSION,
+      agreementVersion: USER_AGREEMENT_VERSION,
+    })
 
     await navigateTo({
       path: '/verify-email',
@@ -88,6 +103,7 @@ definePageMeta({
     :text-link="$t('auth.login')"
     link="/login"
     :is-loading="auth.isLoading"
+    :checkboxes="true"
     @submit="onRegister"
   />
   <ErrorModalContent
