@@ -1,10 +1,12 @@
 <script setup lang="ts">
 const route = useRoute()
+const { t } = useI18n()
 
 const email = ref('')
 const code = ref('')
 const state = ref<'idle' | 'loading' | 'success' | 'error'>('idle')
 const errorMessage = ref('')
+const resendState = ref<'idle' | 'loading' | 'sent'>('idle')
 
 onMounted(() => {
   const value = route.query.email
@@ -33,6 +35,26 @@ async function verifyEmail() {
   } catch {
     state.value = 'error'
     errorMessage.value = 'Код недействителен, истёк или уже использован.'
+  }
+}
+
+async function resendCode() {
+  if (!email.value || !/^\S+@\S+\.\S+$/.test(email.value)) {
+    state.value = 'error'
+    errorMessage.value = 'Введите корректный email.'
+    return
+  }
+
+  resendState.value = 'loading'
+
+  try {
+    await $fetch('/api/auth/resend-verification', {
+      method: 'POST',
+      body: { email: email.value },
+    })
+    resendState.value = 'sent'
+  } catch {
+    resendState.value = 'sent'
   }
 }
 </script>
@@ -72,6 +94,23 @@ async function verifyEmail() {
             Подтвердить email
           </button>
         </form>
+
+        <button
+          type="button"
+          class="mt-3 text-blue-600 underline disabled:cursor-wait disabled:opacity-60"
+          :disabled="resendState === 'loading'"
+          @click="resendCode"
+        >
+          {{
+            resendState === 'loading'
+              ? t('email.verification.resending')
+              : t('email.verification.resend')
+          }}
+        </button>
+
+        <p v-if="resendState === 'sent'" class="mt-2 text-sm text-gray-600">
+          {{ t('email.verification.resendHint') }}
+        </p>
 
         <p v-if="state === 'error'" class="mt-4 text-red-600">
           {{ errorMessage }}

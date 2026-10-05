@@ -17,6 +17,7 @@ model User {
   createdAt DateTime @default(now())
 
   emailVerifiedAt DateTime?
+  emailVerificationDeadline DateTime?
 
   emailVerificationTokens EmailVerificationToken[]
   memberships             OrganizationMember[]
