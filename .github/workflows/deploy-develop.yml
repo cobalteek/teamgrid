@@ -48,7 +48,7 @@ jobs:
             git merge --ff-only origin/develop
 
             echo "Install dependencies"
-            npm ci
+            npm ci --include=dev
 
             echo "Load environment"
             set -a

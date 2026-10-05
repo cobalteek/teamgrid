@@ -28,7 +28,7 @@ set -a
 . ./.env
 set +a
 
-npm ci
+npm ci --include=dev
 npx prisma db push
 npm run build
 test -f .output/server/index.mjs
