@@ -39,10 +39,10 @@ jobs:
             git pull origin master
 
             echo "Install dependencies"
-            if ! npm ci; then
+            if ! npm ci --include=dev; then
               echo "Retry dependency installation after clearing Nuxt cache"
               rm -rf node_modules/.cache/nuxt
-              npm ci
+              npm ci --include=dev
             fi
 
             echo "Update database schema"
