@@ -144,6 +144,8 @@
       "passwordsNotMatch": "Passwords do not match.",
       "nameLength": "The name must be at least 2 characters long.",
       "emailExist": "Email already exists.",
+      "emailVerificationInvalid": "The verification code is invalid or has already been used.",
+      "emailNotVerified": "Please verify your email address first.",
       "unAuth": "Unauthorized",
       "logoutFailed": "Logout failed.",
       "register": "Register failed.",
@@ -295,9 +297,22 @@
       "deleteAll": "Delete all organization shifts",
       "confirmAll": "I understand that all organization shifts will be permanently deleted.",
       "submit": "Delete shifts"
-    }
+    },
   },
   "modal": {
     "editOrganization": "Edit organization"
-  }
+  },
+  "email": {
+    "verification": {
+      "subject": "Confirm your email",
+      "greeting": "Hello",
+      "code": "Your verification code",
+      "expiration": "The code is valid for 10 minutes"
+    }
+  },
+  "email.verification.code": "Your verification code",
+  "email.verification.subject": "Confirm your email address",
+  "email.verification.expiration": "The code is valid for 10 minutes",
+  "email.verification.greeting": "Hello",
+  "message.appInfoDev": "A web application for managing employee shift schedules.\nDeveloper version; main website: "
 }

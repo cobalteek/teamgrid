@@ -14,36 +14,39 @@ model User {
   name     String
   gender   String
 
+  createdAt DateTime @default(now())
+
   emailVerifiedAt DateTime?
 
   emailVerificationTokens EmailVerificationToken[]
-  memberships OrganizationMember[]
+  memberships             OrganizationMember[]
 }
 
 model Employee {
-  id         String     @id @default(cuid())
+  id         String @id @default(cuid())
   name       String
   surname    String
   middlename String
-  email      String     
+  email      String
   color      String
 
   positionId Int
-  position   Position   @relation(fields: [positionId], references: [id])
+  position   Position @relation(fields: [positionId], references: [id])
 
   organizationId Int
-  organization Organization @relation(fields: [organizationId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id])
 
-  shifts     Shift[]
+  shifts Shift[]
+
   @@unique([email, organizationId])
 }
 
 model Shift {
-  id String @id @default(cuid())
+  id   String   @id @default(cuid())
   date DateTime
 
-  employeeId String
-  positionId Int
+  employeeId     String
+  positionId     Int
   organizationId Int
 
   allDay    Boolean @default(true)
@@ -51,12 +54,12 @@ model Shift {
   endTime   Int?
 
   organization Organization @relation(fields: [organizationId], references: [id])
-  employee   Employee @relation(fields: [employeeId], references: [id])
-  position   Position @relation(fields: [positionId], references: [id])
+  employee     Employee     @relation(fields: [employeeId], references: [id])
+  position     Position     @relation(fields: [positionId], references: [id])
 }
 
 model Position {
-  id             Int @id @default(autoincrement())
+  id             Int    @id @default(autoincrement())
   name           String
   fullName       String
   organizationId Int
@@ -69,10 +72,9 @@ model Position {
   @@unique([organizationId, name])
 }
 
-
 model Organization {
-  id   Int    @id @default(autoincrement())
-  name String @unique
+  id          Int    @id @default(autoincrement())
+  name        String @unique
   description String
 
   members   OrganizationMember[]
@@ -105,7 +107,8 @@ model OrganizationMember {
 model EmailVerificationToken {
   id        String    @id @default(cuid())
   userId    String
-  tokenHash String    @unique
+  codeHash String @unique
+  attempts Int @default(0)
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime  @default(now())

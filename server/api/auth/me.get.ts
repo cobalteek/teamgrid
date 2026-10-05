@@ -1,10 +1,10 @@
 import { prisma } from '~~/server/utils/prisma'
-import { requireUser } from '~~/server/utils/auth'
+import { requireAuthenticatedUser } from '~~/server/utils/auth'
 import { createError } from 'h3'
 import type { Prisma } from '@prisma/client'
 
 export default defineEventHandler(async (event) => {
-  const { userId } = await requireUser(event)
+  const { userId } = await requireAuthenticatedUser(event)
   const t = await useTranslation(event)
   type UserMembreship = Prisma.UserGetPayload<{
     include: { memberships: { include: { user: true; organization: true } } }
@@ -27,5 +27,6 @@ export default defineEventHandler(async (event) => {
     email: user.email,
     name: user.name,
     gender: user.gender,
+    emailVerifiedAt: user.emailVerifiedAt?.toISOString() ?? null,
   }
 })

@@ -39,6 +39,7 @@ async function main() {
       email: 'admin@example.com',
       password,
       gender: 'male',
+      emailVerifiedAt: new Date(),
     },
   })
 

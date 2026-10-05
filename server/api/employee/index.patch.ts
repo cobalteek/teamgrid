@@ -1,4 +1,5 @@
 import { prisma } from '~~/server/utils/prisma'
+import { Prisma } from '@prisma/client'
 import { requireUser } from '~~/server/utils/auth'
 import { isValidEmail, isValidName } from '~~/shared/utils/validation'
 import { isManagerOrganization } from '~~/server/utils/member'
@@ -66,27 +67,35 @@ export default defineEventHandler(async (event) => {
         name: true,
         email: true,
         gender: true,
+        emailVerifiedAt: true,
       },
     })
 
     if (user) {
+      if (!user.emailVerifiedAt) {
+        throw createError({
+          statusCode: 403,
+          statusMessage: t('error.auth.emailNotVerified'),
+        })
+      }
+
       try {
-        const memberOrganization = await prisma.organizationMember.create({
+        await prisma.organizationMember.create({
           data: {
             userId: user.id,
             organizationId: organizationId,
             roleId: 3,
           },
         })
-      } catch (error: any) {
-        if (error.code === 'P2025') {
+      } catch (error: unknown) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
           throw createError({
             statusCode: 404,
             statusMessage: 'error.notFound',
           })
         }
 
-        if (error.code === 'P2002') {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
           throw createError({
             statusCode: 409,
             statusMessage: 'error.user.alreadyInOrganization',

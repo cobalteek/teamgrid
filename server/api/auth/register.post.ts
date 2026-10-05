@@ -4,10 +4,7 @@ import { Prisma } from '@prisma/client'
 import { enforceRateLimit } from '~~/server/utils/rate-limit'
 import { isValidEmail, isValidName, isValidPassword } from '~~/shared/utils/validation'
 import { sendEmail } from '~~/server/utils/mailer'
-import {
-  buildEmailVerificationUrl,
-  createEmailVerificationToken,
-} from '~~/server/utils/email-verification'
+import { createEmailVerificationCode } from '~~/server/utils/email-verification'
 
 export default defineEventHandler(async (event) => {
   const t = await useTranslation(event)
@@ -56,7 +53,7 @@ export default defineEventHandler(async (event) => {
 
     const hash = await bcrypt.hash(password, 10)
 
-    const { rawToken, tokenHash, expiresAt } = createEmailVerificationToken()
+    const { code, codeHash, expiresAt } = createEmailVerificationCode()
 
     const registration = await prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
@@ -71,80 +68,23 @@ export default defineEventHandler(async (event) => {
       await tx.emailVerificationToken.create({
         data: {
           userId: user.id,
-          tokenHash,
+          codeHash,
           expiresAt,
         },
       })
 
-      const employeeOrganizations = await tx.employee.findMany({
-        where: { email },
-        select: {
-          organizationId: true,
-        },
-      })
-
-      let organization = null
-      let selfMembership = null
-
-      if (employeeOrganizations.length > 0) {
-        await tx.organizationMember.createMany({
-          data: employeeOrganizations.map((emp) => ({
-            userId: user.id,
-            organizationId: emp.organizationId,
-            roleId: 3,
-          })),
-        })
-      } else {
-        organization = await tx.organization.create({
-          data: {
-            name: `${name}_organization`,
-            description: `Description of ${name}_organization`,
-          },
-        })
-
-        const role = await tx.role.findFirst({
-          where: { name: 'owner' },
-        })
-
-        if (!role) {
-          throw createError({
-            statusCode: 500,
-            statusMessage: t('error.auth.register'),
-          })
-        }
-
-        selfMembership = await tx.organizationMember.create({
-          data: {
-            userId: user.id,
-            organizationId: organization.id,
-            roleId: role.id,
-          },
-          include: {
-            organization: true,
-            role: true,
-          },
-        })
-      }
-
-      return {
-        user,
-        selfMembership,
-        organization,
-      }
+      return { user }
     })
-
-    const verificationUrl = buildEmailVerificationUrl(rawToken)
 
     await sendEmail({
       to: registration.user.email,
-      subject: 'Подтвердите электронную почту TeamGrid',
+      subject: `${t('email.verification.subject')} TeamGrid`,
       text: [
-        `Здравствуйте, ${registration.user.name}!`,
+        `${t('email.verification.greeting')}, ${registration.user.name}!`,
         '',
-        'Для подтверждения электронной почты перейдите по ссылке:',
-        verificationUrl,
+        `${t('email.verification.code')}: ${code}`,
         '',
-        'Ссылка действительна 24 часа.',
+        t('email.verification.expiration'),
       ].join('\n'),
     })
   } catch (error: unknown) {

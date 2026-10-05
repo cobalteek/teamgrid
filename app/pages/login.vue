@@ -38,6 +38,11 @@ async function onLogin() {
     const status = error.statusCode || error.status || error.response?.status
     if (status === 401) {
       errorModal.showError('error.auth.loginOrPasswordInvalid')
+    } else if (status === 403) {
+      await navigateTo({
+        path: '/verify-email',
+        query: { email: form.value.email.trim().toLowerCase() },
+      })
     }
   }
 }
@@ -49,6 +54,7 @@ definePageMeta({
 
 <template>
   <AuthForm
+    v-model="form"
     :name="$t('auth.login')"
     :inputs="fields"
     :btn-name="$t('auth.login')"
@@ -56,12 +62,11 @@ definePageMeta({
     :text-link="$t('auth.signUp')"
     link="/sign-up"
     :is-loading="isSubmitting"
-    v-model="form"
     @submit="onLogin"
   />
   <ErrorModalContent
     :error="errorModal.error.value"
-    @close="errorModal.close"
     class="top-1/4 h-[200px] w-[300px]"
+    @close="errorModal.close"
   />
 </template>

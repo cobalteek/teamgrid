@@ -1,30 +1,27 @@
-import { createHash, randomBytes } from 'node:crypto'
+import { createHmac, randomInt } from 'node:crypto'
 
-const TOKEN_TTL_MS = 24 * 60 * 60 * 1000
+const CODE_TTL_MS = 10 * 60 * 1000
 
-export function createEmailVerificationToken() {
-  const rawToken = randomBytes(32).toString('hex')
-  const tokenHash = hashEmailVerificationToken(rawToken)
-  const expiresAt = new Date(Date.now() + TOKEN_TTL_MS)
+function getSecret() {
+  const secret = process.env.EMAIL_VERIFICATION_SECRET
 
-  return { rawToken, tokenHash, expiresAt }
-}
-
-export function hashEmailVerificationToken(rawToken: string) {
-  return createHash('sha256').update(rawToken).digest('hex')
-}
-
-export function buildEmailVerificationUrl(rawToken: string) {
-  const origin = process.env.APP_ORIGIN
-
-  if (!origin) {
-    throw new Error('APP_ORIGIN is not configured')
+  if (!secret) {
+    throw new Error('EMAIL_VERIFICATION_SECRET is not configured')
   }
 
-  const baseUrl = origin.endsWith('/') ? origin : `${origin}/`
-  const url = new URL('verify-email', baseUrl)
+  return secret
+}
 
-  url.searchParams.set('token', rawToken)
+export function createEmailVerificationCode() {
+  const code = randomInt(0, 1_000_000).toString().padStart(6, '0')
 
-  return url.toString()
+  return {
+    code,
+    codeHash: hashEmailVerificationCode(code),
+    expiresAt: new Date(Date.now() + CODE_TTL_MS),
+  }
+}
+
+export function hashEmailVerificationCode(code: string) {
+  return createHmac('sha256', getSecret()).update(code).digest('hex')
 }

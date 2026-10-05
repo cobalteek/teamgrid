@@ -4,6 +4,7 @@ import { isValidEmail, isValidName, isValidPassword } from '~~/shared/utils/vali
 import { useErrorModal } from '../composables/useErrorModal'
 const auth = useAuthStore()
 const errorModal = useErrorModal()
+
 const fields = computed(
   () =>
     [
@@ -44,9 +45,6 @@ async function onRegister() {
   } else if (!isValidName(form.value.name)) {
     errorModal.showError('error.auth.nameLength')
     return
-  } else if (!isValidName(form.value.name)) {
-    errorModal.showError('error.auth.nameLength')
-    return
   }
   if (!isValidEmail(form.value.email)) {
     errorModal.showError('error.auth.emailInvalid')
@@ -57,9 +55,10 @@ async function onRegister() {
     const { confirmPassword, ...payload } = form.value
     await auth.signUp(payload)
 
-    await auth.login(form.value)
-
-    await navigateTo('/dashboard')
+    await navigateTo({
+      path: '/verify-email',
+      query: { email: form.value.email.trim().toLowerCase() },
+    })
   } catch (e: unknown) {
     const error = e as { statusCode?: number; status?: number; response?: { status?: number } }
     const status = error.statusCode || error.status || error.response?.status
@@ -75,6 +74,7 @@ definePageMeta({
 
 <template>
   <AuthForm
+    v-model="form"
     :name="$t('auth.signUp')"
     :inputs="fields"
     :sex="true"
@@ -83,12 +83,11 @@ definePageMeta({
     :text-link="$t('auth.login')"
     link="/login"
     :is-loading="auth.isLoading"
-    v-model="form"
     @submit="onRegister"
   />
   <ErrorModalContent
     :error="errorModal.error.value"
-    @close="errorModal.close"
     class="top-1/4 h-[200px] w-[300px]"
+    @close="errorModal.close"
   />
 </template>
