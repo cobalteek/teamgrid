@@ -21,6 +21,19 @@ model User {
 
   emailVerificationTokens EmailVerificationToken[]
   memberships             OrganizationMember[]
+  consents                ConsentRecord[]
+}
+
+model ConsentRecord {
+  id          String   @id @default(cuid())
+  userId      String
+  consentType String   @default("personal_data")
+  version     String
+  acceptedAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, consentType])
 }
 
 model Employee {

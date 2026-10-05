@@ -72,6 +72,10 @@ export const useAuthStore = defineStore('auth', () => {
     email: string
     password: string
     gender: string
+    personalDataConsent: boolean
+    userAgreementAccepted: boolean
+    consentVersion: string
+    agreementVersion: string
   }) {
     isLoading.value = true
     error.value = null
