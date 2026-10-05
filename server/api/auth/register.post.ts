@@ -4,7 +4,10 @@ import { Prisma } from '@prisma/client'
 import { enforceRateLimit } from '~~/server/utils/rate-limit'
 import { isValidEmail, isValidName, isValidPassword } from '~~/shared/utils/validation'
 import { sendEmail } from '~~/server/utils/mailer'
-import { createEmailVerificationCode } from '~~/server/utils/email-verification'
+import {
+  createEmailVerificationCode,
+  createEmailVerificationDeadline,
+} from '~~/server/utils/email-verification'
 
 export default defineEventHandler(async (event) => {
   const t = await useTranslation(event)
@@ -62,6 +65,7 @@ export default defineEventHandler(async (event) => {
           password: hash,
           name,
           gender,
+          emailVerificationDeadline: createEmailVerificationDeadline(),
         },
       })
 

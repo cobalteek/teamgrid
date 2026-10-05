@@ -35,6 +35,8 @@ export default defineEventHandler(async (event) => {
         select: {
           email: true,
           name: true,
+          emailVerifiedAt: true,
+          emailVerificationDeadline: true,
         },
       },
       codeHash: true,
@@ -47,6 +49,9 @@ export default defineEventHandler(async (event) => {
   if (
     !record ||
     record.usedAt ||
+    record.user.emailVerifiedAt ||
+    !record.user.emailVerificationDeadline ||
+    record.user.emailVerificationDeadline <= now ||
     record.expiresAt <= now ||
     record.attempts >= 5 ||
     record.codeHash !== hashEmailVerificationCode(code)
@@ -82,7 +87,7 @@ export default defineEventHandler(async (event) => {
 
     await tx.user.update({
       where: { id: record.userId },
-      data: { emailVerifiedAt: now },
+      data: { emailVerifiedAt: now, emailVerificationDeadline: null },
     })
 
     const employeeOrganizations = await tx.employee.findMany({

@@ -307,7 +307,10 @@
       "subject": "Confirm your email",
       "greeting": "Hello",
       "code": "Your verification code",
-      "expiration": "The code is valid for 10 minutes"
+      "expiration": "The code is valid for 10 minutes",
+      "resend": "Send the code again",
+      "resending": "Sending…",
+      "resendHint": "If this account can receive a code, a new email has been sent."
     }
   },
   "email.verification.code": "Your verification code",

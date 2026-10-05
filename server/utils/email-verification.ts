@@ -1,6 +1,7 @@
 import { createHmac, randomInt } from 'node:crypto'
 
-const CODE_TTL_MS = 10 * 60 * 1000
+export const EMAIL_VERIFICATION_CODE_TTL_MS = 10 * 60 * 1000
+export const EMAIL_VERIFICATION_DEADLINE_MS = 72 * 60 * 60 * 1000
 
 function getSecret() {
   const secret = process.env.EMAIL_VERIFICATION_SECRET
@@ -18,8 +19,12 @@ export function createEmailVerificationCode() {
   return {
     code,
     codeHash: hashEmailVerificationCode(code),
-    expiresAt: new Date(Date.now() + CODE_TTL_MS),
+    expiresAt: new Date(Date.now() + EMAIL_VERIFICATION_CODE_TTL_MS),
   }
+}
+
+export function createEmailVerificationDeadline(now = new Date()) {
+  return new Date(now.getTime() + EMAIL_VERIFICATION_DEADLINE_MS)
 }
 
 export function hashEmailVerificationCode(code: string) {

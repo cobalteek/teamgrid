@@ -14,7 +14,8 @@
     "typecheck": "nuxt typecheck",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
-    "db:seed": "prisma db seed"
+    "db:seed": "prisma db seed",
+    "email:enroll-existing": "tsx scripts/enroll-existing-users-email-verification.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
