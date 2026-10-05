@@ -30,6 +30,11 @@ jobs:
 
             cd /var/www/teamgrid
 
+            echo "Load environment"
+            set -a
+            . ./.env
+            set +a
+
             echo "Pull latest changes"
             git pull origin master
 
@@ -46,7 +51,10 @@ jobs:
             echo "Build application"
             npm run build
 
+            test -f .output/server/index.mjs
+
             echo "Restart application"
-            pm2 restart teamgrid
+            pm2 restart teamgrid --update-env
+            pm2 save
 
             echo "Deployment completed"
