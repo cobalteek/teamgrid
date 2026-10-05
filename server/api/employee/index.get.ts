@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
 
     if (employeeId) {
       const employee = await prisma.employee.findUnique({
-        where: { id: employeeId },
+        where: { id: employeeId, organizationId },
         select: selectFields,
       })
 

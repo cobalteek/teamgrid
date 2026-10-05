@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const shifts = await prisma.shift.findMany({
-    where: { positionId: id },
+    where: { positionId: id, organizationId },
   })
 
   if (!shifts) {
@@ -61,6 +61,7 @@ export default defineEventHandler(async (event) => {
     await prisma.shift.deleteMany({
       where: {
         positionId: id,
+        organizationId,
       },
     })
   }

@@ -1,18 +1,22 @@
 <script setup lang="ts">
 const route = useRoute()
 
-const token = computed(() => {
-  const value = route.query.token
-  return typeof value === 'string' ? value : ''
-})
-
+const email = ref('')
+const code = ref('')
 const state = ref<'idle' | 'loading' | 'success' | 'error'>('idle')
 const errorMessage = ref('')
 
+onMounted(() => {
+  const value = route.query.email
+  if (typeof value === 'string') {
+    email.value = value
+  }
+})
+
 async function verifyEmail() {
-  if (!token.value) {
+  if (!email.value || !/^\d{6}$/.test(code.value)) {
     state.value = 'error'
-    errorMessage.value = 'Ссылка подтверждения некорректна.'
+    errorMessage.value = 'Введите email и 6-значный код.'
     return
   }
 
@@ -22,13 +26,13 @@ async function verifyEmail() {
   try {
     await $fetch('/api/auth/verify-email', {
       method: 'POST',
-      body: { token: token.value },
+      body: { email: email.value, code: code.value },
     })
 
     state.value = 'success'
   } catch {
     state.value = 'error'
-    errorMessage.value = 'Ссылка недействительна или уже использована.'
+    errorMessage.value = 'Код недействителен, истёк или уже использован.'
   }
 }
 </script>
@@ -38,33 +42,50 @@ async function verifyEmail() {
     <section class="w-full rounded-2xl border border-gray-200 p-6 text-center shadow-sm">
       <h1 class="mb-4 text-2xl font-semibold">Подтверждение почты</h1>
 
-      <template v-if="state === 'idle'">
+      <template v-if="state === 'idle' || state === 'error'">
         <p class="mb-6 text-gray-600">
-          Нажмите кнопку, чтобы подтвердить адрес электронной почты.
+          Введите код из письма, чтобы подтвердить адрес электронной почты.
         </p>
 
-        <button
-          type="button"
-          class="rounded-lg bg-blue-600 px-5 py-3 text-white hover:bg-blue-700"
-          @click="verifyEmail"
-        >
-          Подтвердить email
-        </button>
-      </template>
+        <form class="flex flex-col gap-3" @submit.prevent="verifyEmail">
+          <input
+            v-model="email"
+            type="email"
+            autocomplete="email"
+            placeholder="Email"
+            class="rounded-lg border border-gray-300 px-3 py-3"
+          />
+          <input
+            v-model="code"
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            maxlength="6"
+            pattern="[0-9]{6}"
+            placeholder="6-значный код"
+            class="rounded-lg border border-gray-300 px-3 py-3 text-center tracking-[0.4em]"
+          />
+          <button
+            type="submit"
+            class="rounded-lg bg-blue-600 px-5 py-3 text-white hover:bg-blue-700"
+          >
+            Подтвердить email
+          </button>
+        </form>
 
-      <p v-else-if="state === 'loading'" class="text-gray-600">
-        Проверяем ссылку…
-      </p>
-
-      <template v-else-if="state === 'success'">
-        <p class="text-green-600">
-          Email успешно подтверждён.
+        <p v-if="state === 'error'" class="mt-4 text-red-600">
+          {{ errorMessage }}
         </p>
       </template>
 
-      <p v-else class="text-red-600">
-        {{ errorMessage }}
-      </p>
+      <p v-else-if="state === 'loading'" class="text-gray-600">Проверяем код…</p>
+
+      <template v-else>
+        <p class="text-green-600">Email успешно подтверждён.</p>
+        <NuxtLink to="/login" class="mt-4 inline-block text-blue-600 underline">
+          Перейти ко входу
+        </NuxtLink>
+      </template>
     </section>
   </main>
 </template>

@@ -21,6 +21,14 @@ export default defineEventHandler(async (event) => {
 
   const ok = await bcrypt.compare(password, user.password)
   if (!ok) throw createError({ statusCode: 401, statusMessage: t('error.auth.credentials') })
+
+  if (!user.emailVerifiedAt) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: t('error.auth.emailNotVerified'),
+    })
+  }
+
   const token = signToken({ userId: user.id })
 
   setCookie(event, 'token', token, {
