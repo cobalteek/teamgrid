@@ -72,7 +72,8 @@
     "editEmployee": "Edit Employee",
     "addEvent": "Add an event",
     "addShift": "Add shift",
-    "deleteShifts": "Delete shifts"
+    "deleteShifts": "Delete shifts",
+    "accept": "I accept"
   },
   "select": {
     "selectUser": "Select user",

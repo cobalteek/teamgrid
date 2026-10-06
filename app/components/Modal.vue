@@ -27,7 +27,7 @@ function close() {
         <button
           type="button"
           @click="close"
-          class="absolute top-3 right-3 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border-main)] bg-[var(--btn-bg)] text-lg leading-none transition hover:scale-95 sm:h-9 sm:w-9"
+          class="absolute top-3 right-3 z-10 flex h-11 w-11 items-center justify-center rounded-full border border-[var(--border-main)] bg-[var(--btn-bg)] text-lg leading-none transition hover:scale-95 sm:h-9 sm:w-9 text-[var(--text-main)]"
         >
           ×
         </button>
