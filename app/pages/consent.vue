@@ -1,9 +1,13 @@
+<script setup lang="ts">
+import { PERSONAL_DATA_CONSENT_VERSION } from '~~/shared/constants/personalData'
+</script>
+
 <template>
   <article class="prose prose-invert w-full max-w-3xl rounded-xl bg-[var(--bg-modal)] p-5 sm:p-10">
     <h1>Согласие на обработку персональных данных</h1>
     <p>
-      Версия согласия: pd-consent-2026-10-01-v1. Оператор: Кенжебаев Равшан Фахретдинович,
-      регистрационный номер 2-26-060638. E-mail:
+      Версия согласия: {{ PERSONAL_DATA_CONSENT_VERSION }}. Оператор: Кенжебаев Равшан
+      Фахретдинович, регистрационный номер 2-26-060638. E-mail:
       <a href="mailto:cobalteek@gmail.com">cobalteek@gmail.com</a>.
     </p>
     <p>

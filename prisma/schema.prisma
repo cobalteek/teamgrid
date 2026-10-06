@@ -22,18 +22,8 @@ model User {
   emailVerificationTokens EmailVerificationToken[]
   memberships             OrganizationMember[]
   consents                ConsentRecord[]
-}
-
-model ConsentRecord {
-  id          String   @id @default(cuid())
-  userId      String
-  consentType String   @default("personal_data")
-  version     String
-  acceptedAt  DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, consentType])
+  createdNotifications    Notification[]           @relation("NotificationCreatedBy")
+  notificationRecipients  NotificationRecipient[]
 }
 
 model Employee {
@@ -130,4 +120,65 @@ model EmailVerificationToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, expiresAt])
+}
+
+model Notification {
+  id              String   @id @default(cuid())
+  title           String
+  message         String
+  actionUrl       String?
+  isGlobal        Boolean  @default(false)
+  consentRequired Boolean  @default(false)
+  consentType     String?
+  consentVersion  String?
+  createdAt       DateTime @default(now())
+  createdById     String?
+
+  createdBy      User?                   @relation("NotificationCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  recipients     NotificationRecipient[]
+  checkboxes     NotificationCheckbox[]
+  consentRecords ConsentRecord[]          @relation("NotificationConsent")
+
+  @@index([createdAt])
+}
+
+model NotificationCheckbox {
+  id             String       @id @default(cuid())
+  notificationId String
+  label          String
+  sortOrder      Int          @default(0)
+  required       Boolean      @default(true)
+
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@index([notificationId, sortOrder])
+}
+
+model NotificationRecipient {
+  notificationId String
+  userId         String
+  readAt         DateTime?
+  acceptedAt     DateTime?
+
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([notificationId, userId])
+  @@index([userId, readAt])
+}
+
+model ConsentRecord {
+  id             String   @id @default(cuid())
+  userId         String
+  consentType    String   @default("personal_data")
+  version        String
+  acceptedAt     DateTime @default(now())
+  notificationId String?
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notification Notification? @relation("NotificationConsent", fields: [notificationId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, consentType, version])
+  @@index([userId, consentType])
+  @@index([notificationId])
 }

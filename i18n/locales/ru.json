@@ -72,7 +72,8 @@
     "editEmployee": "Редактировать сотрудника",
     "addEvent": "Добавить событие",
     "addShift": "Добавить смену",
-    "deleteShifts": "Удалить смены"
+    "deleteShifts": "Удалить смены",
+    "accept": "Принимаю"
   },
   "select": {
     "selectUser": "Пользователь",
