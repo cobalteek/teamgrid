@@ -66,7 +66,9 @@ watch(
   <header
     class="sticky top-0 z-40 flex flex-wrap items-center gap-3 bg-[var(--bg-header)] px-3 py-3 sm:px-4"
   >
-    <NuxtLink to="/" class="shrink-0 font-semibold">{{activeBranch === 'master' ? 'TeamGrid' : 'TeamGrid Dev'}}</NuxtLink>
+    <NuxtLink to="/" class="shrink-0 font-semibold">{{
+      activeBranch === 'master' ? 'TeamGrid' : 'TeamGrid Dev'
+    }}</NuxtLink>
     <ClientOnly>
       <div v-if="user && isDashboard" class="order-3 w-full min-w-0 md:order-none md:w-auto">
         <OrganizationSwitcher @addOrganization="openModal" />
@@ -123,7 +125,7 @@ watch(
         @open-edit-organization-modal="openEditOrganizationModal"
         @go-dashboard="goDashboard"
         @logout="logout"
-        @is-open="isMobileMenuOpen, false"
+        @is-open="(isMobileMenuOpen, false)"
       />
     </div>
   </header>

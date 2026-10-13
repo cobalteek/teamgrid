@@ -13,7 +13,7 @@ const emit = defineEmits<{
   (e: 'openEditOrganizationModal'): void
   (e: 'isOpen', v: boolean): void
 }>()
-const {setLocale} = useI18n()
+const { setLocale } = useI18n()
 </script>
 
 <template>

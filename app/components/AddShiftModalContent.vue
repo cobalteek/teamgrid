@@ -21,6 +21,12 @@ const isSubmitting = ref(false)
 
 const advancedSettings = ref(false)
 const templateEnabled = ref(false)
+const formWidthClass = computed(() =>
+  advancedSettings.value
+    ? 'transition-all duration-350 sm:w-[725px]'
+    : 'transition-all duration-350 sm:w-[450px]',
+)
+
 const createShift = ref<CreateShift>({
   date: '',
   employeeId: '',
@@ -32,6 +38,7 @@ const template = ref<ScheduleTemplate>({
   workDays: 0,
   restDays: 0,
   endDate: props.info.dateStr ?? new Date().toISOString().split('T')[0] ?? '',
+  weekdays: [] as number[],
 })
 
 const emit = defineEmits<{
@@ -61,6 +68,7 @@ function resetModal() {
   template.value.endDate = props.info.dateStr ?? new Date().toISOString().split('T')[0] ?? ''
   template.value.restDays = 0
   template.value.workDays = 0
+  template.value.weekdays = []
 }
 
 const handleCancel = () => {
@@ -86,19 +94,19 @@ const handleSubmit = async () => {
   }
 
   if (templateEnabled.value) {
-    if (!template.value.endDate || !template.value.workDays) {
-      errorModal.showError('error.form.fieldsEmpty')
-      return
-    }
-    if (!template.value.restDays) {
-      const confirmed = confirm(t('ui.noRestDays'))
-      if (!confirmed) {
-        return
-      }
-    }
+    const hasWeekdays = Boolean(template.value.weekdays?.length)
+    const hasCycle = template.value.workDays > 0
+    console.log(
+      'hasWeekdays:',
+      hasWeekdays,
+      'hasCycle:',
+      hasCycle,
+      'template.value.weekdays:',
+      template.value.weekdays,
+    )
 
-    if (template.value.workDays === 0) {
-      errorModal.showError('error.form.workDaysZero')
+    if (!template.value.endDate || (!hasWeekdays && !hasCycle)) {
+      errorModal.showError('error.form.fieldsEmpty')
       return
     }
 
@@ -111,7 +119,7 @@ const handleSubmit = async () => {
     }
 
     const shifts = generateShifts(createShift.value, template.value)
-    if (!shifts) {
+    if (!shifts || shifts.length === 0) {
       errorModal.showError('error.form.shiftsEmpty')
       return
     }
@@ -153,6 +161,41 @@ function generateShifts(createShift: CreateShift, template: ScheduleTemplate) {
 
   let daysPassed = 0
 
+  if (template.weekdays && template.weekdays.length > 0) {
+    let date = new Date(`${createShift.date}T00:00:00Z`)
+    const endDate = new Date(`${template.endDate}T00:00:00Z`)
+
+    while (date <= endDate) {
+      const dayOfWeek = date.getUTCDay() === 0 ? 7 : date.getUTCDay() // Convert Sunday from 0 to 7
+
+      if (template.weekdays.includes(dayOfWeek)) {
+        const dateStr = formatDateStr(date)
+        if (!dateStr) {
+          throw createError({
+            statusCode: 400,
+            statusMessage: 'error.invalidData',
+          })
+        }
+
+        const newShift: CreateShift = {
+          date: dateStr,
+          employeeId: createShift.employeeId,
+          positionId: createShift.positionId,
+          allDay: createShift.allDay,
+          startTime: createShift.startTime,
+          endTime: createShift.endTime,
+        }
+
+        newShifts.push(newShift)
+      }
+
+      daysPassed++
+      date.setUTCDate(date.getUTCDate() + 1)
+    }
+
+    return newShifts
+  }
+
   let date = new Date(`${createShift.date}T00:00:00Z`)
   const endDate = new Date(`${template.endDate}T00:00:00Z`)
 
@@ -184,7 +227,7 @@ function generateShifts(createShift: CreateShift, template: ScheduleTemplate) {
 
     daysPassed++
 
-    date.setDate(date.getDate() + 1)
+    date.setUTCDate(date.getUTCDate() + 1)
   }
 
   return newShifts
@@ -221,7 +264,7 @@ watch(
 <template>
   <Modal :model-value="modelValue" @update:model-value="onUpdateModelValue">
     <Form
-      class="sm:w-[640px]"
+      :class="formWidthClass"
       title="btn.addShift"
       :date="info.date"
       :selects="[
@@ -257,13 +300,23 @@ watch(
               {{ advancedSettings ? '−' : '+' }}
             </span>
           </button>
-          <ShiftTemplate
-            v-if="advancedSettings"
-            v-model:model-value="template"
-            v-model:shift="createShift"
-            v-model:template-enabled="templateEnabled"
-            :date="info.date"
-          />
+          <Transition
+            enter-active-class="overflow-hidden transition-all duration-200 ease-out"
+            enter-from-class="max-h-0 opacity-0"
+            enter-to-class="max-h-[900px] opacity-100"
+            leave-active-class="overflow-hidden transition-all duration-200 ease-in"
+            leave-from-class="max-h-[900px] opacity-100"
+            leave-to-class="max-h-0 opacity-0"
+          >
+            <div v-if="advancedSettings" class="border-t border-[var(--border-main)] pt-3">
+              <ShiftTemplate
+                v-model:model-value="template"
+                v-model:shift="createShift"
+                v-model:template-enabled="templateEnabled"
+                :date="info.date"
+              />
+            </div>
+          </Transition>
         </div>
       </template>
     </Form>
