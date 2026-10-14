@@ -230,7 +230,7 @@ watch(
         />
         <span class="flex h-11 items-center justify-center rounded-full
              border border-[var(--border-main)]
-             bg-[var(--bg-main)] px-3 text-sm font-medium
+             bg-[var(--bg-main)] px-1 text-sm font-medium
              text-[var(--text-main)] transition-all
              hover:border-[var(--accent)]
              hover:bg-[var(--bg-hover)]
@@ -238,7 +238,8 @@ watch(
              peer-checked:bg-[var(--accent)]
              peer-checked:text-white
              peer-focus-visible:ring-2
-             peer-focus-visible:ring-[var(--accent)]"
+             peer-focus-visible:ring-[var(--accent)]
+             md:px-3"
         >
           {{ $t(day.label) }}
         </span>

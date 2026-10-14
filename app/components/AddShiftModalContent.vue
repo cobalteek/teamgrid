@@ -14,7 +14,6 @@ const props = defineProps<{
 const employeeStore = useEmployeeStore()
 const positionStore = usePositionStore()
 const shiftStore = useShiftStore()
-const { t } = useI18n()
 
 const errorModal = useErrorModal()
 const isSubmitting = ref(false)
