@@ -92,11 +92,11 @@
     "owner": "Owner"
   },
   "message": {
-    "hello": "Hello",
+    "hello": "Hi",
     "welcome": "Welcome",
-    "signUser": "This page is available only to signed-in users.",
-    "appInfo": "Web application for managing employee shift schedules.",
-    "signed": "Signed in as "
+    "signUser": "This page is available only to authorized users.",
+    "appInfo": "A web application for managing employee shift schedules.",
+    "signed": "You are logged in as "
   },
   "status": {
     "notStarted": "Not started",
@@ -297,7 +297,19 @@
       "deleteAll": "Delete all organization shifts",
       "confirmAll": "I understand that all organization shifts will be permanently deleted.",
       "submit": "Delete shifts"
-    }
+    },
+    "days": {
+      "friday": "Fri",
+      "monday": "Mon",
+      "saturday": "Sat",
+      "sunday": "Sun",
+      "thursday": "Thu",
+      "tuesday": "Tue",
+      "wednesday": "Wed"
+    },
+    "other": "Another",
+    "templateInfoDays": "Workday/Day Off",
+    "templateInfoWeek": "Days of the Week"
   },
   "modal": {
     "editOrganization": "Edit organization"
@@ -308,9 +320,9 @@
       "greeting": "Hello",
       "code": "Your verification code",
       "expiration": "The code is valid for 10 minutes",
-      "resend": "Send the code again",
+      "resend": "Resend the code",
       "resending": "Sending…",
-      "resendHint": "If this account can receive a code, a new email has been sent."
+      "resendHint": "If the account is eligible to receive a code, a new email has already been sent."
     }
   },
   "email.verification.code": "Your verification code",

@@ -299,7 +299,19 @@
       "confirmAll": "Я понимаю, что все смены организации будут удалены без возможности восстановления.",
       "submit": "Удалить смены"
     },
-    "personalData": "Соглашаюсь c 152 ФЗ"
+    "personalData": "Соглашаюсь c 152 ФЗ",
+    "other": "Другой",
+    "templateInfoDays": "Рабочий/Выходной",
+    "templateInfoWeek": "Дни недели",
+    "days": {
+      "monday": "Пн",
+      "tuesday": "Вт",
+      "wednesday": "Ср",
+      "thursday": "Чт",
+      "friday": "Пт",
+      "saturday": "Сб",
+      "sunday": "Вс"
+    }
   },
   "modal": {
     "editOrganization": "Редактировать организацию"

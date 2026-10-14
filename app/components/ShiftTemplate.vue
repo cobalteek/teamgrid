@@ -18,8 +18,12 @@ const templateGrid = ref<ScheduleTemplate>({
   workDays: props.modelValue.workDays,
   restDays: props.modelValue.restDays,
   endDate: props.modelValue.endDate,
+  weekdays: props.modelValue.weekdays ?? [] as number[],
 })
 
+const weekDays = [{value: 1, label: 'ui.days.monday'}, {value: 2, label: 'ui.days.tuesday'}, {value: 3, label: 'ui.days.wednesday'}, {value: 4, label: 'ui.days.thursday'}, {value: 5, label: 'ui.days.friday'}, {value: 6, label: 'ui.days.saturday'}, {value: 7, label: 'ui.days.sunday'}]
+const modeToggle = ref(<'weekdays' | 'days' | 'state'>'state')
+const other = ref(false)
 const formatedDate = ref()
 
 function minutesToTime(value: number | undefined) {
@@ -68,12 +72,38 @@ if (props.date) {
   formatedDate.value = ''
 }
 
+function getTemplate(workDays: number, restDays: number) {
+  templateGrid.value.workDays = workDays
+  templateGrid.value.restDays = restDays
+}
+
+function resetWeekdays() {
+  templateGrid.value.weekdays = []
+}
+
+function resetDays() {
+  templateGrid.value.workDays = 0
+  templateGrid.value.restDays = 0
+  other.value = false
+}
+
 watch(
   templateGrid,
   (value) => {
     emit('update:modelValue', value)
   },
   { deep: true },
+)
+
+watch(
+  () => props.templateEnabled,
+  (value) => {
+    if (!value) {
+      resetWeekdays()
+      resetDays()
+      modeToggle.value = 'state'
+    }
+  }
 )
 </script>
 
@@ -84,7 +114,6 @@ watch(
         <input v-model="enableShiftTime" type="checkbox" class="h-5 w-5" />
         <span>{{ $t('ui.shiftTime') }}</span>
       </label>
-
       <fieldset
         :disabled="!enableShiftTime"
         class="mt-3 grid grid-cols-2 gap-3 disabled:opacity-40"
@@ -131,7 +160,41 @@ watch(
             class="min-h-11 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] p-2 text-[var(--input-text)]"
           />
         </label>
-        <div class="grid grid-cols-2 gap-3">
+        <p class="text-sm">{{ $t('ui.templateInfoDays') }}</p>
+        <div :disabled="modeToggle" :class="[modeToggle === 'days' || modeToggle === 'state' ? '' : 'opacity-30']" @click="modeToggle = 'days'; resetWeekdays()" class="inline-flex gap-1">
+          <TemplatePresetButton
+            :work-days="5"
+            :rest-days="2"
+            :active="templateGrid.workDays === 5 && templateGrid.restDays === 2"
+            @select="getTemplate(5, 2)"
+          />
+          <TemplatePresetButton
+            :work-days="4"
+            :rest-days="2"
+            :active="templateGrid.workDays === 4 && templateGrid.restDays === 2"
+            @select="getTemplate(4, 2)"
+          />
+          <TemplatePresetButton
+            :work-days="3"
+            :rest-days="3"
+            :active="templateGrid.workDays === 3 && templateGrid.restDays === 3"
+            @select="getTemplate(3, 3)"
+          />
+          <TemplatePresetButton
+            :work-days="2"
+            :rest-days="2"
+            :active="templateGrid.workDays === 2 && templateGrid.restDays === 2"
+            @select="getTemplate(2, 2)"
+          />
+          <button
+          type="button"
+          class="w-fit rounded-md border border-[var(--border-main)] bg-[var(--bg-main)] px-2 text-sm text-[var(--text-main)] hover:bg-[var(--bg-hover)] hover:border-[var(--accent)]"
+          @click="other = !other"
+        >
+          {{ '+' }}
+        </button>
+        </div>
+        <div :disabled="!other" v-if="other" class="grid grid-cols-2 gap-3">
           <label class="flex min-w-0 flex-col gap-1 text-sm">
             <span>{{ $t('ui.workDays') }}</span>
             <input
@@ -151,6 +214,37 @@ watch(
             />
           </label>
         </div>
+      <div @click="modeToggle = 'weekdays'; resetDays()">
+        <p class="text-sm">{{ $t('ui.templateInfoWeek') }}</p>
+        <label
+          v-for="day in weekDays"
+          :key="day.value"
+          class="inline-flex min-h-10 cursor-pointer items-center font-medium"
+          :class="[modeToggle === 'weekdays' || modeToggle === 'state' ? '' : 'opacity-30']">
+          <input
+          type="checkbox"
+          class="peer sr-only"
+          :disabled="modeToggle !== 'weekdays'"
+          v-model="templateGrid.weekdays"
+          :value="day.value"
+        />
+        <span class="flex h-11 items-center justify-center rounded-full
+             border border-[var(--border-main)]
+             bg-[var(--bg-main)] px-1 text-sm font-medium
+             text-[var(--text-main)] transition-all
+             hover:border-[var(--accent)]
+             hover:bg-[var(--bg-hover)]
+             peer-checked:border-[var(--accent)]
+             peer-checked:bg-[var(--accent)]
+             peer-checked:text-white
+             peer-focus-visible:ring-2
+             peer-focus-visible:ring-[var(--accent)]
+             md:px-3"
+        >
+          {{ $t(day.label) }}
+        </span>
+        </label>
+      </div>
       </fieldset>
     </section>
   </div>

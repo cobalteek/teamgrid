@@ -42,4 +42,5 @@ export type ScheduleTemplate = {
   workDays: number
   restDays: number
   endDate: string
+  weekdays?: number[]
 }
