@@ -9,7 +9,7 @@ const errorMessage = ref('')
 const resendState = ref<'idle' | 'loading' | 'sent'>('idle')
 
 useHead({
-  title: `$t('pages.verifyemail')`,
+  title: $t('pages.verifyemail'),
 })
 
 onMounted(() => {

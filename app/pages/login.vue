@@ -3,7 +3,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useErrorModal } from '../composables/useErrorModal'
 
 useHead({
-  title: `$t('pages.login')`,
+  title: $t('pages.login'),
 })
 
 const auth = useAuthStore()

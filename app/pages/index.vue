@@ -6,7 +6,7 @@ const { activeBranch } = useAppConfig()
 const auth = useAuthStore()
 
 useHead({
-  title: `$t('pages.home')`,
+  title: $t('pages.home'),
 })
 </script>
 

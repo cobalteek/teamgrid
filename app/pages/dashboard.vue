@@ -7,7 +7,7 @@ definePageMeta({
 })
 
 useHead({
-  title: `$t('pages.dashboard')`,
+  title: $t('pages.dashboard'),
 })
 
 const toggleView = 'dayGridMonth'

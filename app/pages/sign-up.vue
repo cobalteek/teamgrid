@@ -4,7 +4,7 @@ import { isValidEmail, isValidName, isValidPassword } from '~~/shared/utils/vali
 import { useErrorModal } from '../composables/useErrorModal'
 
 useHead({
-  title: `$t('pages.signup')`,
+  title: $t('pages.signup'),
 })
 
 const auth = useAuthStore()
