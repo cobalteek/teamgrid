@@ -3,8 +3,11 @@
     "about": "О нас",
     "contact": "Контакты",
     "docs": "Лицензия",
-    "home": "Главная",
-    "dashboard": "Панель управления"
+    "home": "TeamGrid",
+    "dashboard": "Панель управления",
+    "login": "Вход — TeamGrid",
+    "signup": "Регистрация — TeamGrid",
+    "verifyemail": "Подтверждение почты"
   },
   "table": {
     "title": "Название",

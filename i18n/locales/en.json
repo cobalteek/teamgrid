@@ -4,7 +4,10 @@
     "contact": "Contact",
     "docs": "License",
     "home": "Home",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "login": "Login — TeamGrid",
+    "signup": "Registration — TeamGrid",
+    "verifyemail": "Email Verification"
   },
   "table": {
     "title": "Title",
@@ -298,6 +301,7 @@
       "confirmAll": "I understand that all organization shifts will be permanently deleted.",
       "submit": "Delete shifts"
     },
+<<<<<<< Updated upstream
     "days": {
       "friday": "Fri",
       "monday": "Mon",
@@ -310,6 +314,9 @@
     "other": "Another",
     "templateInfoDays": "Workday/Day Off",
     "templateInfoWeek": "Days of the Week"
+=======
+    "personalData": "I agree with Federal Law No. 152"
+>>>>>>> Stashed changes
   },
   "modal": {
     "editOrganization": "Edit organization"

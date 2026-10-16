@@ -8,6 +8,10 @@ const state = ref<'idle' | 'loading' | 'success' | 'error'>('idle')
 const errorMessage = ref('')
 const resendState = ref<'idle' | 'loading' | 'sent'>('idle')
 
+useHead({
+  title: `$t('pages.verifyemail')`,
+})
+
 onMounted(() => {
   const value = route.query.email
   if (typeof value === 'string') {

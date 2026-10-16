@@ -4,6 +4,10 @@ import News from '~/components/News.vue'
 const { activeBranch } = useAppConfig()
 
 const auth = useAuthStore()
+
+useHead({
+  title: `$t('pages.home')`,
+})
 </script>
 
 <template>
