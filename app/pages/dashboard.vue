@@ -5,6 +5,12 @@ definePageMeta({
   middleware: ['auth'],
   layout: 'dashboard-admin',
 })
+const organizationStore = useOrganizationStore()
+const title = computed(() => organizationStore.currentOrganization?.name)
+
+useHead({
+  title: title,
+})
 
 const toggleView = 'dayGridMonth'
 </script>

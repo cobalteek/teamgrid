@@ -2,6 +2,11 @@
 import { useAuthStore } from '~/stores/auth'
 import { isValidEmail, isValidName, isValidPassword } from '~~/shared/utils/validation'
 import { useErrorModal } from '../composables/useErrorModal'
+
+useHead({
+  title: $t('pages.signup'),
+})
+
 const auth = useAuthStore()
 const errorModal = useErrorModal()
 

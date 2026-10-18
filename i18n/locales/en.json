@@ -4,7 +4,10 @@
     "contact": "Contact",
     "docs": "License",
     "home": "Home",
-    "dashboard": "Dashboard"
+    "dashboard": "Dashboard",
+    "login": "Login — TeamGrid",
+    "signup": "Registration — TeamGrid",
+    "verifyemail": "Email Verification"
   },
   "table": {
     "title": "Title",
@@ -309,7 +312,9 @@
     },
     "other": "Another",
     "templateInfoDays": "Workday/Day Off",
-    "templateInfoWeek": "Days of the Week"
+    "templateInfoWeek": "Days of the Week",
+    "personalData": "I agree with Federal Law No. 152",
+    "employeeConfrimDelete": "Are you sure you want to remove this employee?"
   },
   "modal": {
     "editOrganization": "Edit organization"

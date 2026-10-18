@@ -57,6 +57,195 @@
   }
 }
 
+.fc .fc-scrollgrid {
+  border: 0;
+}
+
+.fc .fc-scrollgrid-section > * {
+  border: 0;
+}
+
+.fc .fc-scrollgrid-sync-table {
+  border-collapse: separate;
+  border-spacing: 0.35rem;
+}
+
+.fc .fc-daygrid-day {
+  overflow: hidden;
+  border: 1px solid var(--border-main);
+  border-radius: 0.5rem;
+  background: var(--bg-context);
+}
+
+.fc .fc-daygrid-day-frame {
+  min-height: 6.5rem;
+}
+
+.fc .fc-daygrid-day:hover {
+  background: var(--bg-hover-context);
+}
+
+.fc {
+  --calendar-bg: var(--bg-back);
+  --calendar-cell-bg: var(--bg-context);
+  --calendar-cell-hover: var(--bg-hover-context);
+  --calendar-border: var(--border-main);
+  --fc-page-bg-color: var(--calendar-bg);
+  --fc-neutral-bg-color: var(--calendar-cell-bg);
+  --fc-neutral-text-color: var(--text-muted);
+  --fc-border-color: var(--calendar-border);
+  --fc-today-bg-color: transparent;
+  --fc-button-text-color: var(--btn-text);
+  --fc-button-bg-color: var(--btn-bg);
+  --fc-button-border-color: var(--border-main);
+  --fc-button-hover-bg-color: var(--bg-hover-context);
+  --fc-button-hover-border-color: var(--border-main);
+  --fc-button-active-bg-color: var(--bg-hover-context);
+  --fc-button-active-border-color: var(--border-main);
+
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.fc .fc-toolbar {
+  margin: 0;
+  background: transparent;
+}
+
+.fc .fc-toolbar-title {
+  color: var(--text-main);
+  font-size: 1.9rem;
+  font-weight: 700;
+}
+
+.fc .fc-toolbar > .fc-toolbar-chunk:first-child .fc-button {
+  min-height: 2.55rem;
+  padding: 0.55rem 0.9rem;
+  font-size: 1rem;
+}
+
+.fc .fc-toolbar > .fc-toolbar-chunk:first-child .fc-prev-button,
+.fc .fc-toolbar > .fc-toolbar-chunk:first-child .fc-next-button {
+  min-width: 2.55rem;
+}
+
+.fc .fc-scrollgrid {
+  border: 0;
+}
+
+.fc .fc-scrollgrid-section > * {
+  border: 0;
+}
+
+.fc .fc-scrollgrid-sync-table {
+  border-collapse: separate;
+  border-spacing: 0.35rem;
+}
+
+.fc .fc-daygrid-day {
+  overflow: hidden;
+  border: 1px solid var(--border-main);
+  border-radius: 0.5rem;
+  background: var(--bg-context);
+}
+
+.fc .fc-daygrid-day-frame {
+  min-height: 5.6rem;
+}
+
+.fc .fc-button {
+  min-height: 2.35rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 9px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  box-shadow: none;
+  transition: 0.15s;
+}
+
+.fc .fc-prev-button,
+.fc .fc-next-button {
+  min-width: 2.35rem;
+  padding-right: 0.65rem;
+  padding-left: 0.65rem;
+}
+
+.fc .fc-button:focus-visible {
+  outline: 2px solid var(--border-main);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+.fc .fc-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.fc .fc-deleteShifts-button {
+  --fc-button-text-color: var(--btn-delete-text);
+}
+
+.fc .fc-col-header-cell-cushion {
+  padding: 0.7rem 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.fc .fc-daygrid-day:hover {
+  background: var(--calendar-cell-hover);
+}
+
+.fc .fc-day-today,
+.fc .fc-day-today:hover {
+  background: transparent;
+}
+
+.fc .fc-day-cell-label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  padding: 0.45rem 0.5rem;
+}
+
+.fc .fc-day-cell-weekday {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.fc .fc-day-cell-number {
+  color: var(--text-soft);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.fc .fc-day-today .fc-day-cell-number {
+  display: inline-flex;
+  width: 1.65rem;
+  height: 1.65rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: var(--btn-delete-text);
+  color: #ffffff;
+}
+
+.fc .fc-day-other .fc-day-cell-weekday,
+.fc .fc-day-other .fc-day-cell-number {
+  opacity: 0.45;
+}
+
+.fc .fc-event {
+  margin: 2px 4px;
+  border: 0;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgb(0 0 0 / 15%);
+}
+
 * {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.25) transparent;

@@ -3,8 +3,11 @@
     "about": "О нас",
     "contact": "Контакты",
     "docs": "Лицензия",
-    "home": "Главная",
-    "dashboard": "Панель управления"
+    "home": "TeamGrid",
+    "dashboard": "Панель управления",
+    "login": "Вход — TeamGrid",
+    "signup": "Регистрация — TeamGrid",
+    "verifyemail": "Подтверждение почты"
   },
   "table": {
     "title": "Название",
@@ -311,7 +314,9 @@
       "friday": "Пт",
       "saturday": "Сб",
       "sunday": "Вс"
-    }
+    },
+    "employeeConfrimDelete": "Вы дейтсвительно хотите удалить сотрудника",
+    "positionfrimDelete": "Вы действительно хотить удалить должность"
   },
   "modal": {
     "editOrganization": "Редактировать организацию"

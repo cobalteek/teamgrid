@@ -2,6 +2,10 @@
 import { useAuthStore } from '~/stores/auth'
 import { useErrorModal } from '../composables/useErrorModal'
 
+useHead({
+  title: $t('pages.login'),
+})
+
 const auth = useAuthStore()
 const fields = [
   { key: 'email', type: 'email', placeholder: 'form.placeholder.email' },

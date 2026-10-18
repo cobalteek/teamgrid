@@ -30,6 +30,12 @@ function getSmtpConfig() {
 }
 
 export async function sendEmail({ to, subject, text, html }: SendEmailOptions) {
+  // Explicit local mode: display verification emails without an external SMTP account.
+  if (process.env.NODE_ENV === 'development' && process.env.TEAMGRID_LOCAL === '1') {
+    console.log(`[Local email] To: ${to}\nSubject: ${subject}\n${text}`)
+    return
+  }
+
   const config = getSmtpConfig()
 
   const transporter = nodemailer.createTransport({

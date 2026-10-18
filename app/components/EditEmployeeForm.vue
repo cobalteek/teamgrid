@@ -29,6 +29,8 @@ const employeeStore = useEmployeeStore()
 const positionStore = usePositionStore()
 const organizationStore = useOrganizationStore()
 const isSubmitting = ref(false)
+const isDeleteEmployeeConfirmModalOpen = ref(false)
+const selectedEmployeeConfirmDelete = ref('')
 
 const employee = ref<Employee>({
   id: '',
@@ -81,6 +83,12 @@ async function handleSubmit() {
 function handleCancel() {
   emit('close')
 }
+
+function confirmDelete() {
+  selectedEmployeeConfirmDelete.value = `${$t('ui.employeeConfrimDelete') + ' ' + employee.value.surname + ' ' + employee.value.name + '?'}`
+  isDeleteEmployeeConfirmModalOpen.value = true
+}
+
 
 async function handleDelete() {
   isSubmitting.value = true
@@ -148,12 +156,20 @@ watch(
       :delete="true"
       @submit="handleSubmit"
       @close="handleCancel"
-      @delete="handleDelete"
+      @delete="confirmDelete"
     />
   </Modal>
   <ErrorModalContent
     :error="errorModal.error.value"
     class="top-1/4 h-[200px] w-[300px]"
     @close="errorModal.close"
+  />
+  <Confirm
+    :model-value="isDeleteEmployeeConfirmModalOpen"
+    :message="selectedEmployeeConfirmDelete"
+    :is-loading="isSubmitting"
+    submit-text="btn.delete"
+    @submit="handleDelete"
+    @close="isDeleteEmployeeConfirmModalOpen = false"
   />
 </template>

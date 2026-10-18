@@ -8,6 +8,7 @@ import { useShiftStore } from '../stores/shift'
 import { useOrganizationStore } from '../stores/organization'
 import { useEmployeeStore } from '../stores/employee'
 import { formatDateStrLocale } from '~~/shared/utils/formatDate'
+import { checkManagerStatus } from '~~/shared/utils/validation'
 
 const { locale } = useI18n()
 const props = defineProps<{
@@ -47,7 +48,10 @@ function formatShiftTime(minutes: number) {
 
 function getShiftTimeLabel(startTime: number | null, endTime: number | null) {
   if (startTime === null || endTime === null) return null
-  return `${formatShiftTime(startTime)}–${formatShiftTime(endTime)}`
+  return {
+    start: formatShiftTime(startTime),
+    end: formatShiftTime(endTime),
+  }
 }
 
 const events = computed(() => {
@@ -62,6 +66,8 @@ const events = computed(() => {
       extendedProps: {
         employeeId: shift.employee.id,
         positionId: shift.position.id,
+        employeeLabel: `${shift.employee.name} ${shift.employee.surname}`,
+        positionLabel: shift.position.name,
         timeLabel: shift.allDay ? null : getShiftTimeLabel(shift.startTime, shift.endTime),
 
         employeeColor: shift.employee.color,
@@ -114,9 +120,11 @@ const calendarOptions = computed(() => ({
   plugins: [dayGridPlugin, listPlugin, interactionPlugin],
 
   initialView: props.settings.initialView,
-  aspectRatio: 1.2,
+  aspectRatio: 1.05,
   locale: locale.value === 'ru' ? ruBetterLocale : enBetterLocale,
   firstDay: 1,
+  dayHeaders: false,
+  dayMaxEvents: 3,
   displayEventTime: false,
   dateClick: function (info: any) {
     if (!isManager.value) {
@@ -138,24 +146,27 @@ const calendarOptions = computed(() => ({
   customButtons: {
     addEmployee: {
       text: $t('btn.addEmployee') as string,
+      isPrimary: true,  
       click: () => {
+        if (isSubmitting.value) return
         isAddEmployeeModalOpen.value = true
       },
     },
     editOrganization: {
       text: $t('btn.edit') as string,
       click: () => {
+        if (isSubmitting.value) return
         isEditOrganizationModalOpen.value = true
       },
     },
     deleteShifts: {
       text: $t('btn.deleteShifts') as string,
       click: () => {
+        if (isSubmitting.value || !shiftStore.shifts.length) return
         isDeleteShiftsModalOpen.value = true
       },
     },
   },
-
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
@@ -178,6 +189,21 @@ const calendarOptions = computed(() => ({
     })
 
     return text.charAt(0).toUpperCase() + text.slice(1)
+  },
+  dayCellContent(arg: any) {
+    const weekday = arg.date.toLocaleDateString(locale.value === 'ru' ? 'ru-RU' : 'en-US', {
+      weekday: 'short',
+    })
+    const day = arg.dayNumberText
+
+    return {
+      html: `
+        <div class="fc-day-cell-label">
+          <span class="fc-day-cell-weekday">${weekday.charAt(0).toUpperCase() + weekday.slice(1)}</span>
+          <span class="fc-day-cell-number">${day}</span>
+        </div>
+      `,
+    }
   },
   events: events.value,
   eventDidMount,
@@ -283,16 +309,6 @@ function updateAllEventsOpacity() {
   })
 }
 
-async function checkManagerStatus() {
-  try {
-    const result = await organizationStore.isManager()
-    isManager.value = Boolean(result)
-  } catch (error) {
-    console.log(error)
-    isManager.value = false
-  }
-}
-
 async function deleteShift(shiftId: string) {
   isSubmitting.value = true
   try {
@@ -304,6 +320,34 @@ async function deleteShift(shiftId: string) {
   } finally {
     isDeleteShiftConfirmModalOpen.value = false
   }
+}
+
+function setToolbarButtonDisabled(name: string, disabled: boolean) {
+  const button = calendarWrapper.value?.querySelector<HTMLButtonElement>(`.fc-${name}-button`)
+
+  if (!button) return
+
+  button.disabled = disabled
+  button.setAttribute('aria-disabled', String(disabled))
+}
+
+function updateToolbarButtonStates() {
+  const isBusy = isSubmitting.value || shiftStore.isLoading
+  const hasShifts = shiftStore.shifts.length > 0
+
+  setToolbarButtonDisabled('addEmployee', isBusy)
+  setToolbarButtonDisabled('editOrganization', isBusy)
+  setToolbarButtonDisabled('deleteShifts', isBusy || !hasShifts)
+}
+
+function scheduleToolbarButtonStates() {
+  nextTick(() => {
+    if (import.meta.client) {
+      requestAnimationFrame(updateToolbarButtonStates)
+    } else {
+      updateToolbarButtonStates()
+    }
+  })
 }
 
 watch([selectedEmployeeId, selectedPositionId], () => {
@@ -319,16 +363,24 @@ watch(isEditOrganizationModalOpen, (isOpen) => {
 watch(
   () => organizationStore.currentOrganizationId,
   async () => {
-    checkManagerStatus()
+    isManager.value = checkManagerStatus()
   },
 )
 
-checkManagerStatus()
+watch(
+  [isSubmitting, () => shiftStore.isLoading, () => shiftStore.shifts.length, isManager],
+  scheduleToolbarButtonStates,
+  { flush: 'post' },
+)
 
-onMounted(() => {
+isManager.value = checkManagerStatus()
+
+onMounted(async () => {
   if (window.matchMedia('(min-width: 768px)').matches) {
-    shiftStore.getShifts()
+    await shiftStore.getShifts()
   }
+
+  scheduleToolbarButtonStates()
 })
 </script>
 
@@ -336,16 +388,28 @@ onMounted(() => {
   <div ref="calendarWrapper" class="hidden min-w-0 md:block" @click="resetSelection">
     <FullCalendar ref="calendarRef" :options="calendarOptions">
       <template #eventContent="{ event }">
-        <div class="w-full min-w-0 px-1 py-0.5 leading-tight">
+        <div class="flex w-full min-w-0 items-center gap-1 px-1 py-0.5 leading-tight">
+          <div class="min-w-0 flex-1">
+            <div
+              class="truncate text-left text-xs font-semibold text-white"
+              :title="event.extendedProps.employeeLabel"
+            >
+              {{ event.extendedProps.employeeLabel }}
+            </div>
+            <div
+              class="truncate text-left text-[11px] text-white/70"
+              :title="event.extendedProps.positionLabel"
+            >
+              {{ event.extendedProps.positionLabel }}
+            </div>
+          </div>
           <time
             v-if="event.extendedProps.timeLabel"
-            class="mx-auto mb-0.5 block w-fit rounded-sm bg-black/30 px-1.5 py-0.5 text-[11px] font-bold text-white"
+            class="flex min-w-[3rem] shrink-0 flex-col items-end gap-0.5 px-0.5 text-[11px] leading-none font-bold text-white drop-shadow-sm"
           >
-            {{ event.extendedProps.timeLabel }}
+            <span>{{ event.extendedProps.timeLabel.start }}</span>
+            <span>{{ event.extendedProps.timeLabel.end }}</span>
           </time>
-          <div class="truncate text-center text-xs font-medium text-white" :title="event.title">
-            {{ event.title }}
-          </div>
         </div>
       </template>
     </FullCalendar>
