@@ -148,18 +148,21 @@ const calendarOptions = computed(() => ({
       text: $t('btn.addEmployee') as string,
       isPrimary: true,  
       click: () => {
+        if (isSubmitting.value) return
         isAddEmployeeModalOpen.value = true
       },
     },
     editOrganization: {
       text: $t('btn.edit') as string,
       click: () => {
+        if (isSubmitting.value) return
         isEditOrganizationModalOpen.value = true
       },
     },
     deleteShifts: {
       text: $t('btn.deleteShifts') as string,
       click: () => {
+        if (isSubmitting.value || !shiftStore.shifts.length) return
         isDeleteShiftsModalOpen.value = true
       },
     },
@@ -319,6 +322,34 @@ async function deleteShift(shiftId: string) {
   }
 }
 
+function setToolbarButtonDisabled(name: string, disabled: boolean) {
+  const button = calendarWrapper.value?.querySelector<HTMLButtonElement>(`.fc-${name}-button`)
+
+  if (!button) return
+
+  button.disabled = disabled
+  button.setAttribute('aria-disabled', String(disabled))
+}
+
+function updateToolbarButtonStates() {
+  const isBusy = isSubmitting.value || shiftStore.isLoading
+  const hasShifts = shiftStore.shifts.length > 0
+
+  setToolbarButtonDisabled('addEmployee', isBusy)
+  setToolbarButtonDisabled('editOrganization', isBusy)
+  setToolbarButtonDisabled('deleteShifts', isBusy || !hasShifts)
+}
+
+function scheduleToolbarButtonStates() {
+  nextTick(() => {
+    if (import.meta.client) {
+      requestAnimationFrame(updateToolbarButtonStates)
+    } else {
+      updateToolbarButtonStates()
+    }
+  })
+}
+
 watch([selectedEmployeeId, selectedPositionId], () => {
   updateAllEventsOpacity()
 })
@@ -336,12 +367,20 @@ watch(
   },
 )
 
+watch(
+  [isSubmitting, () => shiftStore.isLoading, () => shiftStore.shifts.length, isManager],
+  scheduleToolbarButtonStates,
+  { flush: 'post' },
+)
+
 isManager.value = checkManagerStatus()
 
-onMounted(() => {
+onMounted(async () => {
   if (window.matchMedia('(min-width: 768px)').matches) {
-    shiftStore.getShifts()
+    await shiftStore.getShifts()
   }
+
+  scheduleToolbarButtonStates()
 })
 </script>
 

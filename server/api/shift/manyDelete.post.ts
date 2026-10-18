@@ -66,10 +66,17 @@ export default defineEventHandler(async (event) => {
     ...(!shouldDeleteAll && hasPositions ? { positionId: { in: positionIds } } : {}),
   }
 
-  const result = await prisma.shift.deleteMany({ where })
-
-  return {
-    success: true,
-    deletedCount: result.count,
+  try {
+    const result = await prisma.shift.deleteMany({ where })
+    
+    return {
+      success: true,
+      deletedCount: result.count,
+    }
+  } catch (error) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: 'error.bulk.deleteFailed',
+    })
   }
 })
