@@ -56,7 +56,7 @@ jobs:
             set +a
 
             echo "Apply database schema"
-            npx prisma db push
+            npx prisma migrate deploy
 
             echo "Build application"
             npm run build
