@@ -90,6 +90,26 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function recoverPassword(email: string) {
+    isLoading.value = true
+    error.value = null
+    try {
+      await $fetch('/api/auth/recover-password', {
+        method: 'POST',
+        body: {
+          email
+        },
+        credentials: 'include',
+      })
+    } catch (error: any) {
+      error.value = error.data?.message ?? error.message ?? $t('error.auth.recoverPassword')
+      console.error('Recover password error:', error.value)
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   async function logout() {
     user.value = null
     await $fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
@@ -106,5 +126,6 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     signUp,
     logout,
+    recoverPassword,
   }
 })
