@@ -29,6 +29,7 @@ function handleCancel() {
 
 function handleSubmit() {
   emit('submit')
+  onUpdateModelValue(false)
 }
 </script>
 

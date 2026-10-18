@@ -8,6 +8,7 @@ import { useShiftStore } from '../stores/shift'
 import { useOrganizationStore } from '../stores/organization'
 import { useEmployeeStore } from '../stores/employee'
 import { formatDateStrLocale } from '~~/shared/utils/formatDate'
+import { checkManagerStatus } from '~~/shared/utils/validation'
 
 const { locale } = useI18n()
 const props = defineProps<{
@@ -117,6 +118,8 @@ const calendarOptions = computed(() => ({
   aspectRatio: 1.2,
   locale: locale.value === 'ru' ? ruBetterLocale : enBetterLocale,
   firstDay: 1,
+  dayHeaders: false,
+  dayMaxEvents: 3,
   displayEventTime: false,
   dateClick: function (info: any) {
     if (!isManager.value) {
@@ -138,6 +141,7 @@ const calendarOptions = computed(() => ({
   customButtons: {
     addEmployee: {
       text: $t('btn.addEmployee') as string,
+      isPrimary: true,  
       click: () => {
         isAddEmployeeModalOpen.value = true
       },
@@ -155,7 +159,6 @@ const calendarOptions = computed(() => ({
       },
     },
   },
-
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
@@ -178,6 +181,21 @@ const calendarOptions = computed(() => ({
     })
 
     return text.charAt(0).toUpperCase() + text.slice(1)
+  },
+  dayCellContent(arg: any) {
+    const weekday = arg.date.toLocaleDateString(locale.value === 'ru' ? 'ru-RU' : 'en-US', {
+      weekday: 'short',
+    })
+    const day = arg.dayNumberText
+
+    return {
+      html: `
+        <div class="fc-day-cell-label">
+          <span class="fc-day-cell-weekday">${weekday.charAt(0).toUpperCase() + weekday.slice(1)}</span>
+          <span class="fc-day-cell-number">${day}</span>
+        </div>
+      `,
+    }
   },
   events: events.value,
   eventDidMount,
@@ -283,16 +301,6 @@ function updateAllEventsOpacity() {
   })
 }
 
-async function checkManagerStatus() {
-  try {
-    const result = await organizationStore.isManager()
-    isManager.value = Boolean(result)
-  } catch (error) {
-    console.log(error)
-    isManager.value = false
-  }
-}
-
 async function deleteShift(shiftId: string) {
   isSubmitting.value = true
   try {
@@ -319,11 +327,11 @@ watch(isEditOrganizationModalOpen, (isOpen) => {
 watch(
   () => organizationStore.currentOrganizationId,
   async () => {
-    checkManagerStatus()
+    isManager.value = checkManagerStatus()
   },
 )
 
-checkManagerStatus()
+isManager.value = checkManagerStatus()
 
 onMounted(() => {
   if (window.matchMedia('(min-width: 768px)').matches) {

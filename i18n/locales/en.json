@@ -313,7 +313,8 @@
     "other": "Another",
     "templateInfoDays": "Workday/Day Off",
     "templateInfoWeek": "Days of the Week",
-    "personalData": "I agree with Federal Law No. 152"
+    "personalData": "I agree with Federal Law No. 152",
+    "employeeConfrimDelete": "Are you sure you want to remove this employee?"
   },
   "modal": {
     "editOrganization": "Edit organization"

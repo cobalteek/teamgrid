@@ -314,7 +314,9 @@
       "friday": "Пт",
       "saturday": "Сб",
       "sunday": "Вс"
-    }
+    },
+    "employeeConfrimDelete": "Вы дейтсвительно хотите удалить сотрудника",
+    "positionfrimDelete": "Вы действительно хотить удалить должность"
   },
   "modal": {
     "editOrganization": "Редактировать организацию"

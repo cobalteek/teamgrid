@@ -38,6 +38,9 @@ const errorModal = useErrorModal()
 const initApp = useInitializeApp()
 const isSubmitting = ref(false)
 
+const selectedPositionConfirmDelete = ref('')
+const isDeletePositionConfirmModalOpen = ref(false)
+
 const resetModal = () => {
   position.value = {
     id: 0,
@@ -75,6 +78,11 @@ async function handleSubmit() {
 function handleCancel() {
   resetModal()
   emit('close')
+}
+
+function confirmDelete() {
+  selectedPositionConfirmDelete.value = `${$t('ui.positionfrimDelete') + ' ' + position.value.name + ' ' + position.value.fullName + '?'}`
+  isDeletePositionConfirmModalOpen.value = true
 }
 
 async function handleDelete() {
@@ -135,12 +143,20 @@ watch(
       :delete="true"
       @submit="handleSubmit"
       @close="handleCancel"
-      @delete="handleDelete"
+      @delete="confirmDelete"
     />
   </Modal>
   <ErrorModalContent
     :error="errorModal.error.value"
     class="top-1/4 h-[200px] w-[300px]"
     @close="errorModal.close"
+  />
+  <Confirm
+    :model-value="isDeletePositionConfirmModalOpen"
+    :message="selectedPositionConfirmDelete"
+    :is-loading="isSubmitting"
+    submit-text="btn.delete"
+    @submit="handleDelete"
+    @close="isDeletePositionConfirmModalOpen = false"
   />
 </template>
