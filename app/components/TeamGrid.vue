@@ -77,7 +77,7 @@ const events = computed(() => {
   })
 })
 
-const isManager = ref()
+const isManager = ref(false)
 const isAddEmployeeModalOpen = ref(false)
 const isEditOrganizationModalOpen = ref(false)
 const isDeleteShiftConfirmModalOpen = ref(false)
@@ -363,7 +363,7 @@ watch(isEditOrganizationModalOpen, (isOpen) => {
 watch(
   () => organizationStore.currentOrganizationId,
   async () => {
-    isManager.value = checkManagerStatus()
+    isManager.value = await checkManagerStatus()
   },
 )
 
@@ -373,7 +373,7 @@ watch(
   { flush: 'post' },
 )
 
-isManager.value = checkManagerStatus()
+isManager.value = await checkManagerStatus()
 
 onMounted(async () => {
   if (window.matchMedia('(min-width: 768px)').matches) {
