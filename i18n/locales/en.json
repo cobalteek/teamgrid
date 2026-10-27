@@ -277,7 +277,8 @@
       "name": "Name",
       "password": "Password",
       "search": "Search"
-    }
+    },
+    "addPosition": "Add a position"
   },
   "home": {
     "title": "Home Page"
