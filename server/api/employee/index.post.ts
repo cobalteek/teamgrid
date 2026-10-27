@@ -1,9 +1,8 @@
 import { prisma } from '~~/server/utils/prisma'
-import { Prisma } from '@prisma/client'
 import { requireUser } from '~~/server/utils/auth'
 import { isValidEmail, isValidName } from '~~/shared/utils/validation'
 import { EMPLOYEE_COLORS, POSITION_COLORS } from '~~/shared/utils/defaultColors'
-import { isManagerOrganization } from '~~/server/utils/member'
+import { requireOrganizationRole } from '~~/server/utils/member'
 
 export default defineEventHandler(async (event) => {
   const { userId } = await requireUser(event)
@@ -12,14 +11,12 @@ export default defineEventHandler(async (event) => {
   const { organizationId } = body
 
   try {
-    const isManager = await isManagerOrganization(userId, organizationId)
-
-    if (!isManager) {
-      throw createError({
-        statusCode: 403,
-        statusMessage: t('error.user.onlyManager'),
-      })
-    }
+    await requireOrganizationRole(
+      userId,
+      organizationId,
+      ['owner', 'admin'],
+      t('error.user.onlyManager'),
+    )
 
     const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : ''
     const name = typeof body?.name === 'string' ? body.name.trim() : ''
@@ -74,31 +71,32 @@ export default defineEventHandler(async (event) => {
         })
       }
 
-      try {
-        await prisma.organizationMember.create({
-          data: {
-            userId: user.id,
-            organizationId: organizationId,
-            roleId: 3,
-          },
+      const userRole = await prisma.role.findUnique({
+        where: { name: 'user' },
+        select: { id: true },
+      })
+
+      if (!userRole) {
+        throw createError({
+          statusCode: 500,
+          statusMessage: 'error.role.notFound',
         })
-      } catch (error: unknown) {
-        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-          throw createError({
-            statusCode: 404,
-            statusMessage: 'error.notFound',
-          })
-        }
-
-        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-          throw createError({
-            statusCode: 409,
-            statusMessage: 'error.user.alreadyInOrganization',
-          })
-        }
-
-        throw error
       }
+
+      await prisma.organizationMember.upsert({
+        where: {
+          userId_organizationId: {
+            userId: user.id,
+            organizationId,
+          },
+        },
+        update: {},
+        create: {
+          userId: user.id,
+          organizationId,
+          roleId: userRole.id,
+        },
+      })
     }
 
     const positionsCount = await prisma.position.count({

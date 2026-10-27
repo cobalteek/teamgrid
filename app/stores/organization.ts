@@ -1,5 +1,7 @@
-import type { Organization } from '~~/types/organization'
 import { defineStore } from 'pinia'
+import { computed, ref } from 'vue'
+import { useRequestHeaders } from '#imports'
+import type { Organization, OrganizationAccess, OrganizationRole } from '~~/types/organization'
 
 type RequestError = {
   data?: { message?: string }
@@ -16,12 +18,15 @@ function getErrorMessage(error: unknown) {
 }
 
 export const useOrganizationStore = defineStore('organization', () => {
-  const organizations = ref<Organization[]>([])
+  const organizations = ref<OrganizationAccess[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
-  const currentOrganization = ref<Organization | null>(null)
+  const currentOrganization = ref<OrganizationAccess | null>(null)
 
   const currentOrganizationId = computed(() => currentOrganization.value?.id ?? null)
+  const currentRole = computed(() => currentOrganization.value?.role ?? null)
+  const isOwner = computed(() => currentOrganization.value?.isOwner === true)
+  const isManager = computed(() => currentOrganization.value?.isManager === true)
 
   async function initialize() {
     if (organizations.value.length > 0) return
@@ -36,27 +41,17 @@ export const useOrganizationStore = defineStore('organization', () => {
     try {
       const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
 
-      organizations.value = await $fetch<Organization[]>('/api/organization', {
+      organizations.value = await $fetch<OrganizationAccess[]>('/api/organization', {
         credentials: 'include',
         method: 'GET',
         headers,
       })
 
-      if (!currentOrganization.value) {
-        currentOrganization.value = organizations.value[0] ?? null
-      }
-
-      if (import.meta.client) {
-        const savedId = localStorage.getItem('currentOrganizationId')
-        if (savedId) {
-          currentOrganization.value =
-            organizations.value.find((org) => org.id === Number(savedId)) ??
-            organizations.value[0] ??
-            null
-        } else {
-          currentOrganization.value = organizations.value[0] ?? null
-        }
-      }
+      const savedId = import.meta.client ? localStorage.getItem('currentOrganizationId') : null
+      currentOrganization.value =
+        organizations.value.find((organization) => organization.id === Number(savedId)) ??
+        organizations.value[0] ??
+        null
 
       return organizations.value
     } catch (e: unknown) {
@@ -74,7 +69,7 @@ export const useOrganizationStore = defineStore('organization', () => {
     try {
       const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
 
-      const newOrganization = await $fetch<Organization>('/api/organization', {
+      await $fetch<Organization>('/api/organization', {
         credentials: 'include',
         method: 'POST',
         headers,
@@ -84,98 +79,81 @@ export const useOrganizationStore = defineStore('organization', () => {
         },
       })
 
-      organizations.value.push(newOrganization)
+      await getOrganizations()
     } catch (e: unknown) {
       error.value = getErrorMessage(e)
       throw e
     } finally {
-      await getOrganizations()
       isLoading.value = false
     }
   }
 
   async function changeName(name: string) {
-    isLoading.value = true
-    error.value = null
     if (!isValidName(name)) {
-      console.log(error)
       throw createError({
         statusCode: 400,
         statusMessage: 'error.invalidName',
       })
     }
+
+    if (!currentOrganizationId.value) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'error.organization.notFound',
+      })
+    }
+
+    isLoading.value = true
+    error.value = null
+
     try {
       const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
 
-      const organization = currentOrganization
-
-      organization.value = await $fetch<Organization>('/api/organization', {
+      await $fetch<Organization>('/api/organization', {
         credentials: 'include',
         method: 'PATCH',
         headers,
-        body: {
-          name,
-        },
+        body: { name },
         query: {
           organizationId: currentOrganizationId.value,
         },
       })
-    } catch (e) {
-      console.log(e)
+
+      await getOrganizations()
+    } catch (e: unknown) {
+      error.value = getErrorMessage(e)
       throw e
     } finally {
-      await getOrganizations()
       isLoading.value = false
     }
   }
 
   async function changeOrganization(organization: Organization) {
-    isLoading.value = true
-    error.value = null
     if (organization.id <= 0) {
       throw createError({
         statusCode: 400,
-        statusMessage: 'Invalid organization ID',
+        statusMessage: 'error.organization.invalidId',
       })
     }
 
-    currentOrganization.value = organization
+    const access = organizations.value.find((item) => item.id === organization.id)
 
-    localStorage.setItem('currentOrganizationId', String(organization.id))
-
-    try {
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-
-      const id = organization.id
-
-      const owneredOrganization = await $fetch<Organization>('/api/organization', {
-        credentials: 'include',
-        method: 'GET',
-        headers,
-        query: {
-          id,
-        },
+    if (!access) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'error.organization.notFound',
       })
-
-      if (!owneredOrganization) {
-        throw createError({
-          statusCode: 404,
-          statusMessage: 'error.organization.notFound.notOwner',
-        })
-      }
-
-      currentOrganization.value = organization
-      if (import.meta.client) {
-        localStorage.setItem('currentOrganizationId', String(organization.id))
-      }
-    } catch (e) {
-      console.error(e)
-      error.value = String(e)
-      throw e
-    } finally {
-      await getOrganizations()
-      isLoading.value = false
     }
+
+    currentOrganization.value = access
+
+    if (import.meta.client) {
+      localStorage.setItem('currentOrganizationId', String(access.id))
+    }
+  }
+
+  function hasRole(roles: readonly OrganizationRole[]) {
+    return currentRole.value !== null && roles.includes(currentRole.value)
   }
 
   const options = computed(() =>
@@ -185,9 +163,9 @@ export const useOrganizationStore = defineStore('organization', () => {
         if (b.id === currentOrganization.value?.id) return 1
         return 0
       })
-      .map((p) => ({
-        value: p.id,
-        label: p.name,
+      .map((organization) => ({
+        value: organization.id,
+        label: organization.name,
       })),
   )
 
@@ -198,41 +176,12 @@ export const useOrganizationStore = defineStore('organization', () => {
         if (b.id === currentOrganization.value?.id) return 1
         return 0
       })
-      .map((p) => ({
-        value: p.id,
-        label: p.name,
-        description: p.description,
+      .map((organization) => ({
+        value: organization.id,
+        label: organization.name,
+        description: organization.description,
       })),
   )
-
-  async function isManager() {
-    isLoading.value = true
-    error.value = null
-    try {
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-
-      const orgId =
-        typeof currentOrganizationId === 'object' && currentOrganizationId !== null
-          ? currentOrganizationId.value || currentOrganizationId
-          : currentOrganizationId
-
-      const isManager = await $fetch('/api/organization', {
-        credentials: 'include',
-        method: 'GET',
-        headers,
-        query: {
-          organizationId: Number(orgId),
-        },
-      })
-
-      return isManager
-    } catch (e: any) {
-      error.value = String(e.message)
-      throw e
-    } finally {
-      isLoading.value = false
-    }
-  }
 
   return {
     error,
@@ -242,11 +191,14 @@ export const useOrganizationStore = defineStore('organization', () => {
     createOrganization,
     currentOrganization,
     currentOrganizationId,
+    currentRole,
+    isOwner,
+    isManager,
+    hasRole,
     options,
     initialize,
     changeName,
     changeOrganization,
-    isManager,
     optionsWithDescription,
   }
 })

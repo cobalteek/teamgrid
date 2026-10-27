@@ -3,3 +3,11 @@ export type Organization = {
   name: string
   description: string
 }
+
+export type OrganizationRole = 'owner' | 'admin' | 'user'
+
+export type OrganizationAccess = Organization & {
+  role: OrganizationRole
+  isOwner: boolean
+  isManager: boolean
+}

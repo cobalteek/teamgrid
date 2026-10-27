@@ -5,13 +5,13 @@ const props = defineProps<{
   modelValue: Model
   btnName: string
   disc: string
-  link: string
-  textLink: string
+  textLinks: textLinks[]
   sex?: boolean
   isLoading?: boolean
   checkboxes?: boolean
 }>()
 
+type textLinks = { text: string; link: string }
 type Field = { key: string; type: string; placeholder: string }
 type Model = Record<string, string | boolean>
 
@@ -133,11 +133,12 @@ function setValue(key: string, value: string | boolean) {
           {{ disc }}
         </div>
         <NuxtLink
-          v-if="textLink"
-          :to="link"
-          class="text-[var(--text-blue)] transition duration-300 hover:bg-gray-600"
+          v-if="textLinks"
+          v-for="link in textLinks"
+          :to="link.link"
+          class="pb-2 text-[var(--text-blue)] transition duration-300 hover:bg-gray-600"
         >
-          {{ textLink }}
+          {{ link.text }}
         </NuxtLink>
       </div>
     </div>

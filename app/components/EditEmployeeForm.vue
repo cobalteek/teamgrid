@@ -2,7 +2,6 @@
 import Modal from './Modal.vue'
 import { useEmployeeStore } from '~/stores/employee'
 import { usePositionStore } from '~/stores/position'
-import { useOrganizationStore } from '~/stores/organization'
 import { isValidEmail, isValidName } from '~~/shared/utils/validation'
 import type { Employee } from '~~/types/employee'
 
@@ -27,7 +26,6 @@ const errorModal = useErrorModal()
 const initApp = useInitializeApp()
 const employeeStore = useEmployeeStore()
 const positionStore = usePositionStore()
-const organizationStore = useOrganizationStore()
 const isSubmitting = ref(false)
 const isDeleteEmployeeConfirmModalOpen = ref(false)
 const selectedEmployeeConfirmDelete = ref('')
@@ -89,19 +87,10 @@ function confirmDelete() {
   isDeleteEmployeeConfirmModalOpen.value = true
 }
 
-
 async function handleDelete() {
   isSubmitting.value = true
 
   try {
-    const isManager = await organizationStore.isManager()
-
-    if (!isManager) {
-      isSubmitting.value = false
-      errorModal.showError('error.onlyManager')
-      return
-    }
-
     await employeeStore.deleteEmployee(employee.value.id)
     emit('close')
   } catch (e) {

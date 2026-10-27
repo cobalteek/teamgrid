@@ -90,6 +90,79 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function recoverPassword(email: string) {
+    isLoading.value = true
+    error.value = null
+    try {
+      await $fetch('/api/auth/recover-password', {
+        method: 'POST',
+        body: {
+          email,
+        },
+        credentials: 'include',
+      })
+    } catch (request: unknown) {
+      const requestError = asRequestError(request)
+      const message =
+        requestError.data?.message ?? requestError.message ?? $t('error.auth.recoverPassword')
+      error.value = message
+      console.error('Recover password error:', message)
+      throw request
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  async function verifyRecoverCode(email: string, code: string) {
+    isLoading.value = true
+    error.value = null
+    try {
+      await $fetch('/api/auth/verify-recover-code', {
+        method: 'POST',
+        body: {
+          email,
+          code,
+        },
+        credentials: 'include',
+      })
+
+      await navigateTo('/new-password')
+    } catch (request: unknown) {
+      const requestError = asRequestError(request)
+      error.value =
+        requestError.data?.message ?? requestError.message ?? $t('error.auth.verifyRecoverCode')
+      console.error('Verify recover code error:', error.value)
+      throw request
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  async function updatePassword(newPassword: string, confirmPassword: string) {
+    isLoading.value = true
+    error.value = null
+    try {
+      await $fetch('/api/auth/reset-password', {
+        method: 'PATCH',
+        body: {
+          password: newPassword,
+          confirmPassword: confirmPassword,
+        },
+        credentials: 'include',
+      })
+
+      await navigateTo('/login')
+    } catch (request: unknown) {
+      const requestError = asRequestError(request)
+      error.value =
+        requestError.data?.message ?? requestError.message ?? $t('error.auth.updatePassword')
+      console.error('Update password error:', error.value)
+      throw request
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   async function logout() {
     user.value = null
     await $fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
@@ -106,5 +179,8 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     signUp,
     logout,
+    recoverPassword,
+    verifyRecoverCode,
+    updatePassword,
   }
 })

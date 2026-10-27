@@ -76,15 +76,17 @@ export const useEmployeeStore = defineStore('employee', () => {
     }
   }
 
-  async function getEmployeeById(employeeId: string) {
+  async function getEmployeeById(userId: string) {
     isLoading.value = true
     error.value = null
+
+    const organizationId = organizationStore.currentOrganizationId
 
     try {
       const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
 
       const employee = await $fetch<Employee>('/api/employee', {
-        query: { employeeId },
+        query: { userId, organizationId },
         headers,
       })
 

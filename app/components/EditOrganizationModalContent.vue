@@ -28,9 +28,13 @@ const organizationName = ref('')
 const isDisableName = ref(true)
 const isOpenEditPositionForm = ref(false)
 const isOpenEditEmployeeForm = ref(false)
+const isAddEmployeeModalOpen = ref(false)
+const isAddPositionFormOpen = ref(false)
+const isOpenUser = ref(false)
 
 const posId = ref(0)
 const empId = ref('')
+const userId = ref('')
 
 function onUpdateModelValue(value: boolean) {
   emit('update:modelValue', value)
@@ -63,6 +67,11 @@ function openEditPositionForm(positionId: number) {
 function openEditEmployeeForm(employeeId: string) {
   empId.value = employeeId
   isOpenEditEmployeeForm.value = true
+}
+
+function openEditUser(id: string) {
+  userId.value = id
+  isOpenUser.value = true
 }
 
 watch(
@@ -122,9 +131,14 @@ watch(
           class="flex min-h-[170px] flex-col overflow-hidden rounded-md border border-[var(--border-main)] bg-[var(--input-bg)] sm:h-[300px]"
         >
           <h3
-            class="shrink-0 border-b border-[var(--border-main)] px-3 py-2 text-center text-lg font-bold"
+            class="flex shrink-0 items-center justify-between border-b border-[var(--border-main)] px-3 py-2 text-center text-lg font-bold"
           >
             {{ $t('ui.employees') }}
+            <span
+              class="text-bold cursor-pointer rounded-xl border px-2 text-xl"
+              @click="isAddEmployeeModalOpen = true"
+              >+</span
+            >
           </h3>
           <ul class="min-h-0 w-full flex-1 overflow-y-auto p-2">
             <li
@@ -141,9 +155,14 @@ watch(
           class="flex min-h-[170px] flex-col overflow-hidden rounded-md border border-[var(--border-main)] bg-[var(--input-bg)] sm:h-[300px]"
         >
           <h3
-            class="shrink-0 border-b border-[var(--border-main)] px-3 py-2 text-center text-lg font-bold"
+            class="flex shrink-0 items-center justify-between border-b border-[var(--border-main)] px-3 py-2 text-center text-lg font-bold"
           >
             {{ $t('ui.positions') }}
+            <span
+              class="text-bold cursor-pointer rounded-xl border px-2 text-xl"
+              @click="isAddPositionFormOpen = true"
+              >+</span
+            >
           </h3>
           <ul class="min-h-0 w-full flex-1 overflow-y-auto p-2">
             <li
@@ -166,7 +185,8 @@ watch(
             <li
               v-for="user in userStore.organizationOptions"
               :key="user.value"
-              class="rounded-md px-3 py-2 text-[var(--input-text)]"
+              class="cursor-pointer rounded-md px-3 py-2 text-[var(--input-text)] hover:bg-[var(--btn-bg)]"
+              @click="openEditUser(user.value)"
             >
               {{ user.label }}
             </li>
@@ -175,6 +195,11 @@ watch(
       </div>
     </div>
   </Modal>
+  <AddEmployeeModalContent
+    :model-value="isAddEmployeeModalOpen"
+    @close="isAddEmployeeModalOpen = false"
+  />
+  <AddPositionForm :model-value="isAddPositionFormOpen" @close="isAddPositionFormOpen = false" />
   <EditPositionForm
     :model-value="isOpenEditPositionForm"
     :position-id="posId"
@@ -185,6 +210,7 @@ watch(
     :employee-id="empId"
     @close="isOpenEditEmployeeForm = false"
   />
+  <EditUserInOrganization :model-value="isOpenUser" :user-id="userId" @close="isOpenUser = false" />
   <ErrorModalContent
     :error="errorModal.error.value"
     class="top-1/4 h-[200px] w-[300px]"

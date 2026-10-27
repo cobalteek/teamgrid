@@ -6,6 +6,11 @@ useHead({
   title: $t('pages.login'),
 })
 
+const textLinks = [
+  { link: '/sign-up', text: $t('auth.signUp') as string },
+  { link: '/recover-password', text: $t('auth.forgotPassword') as string },
+]
+
 const auth = useAuthStore()
 const fields = [
   { key: 'email', type: 'email', placeholder: 'form.placeholder.email' },
@@ -61,10 +66,9 @@ definePageMeta({
     v-model="form"
     :name="$t('auth.login')"
     :inputs="fields"
-    :btn-name="$t('auth.login')"
     :disc="$t('auth.noAccount')"
-    :text-link="$t('auth.signUp')"
-    link="/sign-up"
+    :btn-name="$t('auth.login')"
+    :text-links="textLinks"
     :is-loading="isSubmitting"
     @submit="onLogin"
   />

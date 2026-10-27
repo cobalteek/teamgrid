@@ -70,6 +70,46 @@ export const usePositionStore = defineStore('position', () => {
     }
   }
 
+  async function createPosition(position: Position) {
+    isLoading.value = true
+    error.value = null
+
+    if (!position.name || !position.fullName) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'error.position.invalidData',
+      })
+    }
+
+    if (!isValidName(position.name) || !isValidName(position.fullName)) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'error.position.invalidName',
+      })
+    }
+    try {
+      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
+
+      const createdPosition = await $fetch<Position>('api/position', {
+        credentials: 'include',
+        method: 'POST',
+        headers,
+        body: position,
+        query: {
+          organizationId: organizationStore.currentOrganizationId,
+        },
+      })
+
+      return createdPosition
+    } catch (e: unknown) {
+      error.value = getErrorMessage(e)
+      throw e
+    } finally {
+      await getPositions()
+      isLoading.value = false
+    }
+  }
+
   async function changePosition(position: Position) {
     isLoading.value = true
     error.value = null
@@ -100,6 +140,8 @@ export const usePositionStore = defineStore('position', () => {
           positionId: position.id,
         },
       })
+
+      return changedPosition
     } catch (e: unknown) {
       error.value = getErrorMessage(e)
       throw e
@@ -157,5 +199,6 @@ export const usePositionStore = defineStore('position', () => {
     deletePosition,
     options,
     optionsFull,
+    createPosition,
   }
 })

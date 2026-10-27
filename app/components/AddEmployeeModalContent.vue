@@ -26,7 +26,7 @@ const employee = ref<CreateEmployee>({
   middlename: '',
   position: '',
   email: '',
-  organizationId: 1,
+  organizationId: 0,
 })
 
 function resetEmployee() {

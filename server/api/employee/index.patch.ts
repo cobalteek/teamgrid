@@ -1,8 +1,7 @@
 import { prisma } from '~~/server/utils/prisma'
-import { Prisma } from '@prisma/client'
 import { requireUser } from '~~/server/utils/auth'
 import { isValidEmail, isValidName } from '~~/shared/utils/validation'
-import { isManagerOrganization } from '~~/server/utils/member'
+import { requireOrganizationRole } from '~~/server/utils/member'
 
 export default defineEventHandler(async (event) => {
   const { userId } = await requireUser(event)
@@ -11,14 +10,12 @@ export default defineEventHandler(async (event) => {
   const { organizationId } = body
 
   try {
-    const isManager = await isManagerOrganization(userId, organizationId)
-
-    if (!isManager) {
-      throw createError({
-        statusCode: 403,
-        statusMessage: t('error.user.onlyManager'),
-      })
-    }
+    await requireOrganizationRole(
+      userId,
+      organizationId,
+      ['owner', 'admin'],
+      t('error.user.onlyManager'),
+    )
 
     const id = typeof body?.id === 'string' ? body.id.trim() : ''
     const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : ''
@@ -77,32 +74,6 @@ export default defineEventHandler(async (event) => {
           statusCode: 403,
           statusMessage: t('error.auth.emailNotVerified'),
         })
-      }
-
-      try {
-        await prisma.organizationMember.create({
-          data: {
-            userId: user.id,
-            organizationId: organizationId,
-            roleId: 3,
-          },
-        })
-      } catch (error: unknown) {
-        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-          throw createError({
-            statusCode: 404,
-            statusMessage: 'error.notFound',
-          })
-        }
-
-        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-          throw createError({
-            statusCode: 409,
-            statusMessage: 'error.user.alreadyInOrganization',
-          })
-        }
-
-        throw error
       }
     }
 

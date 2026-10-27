@@ -1,6 +1,6 @@
 import { prisma } from '~~/server/utils/prisma'
 import { requireUser } from '~~/server/utils/auth'
-import { isManagerOrganization } from '~~/server/utils/member'
+import { requireOrganizationRole } from '~~/server/utils/member'
 import { defineEventHandler, createError, getQuery } from 'h3'
 
 export default defineEventHandler(async (event) => {
@@ -30,14 +30,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const isManager = await isManagerOrganization(userId, organizationId)
-
-  if (!isManager) {
-    throw createError({
-      statusCode: 403,
-      statusMessage: 'error.onlyManager',
-    })
-  }
+  await requireOrganizationRole(userId, organizationId, ['owner', 'admin'], 'error.onlyManager')
 
   const shift = await prisma.shift.findUnique({
     where: { id, organizationId },

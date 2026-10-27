@@ -20,6 +20,9 @@ model User {
   emailVerificationDeadline DateTime?
 
   emailVerificationTokens EmailVerificationToken[]
+  passwordRecoverToken PasswordRecoverToken[]
+  PasswordResetSession PasswordResetSession[]
+  tokenVersion Int @default(0)
   memberships             OrganizationMember[]
   consents                ConsentRecord[]
   createdNotifications    Notification[]           @relation("NotificationCreatedBy")
@@ -116,6 +119,33 @@ model EmailVerificationToken {
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+}
+
+model PasswordRecoverToken {
+  id        String    @id @default(cuid())
+  userId    String
+  codeHash String
+  attempts Int @default(0)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+}
+
+model PasswordResetSession {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

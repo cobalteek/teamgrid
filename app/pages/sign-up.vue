@@ -23,6 +23,8 @@ const fields = computed(
     ] as const,
 )
 
+const textLinks = [{ link: '/login', text: $t('auth.login') as string }]
+
 const form = ref({
   name: '',
   email: '',
@@ -100,8 +102,7 @@ definePageMeta({
     :sex="true"
     :btn-name="$t('auth.signUp')"
     :disc="$t('auth.haveAccount')"
-    :text-link="$t('auth.login')"
-    link="/login"
+    :text-links="textLinks"
     :is-loading="auth.isLoading"
     :checkboxes="true"
     @submit="onRegister"

@@ -1,6 +1,6 @@
 import { prisma } from '~~/server/utils/prisma'
 import { defineEventHandler, createError, getQuery } from 'h3'
-import { isMemberOrganization } from '~~/server/utils/member'
+import { requireOrganizationRole } from '~~/server/utils/member'
 
 export default defineEventHandler(async (event) => {
   const { userId } = await requireUser(event)
@@ -32,14 +32,12 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const isMember = await isMemberOrganization(userId, organizationId)
-
-    if (!isMember) {
-      throw createError({
-        statusCode: 403,
-        message: t('error.onlyMember'),
-      })
-    }
+    await requireOrganizationRole(
+      userId,
+      organizationId,
+      ['owner', 'admin', 'user'],
+      t('error.onlyMember'),
+    )
 
     const selectFields = {
       id: true,

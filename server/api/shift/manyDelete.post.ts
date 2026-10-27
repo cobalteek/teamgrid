@@ -1,6 +1,6 @@
 import { prisma } from '~~/server/utils/prisma'
 import { requireUser } from '~~/server/utils/auth'
-import { isManagerOrganization } from '~~/server/utils/member'
+import { requireOrganizationRole } from '~~/server/utils/member'
 import { defineEventHandler, createError, getQuery } from 'h3'
 
 export default defineEventHandler(async (event) => {
@@ -23,14 +23,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const isManager = await isManagerOrganization(userId, organizationId)
-
-  if (!isManager) {
-    throw createError({
-      statusCode: 403,
-      statusMessage: 'error.onlyManager',
-    })
-  }
+  await requireOrganizationRole(userId, organizationId, ['owner', 'admin'], 'error.onlyManager')
 
   const hasDateRange = Boolean(startDate && endDate)
   const hasEmployees = Array.isArray(employeeIds) && employeeIds.length > 0
@@ -68,12 +61,12 @@ export default defineEventHandler(async (event) => {
 
   try {
     const result = await prisma.shift.deleteMany({ where })
-    
+
     return {
       success: true,
       deletedCount: result.count,
     }
-  } catch (error) {
+  } catch {
     throw createError({
       statusCode: 500,
       statusMessage: 'error.bulk.deleteFailed',
