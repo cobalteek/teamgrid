@@ -81,7 +81,7 @@ function handleCancel() {
     <Form
       v-if="position"
       v-model:model-value="position"
-      title="ui.positionEdit"
+      :title="$t('form.addPosition')"
       :fields="[
         { key: 'name', type: 'text', placeholder: 'placeholder.positionName' },
         { key: 'fullName', type: 'text', placeholder: 'placeholder.positionFullName' },
