@@ -15,3 +15,6 @@ node_modules
 .env
 /TeamGrid_Terminal_Cheat_Sheet.md
 scripts
+start.cmd
+start.ps1
+.gitignore

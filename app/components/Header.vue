@@ -35,17 +35,13 @@ function openEditOrganizationModal() {
 
 const isDashboard = computed(() => route.name === 'dashboard')
 
-async function updateOrganizationAccess() {
-  if (!user.value || !isDashboard.value || !organizationStore.currentOrganizationId) {
-    canEditOrganization.value = false
-    return
-  }
-
-  try {
-    canEditOrganization.value = Boolean(await organizationStore.isManager())
-  } catch {
-    canEditOrganization.value = false
-  }
+function updateOrganizationAccess() {
+  canEditOrganization.value = Boolean(
+    user.value &&
+    isDashboard.value &&
+    organizationStore.currentOrganizationId &&
+    organizationStore.isManager,
+  )
 }
 
 watch(
@@ -71,7 +67,7 @@ watch(
     }}</NuxtLink>
     <ClientOnly>
       <div v-if="user && isDashboard" class="order-3 w-full min-w-0 md:order-none md:w-auto">
-        <OrganizationSwitcher @addOrganization="openModal" />
+        <OrganizationSwitcher @add-organization="openModal" />
       </div>
     </ClientOnly>
     <nav class="ml-auto hidden min-w-0 items-center gap-1.5 sm:flex sm:gap-3">

@@ -29,6 +29,18 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
+    const ownerRole = await prisma.role.findUnique({
+      where: { name: 'owner' },
+      select: { id: true },
+    })
+
+    if (!ownerRole) {
+      throw createError({
+        statusCode: 500,
+        statusMessage: 'error.role.notFound',
+      })
+    }
+
     const newOrganization = await prisma.organization.create({
       data: {
         name,
@@ -36,7 +48,7 @@ export default defineEventHandler(async (event) => {
         members: {
           create: {
             userId,
-            roleId: 1,
+            roleId: ownerRole.id,
           },
         },
       },

@@ -1,5 +1,9 @@
-export async function isManagerOrganization(userId: string, organizationId: number) {
-  const member = await prisma.organizationMember.findUnique({
+import { createError } from 'h3'
+import type { OrganizationRole } from '~~/types/organization'
+import { prisma } from './prisma'
+
+export async function getOrganizationMembership(userId: string, organizationId: number) {
+  return prisma.organizationMember.findUnique({
     where: {
       userId_organizationId: {
         userId,
@@ -10,24 +14,23 @@ export async function isManagerOrganization(userId: string, organizationId: numb
       role: true,
     },
   })
-
-  return member?.role.name === 'owner' || member?.role.name === 'admin'
 }
 
-export async function isMemberOrganization(userId: string, organizationId: number) {
-  const member = await prisma.organizationMember.findUnique({
-    where: {
-      userId_organizationId: {
-        userId,
-        organizationId,
-      },
-    },
-    include: {
-      role: true,
-    },
-  })
+export async function requireOrganizationRole(
+  userId: string,
+  organizationId: number,
+  allowedRoles: readonly OrganizationRole[],
+  statusMessage = 'error.onlyMember',
+) {
+  const membership = await getOrganizationMembership(userId, organizationId)
+  const role = membership?.role.name as OrganizationRole | undefined
 
-  return (
-    member?.role.name === 'user' || member?.role.name === 'owner' || member?.role.name === 'admin'
-  )
+  if (!membership || !role || !allowedRoles.includes(role)) {
+    throw createError({
+      statusCode: 403,
+      statusMessage,
+    })
+  }
+
+  return membership
 }

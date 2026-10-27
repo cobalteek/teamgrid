@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import Modal from './Modal.vue'
 import { usePositionStore } from '~/stores/position'
-import { useOrganizationStore } from '~/stores/organization.ts'
 import type { Position } from '~~/types/position'
 import { isValidPosition } from '~~/shared/utils/validation'
 
@@ -22,7 +21,6 @@ function onUpdateModelValue(value: boolean) {
     emit('close')
   }
 }
-const organizationStore = useOrganizationStore()
 const positionStore = usePositionStore()
 const position = ref<Position>({
   id: 0,
@@ -89,14 +87,6 @@ async function handleDelete() {
   isSubmitting.value = true
 
   try {
-    const isManager = await organizationStore.isManager()
-
-    if (!isManager) {
-      isSubmitting.value = false
-      errorModal.showError('error.onlyManager')
-      return
-    }
-
     await positionStore.deletePosition(position.value.id)
     emit('close')
   } catch (e) {

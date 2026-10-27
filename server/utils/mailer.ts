@@ -30,7 +30,6 @@ function getSmtpConfig() {
 }
 
 export async function sendEmail({ to, subject, text, html }: SendEmailOptions) {
-  // Explicit local mode: display verification emails without an external SMTP account.
   if (process.env.NODE_ENV === 'development' && process.env.TEAMGRID_LOCAL === '1') {
     console.log(`[Local email] To: ${to}\nSubject: ${subject}\n${text}`)
     return
@@ -42,7 +41,8 @@ export async function sendEmail({ to, subject, text, html }: SendEmailOptions) {
     host: config.host,
     port: config.port,
     secure: config.secure,
-    ignoreTLS: true,
+    // Refuse plaintext SMTP when secure SMTPS is not configured.
+    requireTLS: !config.secure,
     ...(config.auth ? { auth: config.auth } : {}),
   })
 

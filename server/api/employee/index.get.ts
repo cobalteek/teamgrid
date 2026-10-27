@@ -1,12 +1,12 @@
 import { prisma } from '~~/server/utils/prisma'
-import { isMemberOrganization } from '~~/server/utils/member'
+import { requireOrganizationRole } from '~~/server/utils/member'
 import { defineEventHandler, createError, getQuery } from 'h3'
 
 export default defineEventHandler(async (event) => {
   const { userId } = await requireUser(event)
   const t = await useTranslation(event)
   const query = getQuery(event)
-  const employeeId = query.employeeId ? String(query.employeeId) : undefined
+  const queryUserId = query.userId ? String(query.userId) : undefined
   const organizationId = query.organizationId ? Number(query.organizationId) : undefined
 
   if (!organizationId) {
@@ -16,14 +16,12 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const isMember = await isMemberOrganization(userId, organizationId)
-
-  if (!isMember) {
-    throw createError({
-      statusCode: 403,
-      statusMessage: t('error.onlyMember'),
-    })
-  }
+  await requireOrganizationRole(
+    userId,
+    organizationId,
+    ['owner', 'admin', 'user'],
+    t('error.onlyMember'),
+  )
 
   try {
     const selectFields = {
@@ -36,17 +34,28 @@ export default defineEventHandler(async (event) => {
       organizationId: true,
     }
 
-    if (employeeId) {
-      const employee = await prisma.employee.findUnique({
-        where: { id: employeeId, organizationId },
+    if (queryUserId) {
+      const user = await prisma.user.findFirst({
+        where: { id: queryUserId },
+        select: {
+          email: true,
+        },
+      })
+
+      if (!user) {
+        throw createError({
+          statusCode: 404,
+          statusMessage: t('error.user.notFound'),
+        })
+      }
+
+      const employee = await prisma.employee.findFirst({
+        where: { email: user.email, organizationId },
         select: selectFields,
       })
 
       if (!employee) {
-        throw createError({
-          statusCode: 404,
-          statusMessage: t('error.employee.notFound'),
-        })
+        return false
       }
 
       return {

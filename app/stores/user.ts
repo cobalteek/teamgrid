@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useOrganizationStore } from '~/stores/organization'
-import type { User } from '~~/types/user'
+import type { User, UserWithRole } from '~~/types/user'
 
 type RequestError = {
   data?: { message?: string }
@@ -50,6 +50,93 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  async function getUserWithRole(userId: string) {
+    isLoading.value = true
+    error.value = null
+    const organizationId = organizationStore.currentOrganizationId
+    try {
+      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
+
+      const userWithRole = await $fetch<UserWithRole>('/api/user/role', {
+        credentials: 'include',
+        headers,
+        method: 'GET',
+        query: {
+          userId,
+          organizationId,
+        },
+      })
+
+      return userWithRole
+    } catch (e) {
+      error.value = String(e)
+      console.log(e)
+      throw e
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  async function appointAdmin(userId: string) {
+    isLoading.value = true
+    error.value = null
+    const organizationId = organizationStore.currentOrganizationId
+    try {
+      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
+
+      await $fetch('/api/user/role', {
+        credentials: 'include',
+        headers,
+        method: 'PATCH',
+        body: {
+          userId,
+          role: 'admin',
+        },
+        query: {
+          organizationId,
+        },
+      })
+
+      return true
+    } catch (e) {
+      error.value = String(e)
+      console.log(e)
+      throw e
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  async function disAppointAdmin(userId: string) {
+    isLoading.value = true
+    error.value = null
+    const organizationId = organizationStore.currentOrganizationId
+    try {
+      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
+
+      await $fetch('/api/user/role', {
+        credentials: 'include',
+        headers,
+        method: 'PATCH',
+        body: {
+          userId,
+          role: 'user',
+        },
+        query: {
+          organizationId,
+        },
+      })
+
+      return true
+    } catch (e) {
+      error.value = String(e)
+      console.log(e)
+      throw e
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   const organizationOptions = computed(() =>
     organizationUsers.value.map((ou) => ({ value: ou.id, label: ou.name })),
   )
@@ -60,5 +147,8 @@ export const useUserStore = defineStore('user', () => {
     organizationOptions,
     organizationUsers,
     getOrganizationUsers,
+    getUserWithRole,
+    appointAdmin,
+    disAppointAdmin,
   }
 })

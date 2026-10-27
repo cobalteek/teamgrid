@@ -25,9 +25,24 @@ export async function requireAuthenticatedUser(event: H3Event) {
   const secret = getJwtSecret()
 
   try {
-    const payload = jwt.verify(token, secret) as { userId: string }
+    const payload = jwt.verify(token, secret) as {
+      userId: string
+      tokenVersion?: number
+    }
     const userId = payload.userId
-    if (!userId) throw createError({ statusCode: 401, message: t('error.auth.unAuth') })
+    if (!userId || !Number.isInteger(payload.tokenVersion)) {
+      throw createError({ statusCode: 401, message: t('error.auth.unAuth') })
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { tokenVersion: true },
+    })
+
+    if (!user || user.tokenVersion !== payload.tokenVersion) {
+      throw createError({ statusCode: 401, message: t('error.auth.unAuth') })
+    }
+
     return { userId }
   } catch {
     throw createError({ statusCode: 401, message: t('error.auth.unAuth') })

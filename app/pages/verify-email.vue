@@ -3,7 +3,7 @@ const route = useRoute()
 const { t } = useI18n()
 
 const email = ref('')
-const code = ref('')
+const code = ref()
 const state = ref<'idle' | 'loading' | 'success' | 'error'>('idle')
 const errorMessage = ref('')
 const resendState = ref<'idle' | 'loading' | 'sent'>('idle')
@@ -88,7 +88,7 @@ async function resendCode() {
             autocomplete="one-time-code"
             maxlength="6"
             pattern="[0-9]{6}"
-            placeholder="6-значный код"
+            :placeholder="$t('placeholder.code')"
             class="rounded-lg border border-gray-300 px-3 py-3 text-center tracking-[0.4em]"
           />
           <button

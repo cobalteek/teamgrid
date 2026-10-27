@@ -3,12 +3,12 @@ import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import listPlugin from '@fullcalendar/list'
+import { storeToRefs } from 'pinia'
 import { ruBetterLocale, enBetterLocale } from '~~/shared/utils/betterLocaleCalendarEnRu'
 import { useShiftStore } from '../stores/shift'
 import { useOrganizationStore } from '../stores/organization'
 import { useEmployeeStore } from '../stores/employee'
 import { formatDateStrLocale } from '~~/shared/utils/formatDate'
-import { checkManagerStatus } from '~~/shared/utils/validation'
 
 const { locale } = useI18n()
 const props = defineProps<{
@@ -77,7 +77,6 @@ const events = computed(() => {
   })
 })
 
-const isManager = ref(false)
 const isAddEmployeeModalOpen = ref(false)
 const isEditOrganizationModalOpen = ref(false)
 const isDeleteShiftConfirmModalOpen = ref(false)
@@ -88,6 +87,7 @@ const employeeStore = useEmployeeStore()
 const errorModal = useErrorModal()
 const organization = ref()
 const isSubmitting = ref(false)
+const { isManager } = storeToRefs(organizationStore)
 
 const calendarWrapper = ref<HTMLElement | null>(null)
 const eventElements = new Map<string, HTMLElement[]>()
@@ -146,7 +146,7 @@ const calendarOptions = computed(() => ({
   customButtons: {
     addEmployee: {
       text: $t('btn.addEmployee') as string,
-      isPrimary: true,  
+      isPrimary: true,
       click: () => {
         if (isSubmitting.value) return
         isAddEmployeeModalOpen.value = true
@@ -319,6 +319,7 @@ async function deleteShift(shiftId: string) {
     errorModal.showError('error.shift.delete')
   } finally {
     isDeleteShiftConfirmModalOpen.value = false
+    isSubmitting.value = false
   }
 }
 
@@ -361,19 +362,10 @@ watch(isEditOrganizationModalOpen, (isOpen) => {
 })
 
 watch(
-  () => organizationStore.currentOrganizationId,
-  async () => {
-    isManager.value = await checkManagerStatus()
-  },
-)
-
-watch(
   [isSubmitting, () => shiftStore.isLoading, () => shiftStore.shifts.length, isManager],
   scheduleToolbarButtonStates,
   { flush: 'post' },
 )
-
-isManager.value = await checkManagerStatus()
 
 onMounted(async () => {
   if (window.matchMedia('(min-width: 768px)').matches) {
