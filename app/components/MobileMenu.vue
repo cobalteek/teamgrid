@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const props = defineProps<{
+defineProps<{
   canEditOrganization: boolean
   locale: 'ru' | 'en'
 }>()
@@ -8,9 +8,7 @@ const auth = useAuthStore()
 const { user } = storeToRefs(auth)
 
 const emit = defineEmits<{
-  (e: 'goDashboard'): void
-  (e: 'logout'): void
-  (e: 'openEditOrganizationModal'): void
+  (e: 'goDashboard' | 'logout' | 'openEditOrganizationModal'): void
   (e: 'isOpen', v: boolean): void
 }>()
 const { setLocale } = useI18n()
@@ -18,12 +16,12 @@ const { setLocale } = useI18n()
 
 <template>
   <div
-    class="absolute top-[calc(100%+0.75rem)] right-0 z-50 w-64 rounded-lg border border-[var(--border-main)] bg-[var(--bg-context)] p-2 text-[var(--text-main)] shadow-xl"
+    class="absolute top-[calc(100%+0.625rem)] right-0 z-50 w-[min(20rem,calc(100vw-1.5rem))] rounded-xl border border-[var(--border-main)] bg-[var(--bg-context)] p-2.5 text-[var(--text-main)] shadow-2xl"
   >
     <template v-if="user">
       <NuxtLink
         to="/dashboard"
-        class="flex min-h-11 items-center rounded-md px-2 font-medium hover:bg-[var(--bg-hover-context)]"
+        class="flex min-h-11 items-center rounded-lg px-3 font-medium transition hover:bg-[var(--bg-hover-context)]"
         @click="emit('goDashboard')"
       >
         {{ $t('ui.dashboard') }}
@@ -31,7 +29,7 @@ const { setLocale } = useI18n()
       <button
         v-if="canEditOrganization"
         type="button"
-        class="flex min-h-11 w-full items-center rounded-md px-2 text-left font-medium hover:bg-[var(--bg-hover-context)]"
+        class="flex min-h-11 w-full items-center rounded-lg px-3 text-left font-medium transition hover:bg-[var(--bg-hover-context)]"
         @click="emit('openEditOrganizationModal')"
       >
         {{ $t('modal.editOrganization') }}
@@ -40,12 +38,14 @@ const { setLocale } = useI18n()
     <NuxtLink
       v-else
       to="/login"
-      class="flex min-h-11 items-center rounded-md px-2 font-medium hover:bg-[var(--bg-hover-context)]"
+      class="flex min-h-11 items-center rounded-lg px-3 font-medium transition hover:bg-[var(--bg-hover-context)]"
       @click="emit('isOpen', false)"
     >
       {{ $t('auth.login') }}
     </NuxtLink>
-    <div class="flex min-h-11 items-center justify-between gap-3 px-2">
+    <div
+      class="mt-2 flex min-h-11 items-center justify-between gap-3 border-t border-[var(--border-main)] px-3 pt-2"
+    >
       <span>{{ $t('ui.language') }}</span>
       <select
         :value="locale"
@@ -57,14 +57,14 @@ const { setLocale } = useI18n()
         <option value="en">En</option>
       </select>
     </div>
-    <div class="flex min-h-11 items-center justify-between gap-3 px-2">
+    <div class="flex min-h-11 items-center justify-between gap-3 px-3">
       <span>{{ $t('ui.theme') }}</span>
       <ToggleTheme />
     </div>
     <button
       v-if="user"
       type="button"
-      class="mt-1 flex min-h-11 w-full items-center rounded-md px-2 text-left text-[var(--btn-delete-text)] hover:bg-[var(--bg-hover-context)]"
+      class="mt-2 flex min-h-11 w-full items-center rounded-lg border-t border-[var(--border-main)] px-3 pt-2 text-left text-[var(--btn-delete-text)] transition hover:bg-[var(--bg-hover-context)]"
       @click="emit('logout')"
     >
       {{ $t('auth.logout') }}

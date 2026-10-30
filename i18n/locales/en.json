@@ -1,18 +1,337 @@
 {
-  "ui": {
-    "notAnEmployee": "Not an employee",
-    "advancedSettings": "Advanced Settings",
-    "bulkDelete": {
-      "confirmAll": "I understand that all changes made to the organization will be permanently deleted and cannot be recovered.",
-      "deleteAll": "Delete all shifts for the organization",
-      "description": "Select a time period, employees, or job titles. The specified filters are applied simultaneously.",
-      "submit": "Delete Shifts",
-      "title": "Quick Removal of Shifts"
+  "pages": {
+    "about": "About",
+    "contact": "Contact",
+    "docs": "License",
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "login": "Login — TeamGrid",
+    "signup": "Registration — TeamGrid",
+    "verifyemail": "Email Verification",
+    "recoverPassword": "Password Recovery"
+  },
+  "table": {
+    "title": "Title",
+    "description": "Description",
+    "createdAt": "Created At",
+    "deadline": "Deadline",
+    "status": "Status",
+    "createdBy": "Created By",
+    "handler": "Handler",
+    "doneAt": "Done At",
+    "selectHandler": "Select a handler"
+  },
+  "contextMenu": {
+    "open": "Open",
+    "viewTasks": "View Tasks",
+    "edit": "Edit"
+  },
+  "auth": {
+    "login": "Login",
+    "signUp": "Sign Up",
+    "noAccount": "No account?",
+    "haveAccount": "Have an account?",
+    "email": "Email",
+    "password": "Password",
+    "logout": "Log out",
+    "forgotPassword": "Forgot your password?"
+  },
+  "form": {
+    "placeholder": {
+      "search": "Search",
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password"
     },
+    "addPosition": "Add a position"
+  },
+  "home": {
+    "title": "Home page"
+  },
+  "btn": {
+    "addEmployee": "Add Employee",
+    "allProjects": "All projects",
+    "myProjects": "My projects",
+    "allTasks": "All tasks",
+    "myTasks": "My tasks",
+    "add": "Create",
+    "changeRole": "Change Role",
+    "projects": "Projects",
+    "tasks": "Tasks",
+    "back": "Back",
+    "save": "Save",
+    "delete": "Delete",
+    "set": "Set",
+    "close": "Close",
+    "cancel": "Cancel",
+    "addProject": "Add project",
+    "addTask": "Add task",
+    "editProject": "Edit project",
+    "editTask": "Edit task",
+    "cross": "×",
+    "changePostEmployee": "Change the employee’s position",
+    "edit": "Edit",
+    "editEmployee": "Edit Employee",
+    "addEvent": "Add an event",
+    "addShift": "Add shift",
+    "deleteShifts": "Delete shifts",
+    "accept": "I accept",
+    "verifyCode": "Confirm",
+    "sendCode": "Send Code",
+    "appointAnAdmin": "Appoint as administrator",
+    "disAppointAnAdmin": "Revoke a driver's license",
+    "itsOwner": "Owner",
+    "you": "You"
+  },
+  "select": {
+    "selectUser": "Select user",
+    "selectRole": "Select role",
+    "position": "Select a position",
+    "employee": "Select an employee",
+    "organization": "Select organization"
+  },
+  "user": {
+    "name": "Name",
+    "email": "Email",
+    "gender": "Gender",
+    "male": "Male",
+    "female": "Female",
+    "role": "Role"
+  },
+  "role": {
+    "user": "User",
+    "admin": "Admin",
+    "owner": "Owner"
+  },
+  "message": {
+    "hello": "Hi",
+    "welcome": "Welcome",
+    "signUser": "This page is available only to authorized users.",
+    "appInfo": "A web application for managing employee shift schedules.",
+    "signed": "You are logged in as ",
+    "recoverPasswordTitle": "Password Recovery",
+    "recoverPasswordWarn": "The code is valid for 10 minutes. If you did not request a reset, please ignore this message.",
+    "recoverPassword": "Your password recovery code"
+  },
+  "status": {
+    "notStarted": "Not started",
+    "inProcess": "In process",
+    "completed": "Completed",
+    "abandoned": "Abandoned",
+    "frozen": "Frozen"
+  },
+  "error": {
+    "notFound": "Not Found",
+    "project": {
+      "notFound": "Project not found",
+      "idRequired": "Project ID required",
+      "fetchAll": "Failed to fetch all projects",
+      "fetchMy": "Failed to fetch my projects",
+      "searchFailed": "Failed to search projects",
+      "deadlineEarlier": "The deadline cannot be earlier than the creation date of the project.",
+      "addEdit": "Operation failed, please check your project details.",
+      "create": "Failed to create project",
+      "update": "Failed to update project.",
+      "delete": "Failed to delete project."
+    },
+    "status": {
+      "statusId": "Status ID required",
+      "notFound": "Statuses not found",
+      "get": "Failed to get statuses"
+    },
+    "form": {
+      "fieldsEmpty": "The fields are empty.",
+      "workDaysZero": "The number of working days cannot be zero.",
+      "startOlderEnd": "The start date cannot be later than the end date.",
+      "invalidShiftTime": "The shift end time must be later than the start time.",
+      "shiftsEmpty": "The shift list cannot be empty.",
+      "dateRangeRequired": "Select both boundaries of the date range."
+    },
+    "auth": {
+      "credentials": "Invalid credentials",
+      "login": "Login error",
+      "passwordLength": "Password must be between 8 and 128 characters.",
+      "invalidEmail": "Enter a valid email address.",
+      "tooManyAttempts": "Too many attempts. Try again later.",
+      "loginOrPasswordInvalid": "The login or password is incorrect. Please try again.",
+      "onlyEnglish": "Only English characters allowed.",
+      "selectGender": "Please select a gender.",
+      "personalDataConsentRequired": "Separate consent to personal-data processing is required.",
+      "userAgreementRequired": "Accepting the User Terms is required.",
+      "passwordsNotMatch": "Passwords do not match.",
+      "nameLength": "The name must be at least 2 characters long.",
+      "emailExist": "Email already exists.",
+      "emailVerificationInvalid": "The verification code is invalid or has already been used.",
+      "emailNotVerified": "Please verify your email address first.",
+      "unAuth": "Unauthorized",
+      "logoutFailed": "Logout failed.",
+      "register": "Register failed.",
+      "fullNameLength": "Full name length must be from 2 to 80 characters",
+      "emailInvalid": "Invalid email",
+      "positionLength": "Invalid position length",
+      "emailExistAnEmployee": "This email is already registered among employees",
+      "resetTokenInvalid": "The password reset link is invalid or has expired.",
+      "recoverPassword": "Password Recovery Error"
+    },
+    "user": {
+      "notFound": "User not found",
+      "idRequired": "User ID required",
+      "onlyCreator": "Only the creator of the project can do it.",
+      "onlyOwner": "Only owner can do it.",
+      "creatorForever": "You can't stop being the owner.",
+      "chooseUserAndRole": "Please choose a user and a role.",
+      "loadUsers": "Failed to load users.",
+      "get": "Failed to get user",
+      "roleUserNotFound": "Role user not found",
+      "positionUserNotFound": "User position not found",
+      "onlyAdmin": "Only an admin can do it.",
+      "positions": "Failed to get positions",
+      "onlyManager": "You are not the manager of the organization",
+      "unauthorized": "Not authorized",
+      "notQueryId": "The user ID for the request is missing"
+    },
+    "role": {
+      "idNotFound": "Role ID not found",
+      "assignRole": "Couldn’t assign a role.",
+      "roleUserNotFound": "Role USER not found",
+      "creatorForever": "You can’t change your role!",
+      "change": "Failed to change role",
+      "get": "Failed to get role",
+      "notFound": "Role not found",
+      "invalidId": "Invalid role ID"
+    },
+    "data": {
+      "notFound": "Data not found",
+      "notLoaded": "Data Loading Error"
+    },
+    "bulk": {
+      "notFound": "Bulk action: data not found"
+    },
+    "general": {
+      "invalidName": "Invalid name",
+      "invalidEmail": "Invalid email",
+      "permissionDenied": "Permission denied",
+      "invalidData": "Invalid data"
+    },
+    "candidate": {
+      "loadCandidates": "Failed to load candidates",
+      "loadEmployee": "Failed to load employees"
+    },
+    "employee": {
+      "get": "Failed to get employees",
+      "notFound": "No employees found"
+    },
+    "color": {
+      "notFound": "Color not found"
+    },
+    "position": {
+      "notFound": "No positions found",
+      "invalidData": "Invalid position data",
+      "invalidName": "Invalid position name"
+    },
+    "shift": {
+      "duplicate": "This shift already exists",
+      "notFound": "Shift not found"
+    },
+    "organization": {
+      "get": "Organization not received",
+      "notCreate": "The organization has not been created",
+      "notFound": "Organization not found",
+      "invalidName": "Invalid organization name",
+      "create": "Failed to create organization",
+      "getId": "Failed to get organization ID",
+      "notFoundNotOwner": "Organization not found or you are not the owner",
+      "invalidId": "Invalid Organization ID",
+      "notReceived": "The organization was not specified in the request",
+      "update": "Failed to update the organization"
+    },
+    "onlyManager": "Only the owner or admin can do this",
+    "onlyMember": "You are not a member of the organization",
+    "onlyOwner": "Only the owner of the organization can do this",
+    "invalidData": "Invalid input",
+    "changeRole": "Unable to change permissions"
+  },
+  "placeholder": {
+    "firstName": "Name",
+    "lastName": "Surname",
+    "middleName": "Middle name",
+    "position": "Position",
+    "positionName": "Position Name",
+    "positionFullName": "Position Full Name",
+    "email": "Email",
+    "organizationName": "Name of organization",
+    "organizationDescription": "Add an organization description",
+    "code": "6-digit code"
+  },
+  "validation": {
+    "candidate": "Fill in all fields",
+    "shift": {
+      "requiredFields": "Fill in all required shift fields",
+      "invalidTime": "Enter a valid shift start and end time"
+    },
+    "employee": {
+      "requiredFields": "Fill in all required employee fields"
+    },
+    "organization": {
+      "requiredFields": "Required name organization"
+    }
+  },
+  "ui": {
+    "currentOrganization": "Current organization",
+    "menu": "Menu",
+    "dashboard": "Dashboard",
+    "language": "Language",
+    "theme": "Theme",
+    "schedule": "Schedule",
+    "scheduleView": "Schedule view",
+    "feedView": "Feed",
+    "gridView": "Grid",
+    "scheduleDays": "Schedule days",
+    "today": "Today",
+    "loading": "Loading...",
+    "pullToLoadPrevious": "Pull down to load the previous month",
+    "releaseToLoadPrevious": "Release to load the previous month",
+    "previousWeek": "Previous days",
+    "nextWeek": "Next days",
+    "shifts": "shifts",
+    "noShifts": "No shifts for this day",
+    "organization": {
+      "add": "Add an organization"
+    },
+    "organizationDescription": "Organization description",
+    "organizations": "Organizations",
+    "yourOrganizations": "Your organizations",
+    "employees": "Employees",
+    "positions": "Positions",
+    "users": "Users",
+    "employeeEdit": "Edit Employee",
+    "positionEdit": "Edit Position",
+    "advancedSettings": "Advanced Settings",
+    "shiftTime": "Shift time",
+    "timeFrom": "Starts",
+    "timeTo": "Ends",
+    "noRestDays": "Create a schedule without days off?",
+    "templateGrid": "Grid Template",
+    "workDays": "Work Days",
+    "restDays": "Rest Days",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "shiftDeleteConfirm": "Delete a shift",
     "cancel": "Cancel",
     "confirm": "Confirm",
-    "currentOrganization": "Current Organization",
-    "dashboard": "Control Panel",
+    "fullNamePosition": "Fullname",
+    "roles": "roles",
+    "shift": {
+      "deleteConfirm": "Delete"
+    },
+    "bulkDelete": {
+      "title": "Quick shift deletion",
+      "description": "Select a date range, employees, or positions. Selected filters are applied together.",
+      "deleteAll": "Delete all organization shifts",
+      "confirmAll": "I understand that all organization shifts will be permanently deleted.",
+      "submit": "Delete shifts"
+    },
     "days": {
       "friday": "Fri",
       "monday": "Mon",
@@ -22,352 +341,44 @@
       "tuesday": "Tue",
       "wednesday": "Wed"
     },
-    "employee": "Employee",
-    "employeeConfrimDelete": "Are you sure you want to remove this employee?",
-    "employeeEdit": "Edit Employee",
-    "employees": "Employees",
-    "endDate": "End of Cycle",
-    "feedView": "Feed",
-    "fullNamePosition": "Full Name",
-    "gridView": "Grid",
-    "language": "Language",
-    "loading": "Loading...",
-    "menu": "Menu",
-    "newPassword": "New Password",
-    "nextWeek": "The Next Few Days",
-    "noRestDays": "Create a schedule without days off?",
-    "noShifts": "There are no shifts scheduled for this day",
-    "organization": {
-      "add": "Add an organization"
-    },
     "other": "Another",
-    "owner": "Owner",
-    "personalData": "I hereby give my separate consent to the processing of my personal data",
-    "personalDataConsentText": "Consent Form",
-    "positionEdit": "Editing a Job Posting",
-    "positionfrimDelete": "Are you sure you want to delete this position?",
-    "positions": "Positions",
-    "previousWeek": "Previous days",
-    "privacyPolicy": "Privacy Policy",
-    "recoverPassword": "Password Recovery",
-    "restDays": "Weekends",
-    "roles": "Roles",
-    "schedule": "Schedule",
-    "scheduleDays": "Schedule Days",
-    "scheduleView": "Schedule View",
-    "sendCode": "If an account with that email address exists, a code has been sent to it",
-    "sendMessage": "Send an email",
-    "shift": {
-      "deleteConfirm": "Are you sure you want to delete this shift?"
-    },
-    "shiftDeleteConfirm": "Delete Shift",
-    "shiftTime": "Shift Time",
-    "shifts": "shifts",
-    "startDate": "Start of the cycle",
-    "status": "Status",
-    "templateGrid": "Schedule Template",
     "templateInfoDays": "Workday/Day Off",
     "templateInfoWeek": "Days of the Week",
-    "theme": "Topic",
-    "timeFrom": "Start",
-    "timeTo": "The End",
-    "today": "Today",
+    "employeeConfrimDelete": "Are you sure you want to remove this employee?",
+    "positionfrimDelete": "Are you sure you want to delete this position?",
+    "recoverPassword": "Password Recovery",
+    "sendMessage": "Send an email",
+    "sendCode": "If an account with that email address exists, a code has been sent to it",
+    "employee": "Employee",
+    "owner": "Owner",
+    "admin": "Admin",
     "user": "User",
-    "userAgreement": "Terms of Use",
-    "userAgreementConsent": "I accept",
-    "users": "Users",
-    "workDays": "Workers",
-    "admin": "Admin"
+    "status": "Status",
+    "notAnEmployee": "Not an employee",
+    "newPassword": "New Password",
+    "personalData": "I separately consent to personal-data processing",
+    "personalDataConsentText": "consent text",
+    "privacyPolicy": "Privacy Policy",
+    "userAgreementConsent": "I accept the",
+    "userAgreement": "User Terms"
   },
-  "auth": {
-    "email": "Mail",
-    "forgotPassword": "Forgot your password?",
-    "haveAccount": "Do you have an account?",
-    "login": "Log In",
-    "logout": "Log Out",
-    "noAccount": "Don't have an account?",
-    "password": "Password",
-    "signUp": "Registration"
-  },
-  "btn": {
-    "accept": "I accept",
-    "add": "Create",
-    "addEmployee": "Add an employee",
-    "addEvent": "Add an event",
-    "addProject": "Create a project",
-    "addShift": "Add a shift",
-    "addTask": "Create a task",
-    "allProjects": "All Projects",
-    "allTasks": "All Problems",
-    "appointAnAdmin": "Appoint as administrator",
-    "back": "Back",
-    "cancel": "Cancel",
-    "changePostEmployee": "Change an Employee's Position",
-    "changeRole": "Change Role",
-    "close": "Close",
-    "cross": "×",
-    "delete": "Delete",
-    "deleteShifts": "Delete Shifts",
-    "disAppointAnAdmin": "Revoke a driver's license",
-    "edit": "Edit",
-    "editEmployee": "Edit Employee",
-    "editProject": "Edit the project",
-    "editTask": "Edit Task",
-    "itsOwner": "Owner",
-    "myProjects": "My Projects",
-    "myTasks": "My Responsibilities",
-    "projects": "Projects",
-    "save": "Save",
-    "sendCode": "Send Code",
-    "set": "Install",
-    "tasks": "Objectives",
-    "verifyCode": "Confirm",
-    "you": "You"
-  },
-  "contextMenu": {
-    "edit": "Edit",
-    "open": "Open",
-    "viewTasks": "View the problems"
+  "modal": {
+    "editOrganization": "Edit organization"
   },
   "email": {
     "verification": {
+      "subject": "Confirm your email",
+      "greeting": "Hello",
       "code": "Your verification code",
       "expiration": "The code is valid for 10 minutes",
-      "greeting": "Hello",
       "resend": "Resend the code",
-      "resendHint": "If the account is eligible to receive a code, a new email has already been sent.",
       "resending": "Sending…",
-      "subject": "Confirm your email address"
+      "resendHint": "If the account is eligible to receive a code, a new email has already been sent."
     }
   },
-  "error": {
-    "auth": {
-      "credentials": "Incorrect login credentials",
-      "emailExist": "This email address is already registered.",
-      "emailExistAnEmployee": "This email address is already registered for an employee",
-      "emailInvalid": "Invalid email address",
-      "emailNotVerified": "First, confirm your email address.",
-      "emailVerificationInvalid": "The verification code is invalid or has already been used.",
-      "fullNameLength": "The full name must be between 2 and 80 characters long",
-      "invalidEmail": "Please enter a valid email address.",
-      "login": "Login error",
-      "loginOrPasswordInvalid": "An incorrect username or password was entered. Please try again.",
-      "logoutFailed": "I was unable to log out of my account.",
-      "nameLength": "The name must be at least 2 characters long.",
-      "onlyEnglish": "Only Latin characters are allowed.",
-      "passwordLength": "The password must be between 8 and 128 characters long.",
-      "passwordsNotMatch": "The passwords do not match.",
-      "personalDataConsentRequired": "You must provide separate consent for the processing of your personal data.",
-      "positionLength": "The term of office is incorrect",
-      "recoverPassword": "Password Recovery Error",
-      "register": "Registration failed.",
-      "resetTokenInvalid": "The password reset link is invalid or has expired.",
-      "selectGender": "Please select your gender.",
-      "tooManyAttempts": "Too many attempts. Please try again later.",
-      "unAuth": "Not authorized",
-      "userAgreementRequired": "You must accept the terms of use."
-    },
-    "bulk": {
-      "notFound": "No data found for mass action"
-    },
-    "candidate": {
-      "loadCandidates": "Unable to load candidates",
-      "loadEmployee": "Unable to load employees"
-    },
-    "changeRole": "Unable to change permissions",
-    "color": {
-      "notFound": "Color not found"
-    },
-    "data": {
-      "notFound": "Data not found",
-      "notLoaded": "Data Loading Error"
-    },
-    "employee": {
-      "get": "We were unable to recruit staff",
-      "notFound": "No employees found"
-    },
-    "form": {
-      "dateRangeRequired": "Specify both endpoints of the interval.",
-      "fieldsEmpty": "The fields to be filled out are blank.",
-      "invalidShiftTime": "The shift end time must be later than the shift start time.",
-      "shiftsEmpty": "The list of shifts cannot be empty.",
-      "startOlderEnd": "The start date cannot be later than the end date.",
-      "workDaysZero": "The number of workdays cannot be zero."
-    },
-    "general": {
-      "invalidData": "Incorrect data",
-      "invalidEmail": "Invalid email address",
-      "invalidName": "Invalid name",
-      "permissionDenied": "Access Denied"
-    },
-    "invalidData": "Invalid input",
-    "notFound": "Not found",
-    "onlyManager": "Only the owner or an admin can do this",
-    "onlyMember": "You are not a member of the organization",
-    "onlyOwner": "Only the owner of the organization can do this",
-    "organization": {
-      "create": "Failed to create the organization",
-      "get": "No organization received",
-      "getId": "Unable to retrieve the organization ID",
-      "invalidId": "Invalid organization ID",
-      "invalidName": "Incorrect organization name",
-      "notCreate": "The organization has not been established",
-      "notFound": "The organization was not found",
-      "notFoundNotOwner": "The organization was not found, or you do not have owner permissions",
-      "notReceived": "The organization was not specified in the request"
-    },
-    "position": {
-      "invalidData": "Incorrect job title information",
-      "invalidName": "Incorrect job title",
-      "notFound": "No positions found"
-    },
-    "project": {
-      "addEdit": "The operation failed. Please check the project details.",
-      "create": "The project could not be created.",
-      "deadlineEarlier": "The due date cannot be earlier than the project creation date.",
-      "delete": "The project could not be deleted.",
-      "fetchAll": "Not all projects could be loaded.",
-      "idRequired": "Project ID required",
-      "notFound": "Project not found",
-      "searchFailed": "The project search could not be completed.",
-      "update": "The project could not be updated.",
-      "fetchMy": "I was unable to upload my projects."
-    },
-    "role": {
-      "assignRole": "Unable to assign the role.",
-      "change": "Unable to change the role",
-      "creatorForever": "You cannot change your role!",
-      "get": "I didn't get the part",
-      "idNotFound": "Role ID not found",
-      "invalidId": "Invalid role ID",
-      "notFound": "Role not found",
-      "roleUserNotFound": "The USER role was not found"
-    },
-    "shift": {
-      "duplicate": "This shift already exists",
-      "notFound": "No shift found"
-    },
-    "status": {
-      "get": "Unable to retrieve statuses",
-      "notFound": "No statuses found",
-      "statusId": "Status ID required"
-    },
-    "user": {
-      "chooseUserAndRole": "Please select a user and a role.",
-      "creatorForever": "You can't stop being the owner",
-      "get": "Unable to retrieve the user",
-      "idRequired": "User ID required",
-      "loadUsers": "Unable to load users.",
-      "notFound": "User not found",
-      "notQueryId": "The user ID for the request is missing",
-      "onlyAdmin": "Only an administrator can perform this action.",
-      "onlyCreator": "Only the project creator can perform this action.",
-      "onlyManager": "You are not a manager at the organization",
-      "onlyOwner": "Only the owner can do this.",
-      "positionUserNotFound": "User role not found",
-      "positions": "Failed to secure positions",
-      "roleUserNotFound": "The user with this role was not found",
-      "unauthorized": "Not authorized"
-    }
-  },
-  "form": {
-    "placeholder": {
-      "confirmPassword": "Confirm your password",
-      "email": "Mail",
-      "name": "Name",
-      "password": "Password",
-      "search": "Search"
-    },
-    "addPosition": "Add a position"
-  },
-  "home": {
-    "title": "Home Page"
-  },
-  "message": {
-    "appInfo": "A web application for managing employee shift schedules.",
-    "appInfoDev": "A web application for managing employee shift schedules.\nDeveloper version; main website: ",
-    "hello": "Hi",
-    "recoverPassword": "Your password recovery code",
-    "recoverPasswordTitle": "Password Recovery",
-    "recoverPasswordWarn": "The code is valid for 10 minutes. If you did not request a reset, please ignore this message.",
-    "signUser": "This page is available only to authorized users.",
-    "signed": "You are logged in as ",
-    "welcome": "Welcome"
-  },
-  "modal": {
-    "editOrganization": "Edit Organization"
-  },
-  "pages": {
-    "about": "About Us",
-    "contact": "Contact Information",
-    "dashboard": "Control Panel",
-    "docs": "License",
-    "home": "TeamGrid",
-    "login": "Login — TeamGrid",
-    "recoverPassword": "Password Recovery",
-    "signup": "Sign Up — TeamGrid",
-    "verifyemail": "Email Verification"
-  },
-  "placeholder": {
-    "code": "6-digit code",
-    "email": "Mail",
-    "firstName": "Name",
-    "lastName": "Last Name",
-    "middleName": "Middle Name",
-    "organizationName": "Organization Name",
-    "position": "Position",
-    "positionFullName": "Full Job Title",
-    "positionName": "Job Title"
-  },
-  "role": {
-    "admin": "Administrator",
-    "owner": "Owner",
-    "user": "User"
-  },
-  "select": {
-    "employee": "Select an employee",
-    "organization": "Select an organization",
-    "position": "Select a position",
-    "selectRole": "Select a role",
-    "selectUser": "User"
-  },
-  "status": {
-    "abandoned": "Abandoned",
-    "completed": "Completed",
-    "frozen": "Frozen",
-    "inProcess": "In the process",
-    "notStarted": "Not started"
-  },
-  "table": {
-    "createdAt": "Date Created",
-    "createdBy": "Creator",
-    "deadline": "Deadline",
-    "description": "Description",
-    "doneAt": "Completed",
-    "handler": "Person in Charge",
-    "selectHandler": "Select a person in charge",
-    "status": "Status",
-    "title": "Title"
-  },
-  "user": {
-    "email": "Mail",
-    "female": "Women's",
-    "gender": "Paul",
-    "male": "Men's",
-    "name": "Name",
-    "role": "Role"
-  },
-  "validation": {
-    "candidate": "Please fill in all required fields",
-    "employee": {
-      "requiredFields": "Fill in all required fields for the employee"
-    },
-    "organization": {
-      "requiredFields": "Enter the organization's name"
-    },
-    "shift": {
-      "invalidTime": "Please specify the correct start and end times for the shift",
-      "requiredFields": "Fill in all required fields for the shift"
-    }
-  }
+  "email.verification.code": "Your verification code",
+  "email.verification.subject": "Confirm your email address",
+  "email.verification.expiration": "The code is valid for 10 minutes",
+  "email.verification.greeting": "Hello",
+  "message.appInfoDev": "A web application for managing employee shift schedules.\nDeveloper version; main website: "
 }

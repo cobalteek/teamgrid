@@ -21,6 +21,7 @@ function onUpdateModelValue(value: boolean) {
   emit('update:modelValue', value)
 
   if (!value) {
+    resetModal()
     emit('close')
   }
 }
@@ -36,6 +37,7 @@ const isManager = computed(() => organizationStore.isManager)
 
 const employee = ref<Employee>()
 const user = ref<UserWithRole>()
+const isLoading = ref(false)
 const isSubmitting = ref(false)
 const btnName = computed(() =>
   user.value?.id === me.user.value?.id
@@ -70,13 +72,23 @@ async function fetchUserData() {
   if (!props.userId) {
     return
   }
+  isLoading.value = true
   try {
     user.value = await userStore.getUserWithRole(props.userId)
     employee.value = await employeeStore.getEmployeeById(props.userId)
   } catch (e: unknown) {
     console.log(e)
     errorModal.showError($t('error.data.notLoaded'))
+  } finally {
+    isLoading.value = false
   }
+}
+
+function resetModal() {
+  user.value = undefined
+  employee.value = undefined
+  isLoading.value = false
+  isSubmitting.value = false
 }
 
 watch(
@@ -92,6 +104,13 @@ watch(
 <template>
   <Modal :model-value="modelValue" @update:model-value="onUpdateModelValue">
     <div
+      v-if="isLoading"
+      class="flex min-h-[220px] w-full items-center justify-center p-6 sm:w-[420px]"
+    >
+      <Loading class="min-h-[180px] w-full" />
+    </div>
+    <div
+      v-else
       class="flex max-h-[calc(100dvh-1rem)] w-full flex-col gap-5 overflow-y-auto p-5 pt-12 sm:w-[420px] sm:p-6 sm:pt-10"
     >
       <header class="flex items-center gap-3 border-b border-[var(--border-main)] pr-8 pb-4">

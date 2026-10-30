@@ -20,7 +20,7 @@ function onMonthChange(event: Event) {
 
 <template>
   <div
-    class="mobile-schedule__heading sticky top-0 z-[5] -mx-1 flex items-center justify-between gap-3 bg-[var(--bg-back)] px-1 pt-2 pb-4 shadow-[0_1px_0_var(--border-main)]"
+    class="mobile-schedule__heading sticky top-[8.5rem] z-[5] -mx-1 flex items-center justify-between gap-3 bg-[var(--bg-back)] px-1 pt-2 pb-4 shadow-[0_1px_0_var(--border-main)]"
   >
     <select
       :value="selectedMonth"

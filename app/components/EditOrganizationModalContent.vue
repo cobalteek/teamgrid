@@ -25,7 +25,9 @@ const userStore = useUserStore()
 const errorModal = useErrorModal()
 
 const organizationName = ref('')
+const organizationDescription = ref('')
 const isDisableName = ref(true)
+const isDisableDescription = ref(true)
 const isOpenEditPositionForm = ref(false)
 const isOpenEditEmployeeForm = ref(false)
 const isAddEmployeeModalOpen = ref(false)
@@ -41,6 +43,7 @@ function onUpdateModelValue(value: boolean) {
 
   if (!value) {
     isDisableName.value = true
+    isDisableDescription.value = true
     emit('close')
   }
 }
@@ -56,6 +59,17 @@ async function handleSubmit() {
     isDisableName.value = true
   } catch (e) {
     console.log(e)
+  }
+}
+
+async function handleDescriptionSubmit() {
+  isDisableDescription.value = true
+
+  try {
+    await organizationStore.changeDescription(organizationDescription.value)
+  } catch {
+    isDisableDescription.value = false
+    errorModal.showError('error.organization.update')
   }
 }
 
@@ -79,6 +93,7 @@ watch(
   async (isOpen) => {
     if (isOpen) {
       organizationName.value = organizationStore.currentOrganization?.name ?? ''
+      organizationDescription.value = organizationStore.currentOrganization?.description ?? ''
     }
   },
 )
@@ -118,6 +133,49 @@ watch(
             </button>
             <button
               v-if="!isDisableName"
+              type="submit"
+              class="min-h-11 flex-1 rounded-md bg-[var(--btn-bg)] px-4 py-2 text-[var(--btn-text)] transition hover:text-[var(--btn-save-hover-text)] sm:flex-none"
+            >
+              {{ $t('btn.save') }}
+            </button>
+          </div>
+        </form>
+      </section>
+      <section class="flex w-full flex-col gap-2">
+        <h3 class="text-sm font-semibold text-[var(--text-soft)]">
+          {{ $t('ui.organizationDescription') }}
+        </h3>
+        <form
+          class="flex w-full flex-col gap-2 sm:flex-row"
+          @submit.prevent="handleDescriptionSubmit"
+        >
+          <textarea
+            v-model="organizationDescription"
+            :disabled="isDisableDescription"
+            rows="3"
+            maxlength="500"
+            :placeholder="$t('placeholder.organizationDescription')"
+            class="min-h-20 min-w-0 flex-1 resize-y rounded-md border bg-[var(--input-bg)] p-3 text-[var(--input-text)] transition-all outline-none"
+            :class="
+              isDisableDescription
+                ? 'border-transparent'
+                : 'border-[var(--input-border)] focus:border-[var(--btn-save-hover-text)]'
+            "
+          />
+          <div class="flex gap-2 sm:shrink-0 sm:flex-col">
+            <button
+              type="button"
+              class="flex min-h-11 flex-1 items-center justify-center rounded-md border border-[var(--border-main)] bg-[var(--btn-bg)] px-4 text-[var(--btn-text)] transition duration-100 active:scale-95 sm:w-11 sm:flex-none sm:px-0"
+              :aria-label="$t('btn.edit')"
+              @click="isDisableDescription = false"
+            >
+              <span
+                aria-hidden="true"
+                class="h-5 w-5 bg-[url('/assets/images/edit.png')] bg-cover bg-center invert-[1] [html.light_&]:invert-0"
+              />
+            </button>
+            <button
+              v-if="!isDisableDescription"
               type="submit"
               class="min-h-11 flex-1 rounded-md bg-[var(--btn-bg)] px-4 py-2 text-[var(--btn-text)] transition hover:text-[var(--btn-save-hover-text)] sm:flex-none"
             >

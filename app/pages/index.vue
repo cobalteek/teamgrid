@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import News from '~/components/News.vue'
-
 const { activeBranch } = useAppConfig()
 
 const auth = useAuthStore()
@@ -22,6 +20,6 @@ useHead({
       </p>
       <p v-if="auth.user" class="mt-4">{{ $t('message.signed') }} {{ auth.user.name }}.</p>
     </section>
-    <News />
+    <OrganizationList />
   </main>
 </template>
