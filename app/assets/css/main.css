@@ -383,8 +383,8 @@ html.light {
   --input-text: #172033;
   --placeholder: #94a3b8;
 
-  --btn-bg: #f3f5f9;
-  --btn-hover-bg: #f0f3f8;
+  --btn-bg: #E5E7EB;
+  --btn-hover: #f0f3f8;
   --btn-text: #172033;
   --btn-border: #c5ccd8;
   --btn-delete-text: #ff5656;
@@ -408,6 +408,7 @@ html.light {
   --bg-success: #f0fdf4;
   --text-success: #15803d;
   --border-success: #bbf7d0;
+  --accent: #c8c5ff4f;
 }
 
 html,

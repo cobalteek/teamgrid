@@ -43,7 +43,7 @@ watch(organization.value, async () => {
 <template>
   <div class="flex w-full min-w-0 items-center gap-2 md:w-auto">
     <div
-      class="flex h-[3.25rem] min-w-0 flex-1 items-center gap-2 rounded-xl border border-[var(--border-main)] bg-[var(--btn-bg)] px-2.5 transition focus-within:border-[var(--text-blue)] md:w-[18rem] md:flex-none"
+      class="cursor-pointer flex h-[3.25rem] min-w-0 flex-1 items-center gap-2 rounded-xl border border-[var(--border-main)] bg-[var(--btn-bg)] px-2.5 transition focus-within:border-[var(--text-blue)] md:w-[18rem] md:flex-none"
     >
       <svg
         class="h-4 w-4 shrink-0 text-[var(--text-muted)]"
@@ -65,7 +65,7 @@ watch(organization.value, async () => {
       <select
         id="header-organization"
         v-model="organization.id"
-        class="min-h-0 min-w-0 flex-1 cursor-pointer border-0 bg-transparent p-0 text-sm font-semibold text-[var(--text-main)] outline-none"
+        class="min-h-0 min-w-0 flex-1 cursor-pointer border-0 bg-transparent p-0 text-sm font-semibold text-[var(--text-main)] outline-none hover:text-[var(--text-blue)] md:text-base hover:border-[var(--text-blue)]]"
       >
         <option v-for="org in organizationStore.options" :key="org.value" :value="org.value">
           {{ org.label }}

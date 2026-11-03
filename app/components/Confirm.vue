@@ -44,7 +44,7 @@ function handleSubmit() {
         <div class="mt-6 flex justify-end gap-4">
           <button
             @click="handleCancel"
-            class="px-4 py-2 rounded-md bg-[var(--btn-bg)] text-[var(--btn-text)] hover:bg-[var(--btn-hover)] {{ isLoading ? 'opacity-50 cursor-not-allowed' : '' }}"
+            class="px-4 py-2 rounded-md bg-[var(--btn-bg)] text-[var(--btn-text)] hover:text-[var(--text-soft)] {{ isLoading ? 'opacity-50 cursor-not-allowed' : '' }}"
           >
             {{ cancelText ? $t(cancelText) : $t('ui.cancel') }}
           </button>

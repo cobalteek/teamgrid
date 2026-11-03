@@ -125,7 +125,7 @@ if (props.date) {
             <button
               type="button"
               @click="handleCancel"
-              class="px-4 py-2 rounded-md bg-[var(--btn-bg)] text-[var(--btn-text)] hover:text-[var(--btn-hover)] {{ isLoading ? 'opacity-50 cursor-not-allowed' : '' }}"
+              class="px-4 py-2 rounded-md bg-[var(--btn-bg)] text-[var(--btn-text)] hover:text-[var(--text-soft)] {{ isLoading ? 'opacity-50 cursor-not-allowed' : '' }}"
               :disabled="isLoading"
             >
               {{ $t('btn.cancel') }}
