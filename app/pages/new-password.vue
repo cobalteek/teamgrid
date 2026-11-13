@@ -19,7 +19,7 @@ async function handleSubmit() {
     errorModal.showError($t('error.auth.passwordsNotMatch'))
     return
   }
-  if(!isValidPassword(form.value.password)) {
+  if (!isValidPassword(form.value.password)) {
     errorModal.showError($t('error.auth.passwordLength'))
     return
   }

@@ -5,7 +5,9 @@ import { defineEventHandler, createError, getQuery } from 'h3'
 
 export default defineEventHandler(async (event) => {
   const { userId } = await requireUser(event)
-  const { id } = await readBody(event)
+  const body = await readBody(event)
+  const id = body.id ? String(body.id) : undefined
+  const withShifts = body.withShifts === true
   const query = getQuery(event)
   const organizationId = query.organizationId ? Number(query.organizationId) : undefined
 
@@ -13,6 +15,13 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 400,
       statusMessage: 'error.employeeId.notReceived',
+    })
+  }
+
+  if (withShifts !== true && withShifts !== false) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'error.withShifts.notReceived',
     })
   }
 
@@ -51,12 +60,20 @@ export default defineEventHandler(async (event) => {
   }
 
   if (shifts.length > 0) {
-    await prisma.shift.deleteMany({
-      where: {
-        employeeId: id,
-        organizationId,
-      },
-    })
+    if (withShifts) {
+      shifts.forEach(async (shift) => {
+        await prisma.shift.delete({
+          where: { id: shift.id },
+        })
+      })
+    } else {
+      shifts.forEach(async (shift) => {
+        await prisma.shift.update({
+          where: { id: shift.id },
+          data: { employeeId: null },
+        })
+      })
+    }
   }
 
   await prisma.employee.delete({

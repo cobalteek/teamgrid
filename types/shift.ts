@@ -23,8 +23,8 @@ export type ShiftWithRelations = Shift & {
 
 export type CreateShift = {
   date: string
-  employeeId: string
-  positionId: number
+  employeeId: string | null
+  positionId: number | null
   allDay: boolean
   startTime?: number
   endTime?: number

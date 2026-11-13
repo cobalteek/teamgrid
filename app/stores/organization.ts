@@ -128,6 +128,42 @@ export const useOrganizationStore = defineStore('organization', () => {
     }
   }
 
+  async function changeDescription(description: string) {
+    if (!currentOrganization.value || !currentOrganizationId.value) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'error.organization.notFound',
+      })
+    }
+
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
+
+      await $fetch<Organization>('/api/organization', {
+        credentials: 'include',
+        method: 'PATCH',
+        headers,
+        body: {
+          name: currentOrganization.value.name,
+          description,
+        },
+        query: {
+          organizationId: currentOrganizationId.value,
+        },
+      })
+
+      await getOrganizations()
+    } catch (e: unknown) {
+      error.value = getErrorMessage(e)
+      throw e
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   async function changeOrganization(organization: Organization) {
     if (organization.id <= 0) {
       throw createError({
@@ -198,6 +234,7 @@ export const useOrganizationStore = defineStore('organization', () => {
     options,
     initialize,
     changeName,
+    changeDescription,
     changeOrganization,
     optionsWithDescription,
   }

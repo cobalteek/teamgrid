@@ -49,9 +49,16 @@ const resetModal = () => {
 }
 
 async function handleSubmit() {
-  if (!isValidPosition(position.value.name) || !isValidPosition(position.value.fullName)) {
+  if (
+    !isValidPosition(position.value.name) ||
+    (position.value.fullName.length > 0 && !isValidPosition(position.value.fullName))
+  ) {
     errorModal.showError('error.invalidName')
     return
+  }
+
+  if (position.value.fullName === '') {
+    position.value.fullName = `${$t('ui.fullNamePosition')}_${position.value.name}`
   }
 
   isSubmitting.value = true
@@ -83,7 +90,7 @@ function handleCancel() {
       v-model:model-value="position"
       :title="$t('form.addPosition')"
       :fields="[
-        { key: 'name', type: 'text', placeholder: 'placeholder.positionName' },
+        { key: 'name', type: 'text', placeholder: 'placeholder.positionName', required: true },
         { key: 'fullName', type: 'text', placeholder: 'placeholder.positionFullName' },
       ]"
       submit-btn-name="btn.save"

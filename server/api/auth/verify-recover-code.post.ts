@@ -1,10 +1,7 @@
 import { createError, defineEventHandler, readBody } from 'h3'
 import { randomBytes } from 'node:crypto'
 import { prisma } from '../../utils/prisma'
-import {
-  hashPasswordRecoverCode,
-  hashPasswordResetToken,
-} from '~~/server/utils/password-recover'
+import { hashPasswordRecoverCode, hashPasswordResetToken } from '~~/server/utils/password-recover'
 import { enforceRateLimit } from '~~/server/utils/rate-limit'
 
 const PASSWORD_RESET_TTL_MS = 15 * 60 * 1000

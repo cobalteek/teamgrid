@@ -1,11 +1,5 @@
 import bcrypt from 'bcryptjs'
-import {
-  createError,
-  defineEventHandler,
-  deleteCookie,
-  getCookie,
-  readBody,
-} from 'h3'
+import { createError, defineEventHandler, deleteCookie, getCookie, readBody } from 'h3'
 import { prisma } from '../../utils/prisma'
 import { hashPasswordResetToken } from '~~/server/utils/password-recover'
 import { enforceRateLimit } from '~~/server/utils/rate-limit'
@@ -13,13 +7,7 @@ import { isValidPassword } from '~~/shared/utils/validation'
 
 export default defineEventHandler(async (event) => {
   const t = await useTranslation(event)
-  enforceRateLimit(
-    event,
-    'password-reset',
-    10,
-    15 * 60 * 1000,
-    t('error.auth.tooManyAttempts'),
-  )
+  enforceRateLimit(event, 'password-reset', 10, 15 * 60 * 1000, t('error.auth.tooManyAttempts'))
 
   const rawToken = getCookie(event, 'password_reset')
   if (!rawToken) {
@@ -44,8 +32,7 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event)
   const password = typeof body?.password === 'string' ? body.password : ''
-  const confirmPassword =
-    typeof body?.confirmPassword === 'string' ? body.confirmPassword : ''
+  const confirmPassword = typeof body?.confirmPassword === 'string' ? body.confirmPassword : ''
 
   if (!password || !confirmPassword) {
     throw createError({

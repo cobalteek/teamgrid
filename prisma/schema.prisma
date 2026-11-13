@@ -37,8 +37,8 @@ model Employee {
   email      String
   color      String
 
-  positionId Int
-  position   Position @relation(fields: [positionId], references: [id])
+  positionId Int?
+  position   Position? @relation(fields: [positionId], references: [id], onDelete: SetNull)
 
   organizationId Int
   organization   Organization @relation(fields: [organizationId], references: [id])
@@ -52,8 +52,8 @@ model Shift {
   id   String   @id @default(cuid())
   date DateTime
 
-  employeeId     String
-  positionId     Int
+  employeeId     String?
+  positionId     Int?
   organizationId Int
 
   allDay    Boolean @default(true)
@@ -61,8 +61,8 @@ model Shift {
   endTime   Int?
 
   organization Organization @relation(fields: [organizationId], references: [id])
-  employee     Employee     @relation(fields: [employeeId], references: [id])
-  position     Position     @relation(fields: [positionId], references: [id])
+  employee     Employee?     @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  position     Position?     @relation(fields: [positionId], references: [id], onDelete: SetNull)
 }
 
 model Position {

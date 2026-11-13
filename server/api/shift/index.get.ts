@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   const { userId } = await requireUser(event)
   const t = await useTranslation(event)
   const query = getQuery(event)
-  const employeeId = query.employeeId ? String(query.employeeId) : undefined
+  const employeeId = query.employeeId ? String(query.employeeId) : null
   const organizationId = query.organizationId ? Number(query.organizationId) : undefined
   const startDate = query.startDate ? new Date(`${String(query.startDate)}T00:00:00Z`) : undefined
   const endDate = query.endDate ? new Date(`${String(query.endDate)}T00:00:00Z`) : undefined
@@ -159,25 +159,29 @@ export default defineEventHandler(async (event) => {
     return shifts.map((shift) => ({
       id: shift.id,
       date: shift.date,
-      employeeId: shift.employeeId,
-      positionId: shift.positionId,
+      employeeId: shift.employeeId || null,
+      positionId: shift.positionId || null,
       allDay: shift.allDay,
       startTime: shift.startTime,
       endTime: shift.endTime,
-      employee: {
-        id: shift.employee.id,
-        name: shift.employee.name,
-        surname: shift.employee.surname,
-        middlename: shift.employee.middlename,
-        positionId: shift.employee.positionId,
-        email: shift.employee.email,
-        color: shift.employee.color,
-      },
-      position: {
-        id: shift.position.id,
-        name: shift.position.name,
-        color: shift.position.color,
-      },
+      employee: shift.employee
+        ? {
+            id: shift.employee?.id,
+            name: shift.employee?.name,
+            surname: shift.employee?.surname,
+            middlename: shift.employee?.middlename,
+            positionId: shift.employee?.positionId,
+            email: shift.employee?.email,
+            color: shift.employee?.color,
+          }
+        : null,
+      position: shift.position
+        ? {
+            id: shift.position?.id,
+            name: shift.position?.name,
+            color: shift.position?.color,
+          }
+        : null,
     }))
   } catch (error) {
     console.error(error)

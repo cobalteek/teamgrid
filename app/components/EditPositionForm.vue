@@ -32,6 +32,9 @@ const position = ref<Position>({
   },
   color: '',
 })
+
+const withShifts = ref(false)
+
 const errorModal = useErrorModal()
 const initApp = useInitializeApp()
 const isSubmitting = ref(false)
@@ -50,6 +53,8 @@ const resetModal = () => {
     },
     color: '',
   }
+  withShifts.value = false
+  isSubmitting.value = false
 }
 
 async function handleSubmit() {
@@ -87,7 +92,7 @@ async function handleDelete() {
   isSubmitting.value = true
 
   try {
-    await positionStore.deletePosition(position.value.id)
+    await positionStore.deletePosition(position.value.id, withShifts.value)
     emit('close')
   } catch (e) {
     isSubmitting.value = false
@@ -125,7 +130,7 @@ watch(
       v-model:model-value="position"
       title="ui.positionEdit"
       :fields="[
-        { key: 'name', type: 'text', placeholder: 'placeholder.positionName' },
+        { key: 'name', type: 'text', placeholder: 'placeholder.positionName', required: true },
         { key: 'fullName', type: 'text', placeholder: 'placeholder.positionFullName' },
       ]"
       submit-btn-name="btn.save"
@@ -145,7 +150,9 @@ watch(
     :model-value="isDeletePositionConfirmModalOpen"
     :message="selectedPositionConfirmDelete"
     :is-loading="isSubmitting"
+    :checkboxes="[{ text: 'ui.deleteShiftsPositionToo', required: true, model: withShifts }]"
     submit-text="btn.delete"
+    @update:checkbox="withShifts = $event"
     @submit="handleDelete"
     @close="isDeletePositionConfirmModalOpen = false"
   />

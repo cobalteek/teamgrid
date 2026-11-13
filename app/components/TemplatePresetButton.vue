@@ -14,9 +14,9 @@ const emit = defineEmits<{
   <button
     type="button"
     :class="[
-      'rounded-full border px-2 py-1 text-sm font-medium transition-colors hover:border-[var(--accent)] md:px-4',
+      'cursor-pointer rounded-full border px-2 py-1 text-sm font-medium transition-colors hover:border-[var(--accent)] md:px-4',
       props.active
-        ? 'border-[var(--accent)] bg-[var(--accent)] text-white'
+        ? 'border-[var(--text-main)] bg-[var(--bg-main)] text-[var(--text-main)]'
         : 'border-[var(--border-main)] bg-[var(--bg-main)] text-[var(--text-main)] hover:bg-[var(--bg-hover)]',
     ]"
     :aria-pressed="props.active"

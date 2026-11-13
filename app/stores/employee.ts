@@ -128,7 +128,7 @@ export const useEmployeeStore = defineStore('employee', () => {
       .map((e) => ({ value: e.id, label: `${e.surname} ${e.name} ${e.middlename}` })),
   )
 
-  async function deleteEmployee(employeeId: string) {
+  async function deleteEmployee(employeeId: string, withShifts: boolean) {
     isLoading.value = true
     error.value = null
 
@@ -138,6 +138,7 @@ export const useEmployeeStore = defineStore('employee', () => {
         method: 'POST',
         body: {
           id: employeeId,
+          withShifts,
         },
         query: {
           organizationId: organizationStore.currentOrganizationId,

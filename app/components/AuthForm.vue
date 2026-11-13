@@ -86,7 +86,7 @@ function setValue(key: string, value: string | boolean) {
           />
           <span
             aria-hidden="true"
-            class="relative mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 border-[var(--input-border)] bg-[var(--bg-modal)] transition peer-checked:border-[var(--btn-bg)] peer-checked:bg-[var(--btn-bg)] peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--text-blue)] peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[var(--bg-modal)] after:h-2 after:w-3 after:rotate-[-45deg] after:border-b-2 after:border-l-2 after:border-white after:opacity-0 after:transition-opacity peer-checked:after:opacity-100"
+            class="relative mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 border-[var(--input-border)] bg-[var(--bg-modal)] transition peer-checked:border-[var(--btn-bg)] peer-checked:bg-[var(--btn-bg)] peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--text-blue)] peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[var(--bg-modal)] after:h-2 after:w-3 after:rotate-[-45deg] after:border-b-2 after:border-l-2 after:border-[var(--btn-text)] after:opacity-0 after:transition-opacity peer-checked:after:opacity-100"
           />
           <span>
             {{ $t('ui.personalData') }}
@@ -112,7 +112,7 @@ function setValue(key: string, value: string | boolean) {
           />
           <span
             aria-hidden="true"
-            class="relative mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 border-[var(--input-border)] bg-[var(--bg-modal)] transition peer-checked:border-[var(--btn-bg)] peer-checked:bg-[var(--btn-bg)] peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--text-blue)] peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[var(--bg-modal)] after:h-2 after:w-3 after:rotate-[-45deg] after:border-b-2 after:border-l-2 after:border-white after:opacity-0 after:transition-opacity peer-checked:after:opacity-100"
+            class="relative mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 border-[var(--input-border)] bg-[var(--bg-modal)] transition peer-checked:border-[var(--btn-bg)] peer-checked:bg-[var(--btn-bg)] peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--text-blue)] peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[var(--bg-modal)] after:h-2 after:w-3 after:rotate-[-45deg] after:border-b-2 after:border-l-2 after:border-[var(--btn-text)] after:opacity-0 after:transition-opacity peer-checked:after:opacity-100"
           />
           <span>
             {{ $t('ui.userAgreementConsent') }}
@@ -136,7 +136,7 @@ function setValue(key: string, value: string | boolean) {
           v-if="textLinks"
           v-for="link in textLinks"
           :to="link.link"
-          class="pb-2 text-[var(--text-blue)] transition duration-300 hover:bg-gray-600"
+          class="pb-2 text-[var(--text-blue)] transition duration-300 hover:text-[var(--text-soft)]"
         >
           {{ link.text }}
         </NuxtLink>

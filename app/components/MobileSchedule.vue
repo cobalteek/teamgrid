@@ -38,19 +38,12 @@ const loadedEnd = ref(addMonths(loadedStart.value, 1))
 const viewMode = ref<MobileScheduleViewMode>('feed')
 const isLoadingPrevious = ref(false)
 const isLoadingNext = ref(false)
-const hasScrolledDown = reactive<Record<MobileScheduleViewMode, boolean>>({
-  feed: false,
-  grid: false,
-})
-const scrollDirection = ref<'up' | 'down' | null>(null)
 const scheduleRoot = ref<HTMLElement | null>(null)
 const previousSentinel = ref<HTMLElement | null>(null)
 const nextSentinel = ref<HTMLElement | null>(null)
 const gridPreviousSentinel = ref<HTMLElement | null>(null)
 const gridNextSentinel = ref<HTMLElement | null>(null)
-const previousSentinelInView = ref(false)
 const nextSentinelInView = ref(false)
-const gridPreviousSentinelInView = ref(false)
 const gridNextSentinelInView = ref(false)
 const gridLoadedStart = ref(loadedStart.value)
 const gridLoadedEnd = ref(loadedEnd.value)
@@ -60,9 +53,20 @@ const selectedShiftConfirmDelete = ref('')
 const isSubmitting = ref(false)
 const errorModal = useErrorModal()
 const selectedShiftId = ref('')
+const isPullingPrevious = ref(false)
+const pullDistance = ref(0)
+const pullStartY = ref<number | null>(null)
 let observer: IntersectionObserver | null = null
-let lastScrollY = 0
 let isProgrammaticScroll = false
+
+const pullThreshold = 72
+const pullMaxDistance = 104
+const isPullReady = computed(() => pullDistance.value >= pullThreshold)
+
+type MobileScheduleAnchor = {
+  id: string
+  offset: number
+}
 
 const days = computed(() =>
   daysBetween(loadedStart.value, loadedEnd.value).map(({ date }) => feedDay(date)),
@@ -257,6 +261,65 @@ async function loadNextGridMonth() {
   await loadMonth(gridLoadedEnd.value, 'next', 'grid')
 }
 
+function isAtPullStart() {
+  const previousSentinelElement =
+    viewMode.value === 'grid' ? gridPreviousSentinel.value : previousSentinel.value
+  const sentinelTop = previousSentinelElement?.getBoundingClientRect().top
+  const headingBottom = scheduleRoot.value
+    ?.querySelector<HTMLElement>('.mobile-schedule__heading')
+    ?.getBoundingClientRect().bottom
+
+  if (sentinelTop === undefined || headingBottom === undefined) return false
+
+  return sentinelTop >= headingBottom - 12 && sentinelTop <= headingBottom + 28
+}
+
+function resetPull() {
+  isPullingPrevious.value = false
+  pullDistance.value = 0
+  pullStartY.value = null
+}
+
+function startPull(event: TouchEvent) {
+  if (isLoadingPrevious.value || isProgrammaticScroll || !isAtPullStart()) {
+    return
+  }
+
+  const startY = event.touches[0]?.clientY
+  if (startY === undefined) return
+
+  isPullingPrevious.value = true
+  pullStartY.value = startY
+}
+
+function movePull(event: TouchEvent) {
+  if (!isPullingPrevious.value || pullStartY.value === null) return
+
+  const currentY = event.touches[0]?.clientY
+  if (currentY === undefined) return
+
+  const distance = currentY - pullStartY.value
+  if (distance <= 0) {
+    resetPull()
+    return
+  }
+
+  if (event.cancelable) event.preventDefault()
+  pullDistance.value = Math.min(distance, pullMaxDistance)
+}
+
+async function endPull() {
+  if (!isPullingPrevious.value) return
+
+  const shouldLoadPrevious = isPullReady.value
+  resetPull()
+
+  if (shouldLoadPrevious) {
+    if (viewMode.value === 'grid') await loadPreviousGridMonth()
+    else await loadPreviousMonth()
+  }
+}
+
 async function loadInitialMonth() {
   isLoadingNext.value = true
   try {
@@ -276,7 +339,7 @@ async function scrollToElement(elementId: string, behavior: ScrollBehavior = 'sm
   if (!element) return
 
   const heading = scheduleRoot.value?.querySelector<HTMLElement>('.mobile-schedule__heading')
-  const offset = (heading?.getBoundingClientRect().height ?? 0) + 8
+  const offset = (heading?.getBoundingClientRect().bottom ?? 0) + 8
   const top = element.getBoundingClientRect().top + window.scrollY - offset
   window.scrollTo({ top, behavior })
 }
@@ -287,6 +350,50 @@ async function scrollToDay(dayKey: string) {
 
 async function scrollToGridMonth(monthKey: string) {
   await scrollToElement(`mobile-grid-month-${monthKey}`)
+}
+
+function headingBottom() {
+  return (
+    scheduleRoot.value
+      ?.querySelector<HTMLElement>('.mobile-schedule__heading')
+      ?.getBoundingClientRect().bottom ?? 0
+  )
+}
+
+function captureScheduleAnchor(): MobileScheduleAnchor | null {
+  const topBoundary = headingBottom()
+  const visibleDays = Array.from(
+    scheduleRoot.value?.querySelectorAll<HTMLElement>('[id^="mobile-day-"]') ?? [],
+  ).filter((element) => {
+    const rect = element.getBoundingClientRect()
+    return rect.bottom > topBoundary + 4 && rect.top < window.innerHeight
+  })
+
+  const anchor = visibleDays.find((element) => element.getBoundingClientRect().top >= topBoundary)
+  const element = anchor ?? visibleDays[0]
+  if (!element) return null
+
+  return {
+    id: element.id,
+    offset: element.getBoundingClientRect().top - topBoundary,
+  }
+}
+
+async function restoreScheduleAnchor(anchor: MobileScheduleAnchor | null) {
+  if (!anchor) return
+
+  await nextTick()
+  const element = document.getElementById(anchor.id)
+  if (!element) return
+
+  const top = element.getBoundingClientRect().top + window.scrollY - headingBottom() - anchor.offset
+  if (Math.abs(top - window.scrollY) > 1) {
+    window.scrollTo({ top, behavior: 'auto' })
+  }
+}
+
+function monthKeyFromAnchor(anchor: MobileScheduleAnchor | null) {
+  return anchor?.id.replace('mobile-day-', '').slice(0, 7)
 }
 
 async function goToMonth(monthKey: string) {
@@ -320,24 +427,22 @@ async function setViewMode(mode: MobileScheduleViewMode) {
   if (mode === viewMode.value) return
 
   const monthKey = selectedMonth.value
+  const anchor = captureScheduleAnchor()
+  const targetMonthKey = monthKeyFromAnchor(anchor) ?? monthKey
   isProgrammaticScroll = true
 
   try {
     if (mode === 'grid') {
-      await ensureGridMonth(monthKey)
+      await ensureGridMonth(targetMonthKey)
       viewMode.value = mode
-      await nextTick()
-      await scrollToElement(`mobile-grid-month-${monthKey}`, 'auto')
+      await restoreScheduleAnchor(anchor)
       return
     }
 
-    await ensureFeedMonth(monthKey, true)
+    await ensureFeedMonth(targetMonthKey, true)
     viewMode.value = mode
-    await nextTick()
-    await scrollToElement(`mobile-day-${monthKey}-01`, 'auto')
+    await restoreScheduleAnchor(anchor)
   } finally {
-    lastScrollY = window.scrollY
-    scrollDirection.value = null
     isProgrammaticScroll = false
   }
 }
@@ -402,18 +507,14 @@ function observeSentinels() {
   if (!observer) return
 
   observer.disconnect()
-  previousSentinelInView.value = false
   nextSentinelInView.value = false
-  gridPreviousSentinelInView.value = false
   gridNextSentinelInView.value = false
 
   if (viewMode.value === 'feed') {
-    if (previousSentinel.value) observer.observe(previousSentinel.value)
     if (nextSentinel.value) observer.observe(nextSentinel.value)
     return
   }
 
-  if (gridPreviousSentinel.value) observer.observe(gridPreviousSentinel.value)
   if (gridNextSentinel.value) observer.observe(gridNextSentinel.value)
 }
 
@@ -438,14 +539,6 @@ function handleSentinelEntry(
 }
 
 function markScheduleScroll() {
-  const currentScrollY = window.scrollY
-
-  if (!isProgrammaticScroll && currentScrollY !== lastScrollY) {
-    scrollDirection.value = currentScrollY > lastScrollY ? 'down' : 'up'
-    if (scrollDirection.value === 'down') hasScrolledDown[viewMode.value] = true
-  }
-
-  lastScrollY = currentScrollY
   updateVisibleMonth()
 }
 
@@ -453,26 +546,11 @@ onMounted(async () => {
   if (!window.matchMedia('(max-width: 767px)').matches) return
 
   await loadInitialMonth()
-  lastScrollY = window.scrollY
   window.addEventListener('scroll', markScheduleScroll, { passive: true })
   observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
-        handleSentinelEntry(
-          entry,
-          previousSentinel,
-          previousSentinelInView,
-          () => hasScrolledDown.feed && scrollDirection.value === 'up' && viewMode.value === 'feed',
-          loadPreviousMonth,
-        )
         handleSentinelEntry(entry, nextSentinel, nextSentinelInView, () => true, loadNextMonth)
-        handleSentinelEntry(
-          entry,
-          gridPreviousSentinel,
-          gridPreviousSentinelInView,
-          () => hasScrolledDown.grid && scrollDirection.value === 'up' && viewMode.value === 'grid',
-          loadPreviousGridMonth,
-        )
         handleSentinelEntry(
           entry,
           gridNextSentinel,
@@ -512,9 +590,9 @@ onBeforeUnmount(() => {
       :message="selectedShiftConfirmDelete"
       :is-loading="isSubmitting"
       submit-text="btn.delete"
+      class="absolute my-auto"
       @submit="deleteShift(selectedShiftId)"
       @close="isOpenDeleteConfirm = false"
-      class="absolute my-auto"
     />
     <MobileScheduleToolbar
       :month-options="monthOptions"
@@ -525,63 +603,67 @@ onBeforeUnmount(() => {
       @today="scrollToToday"
     />
 
-    <template v-if="viewMode === 'feed'">
+    <div @touchstart="startPull" @touchmove="movePull" @touchend="endPull" @touchcancel="resetPull">
       <div
-        ref="previousSentinel"
-        class="flex min-h-6 items-center justify-center"
-        aria-hidden="true"
-      >
-        <span v-if="isLoadingPrevious" class="text-xs text-[var(--text-muted)]">{{
-          $t('ui.loading')
-        }}</span>
-      </div>
-
-      <MobileScheduleFeed
-        :days="days"
-        :is-manager="props.isManager"
-        :shifts-by-day="shiftsByDay"
-        :today-key="todayKey"
-        @add-shift="emit('add-shift', $event)"
-        @delete-shift="deleteShift"
-      />
-
-      <div ref="nextSentinel" class="flex min-h-6 items-center justify-center" aria-live="polite">
-        <span v-if="isLoadingNext" class="text-xs text-[var(--text-muted)]">{{
-          $t('ui.loading')
-        }}</span>
-      </div>
-    </template>
-
-    <template v-else>
-      <div
-        ref="gridPreviousSentinel"
-        class="flex min-h-6 items-center justify-center"
-        aria-hidden="true"
-      >
-        <span v-if="isLoadingPrevious" class="text-xs text-[var(--text-muted)]">{{
-          $t('ui.loading')
-        }}</span>
-      </div>
-
-      <MobileScheduleGrid
-        :is-manager="props.isManager"
-        :months="gridMonthSections"
-        :shifts-by-day="shiftsByDay"
-        :today-key="todayKey"
-        @add-shift="emit('add-shift', $event)"
-        @open-day="openGridDay"
-      />
-
-      <div
-        ref="gridNextSentinel"
-        class="flex min-h-6 items-center justify-center"
+        class="flex items-center justify-center overflow-hidden text-xs text-[var(--text-muted)] transition-[height,opacity] duration-150"
+        :style="{ height: `${pullDistance}px`, opacity: pullDistance ? 1 : 0 }"
         aria-live="polite"
       >
-        <span v-if="isLoadingNext" class="text-xs text-[var(--text-muted)]">{{
-          $t('ui.loading')
-        }}</span>
+        <span>
+          {{ isPullReady ? $t('ui.releaseToLoadPrevious') : $t('ui.pullToLoadPrevious') }}
+        </span>
       </div>
-    </template>
+
+      <template v-if="viewMode === 'feed'">
+        <div
+          ref="previousSentinel"
+          class="flex min-h-6 items-center justify-center"
+          aria-hidden="true"
+        />
+
+        <MobileScheduleFeed
+          :days="days"
+          :is-manager="props.isManager"
+          :shifts-by-day="shiftsByDay"
+          :today-key="todayKey"
+          @add-shift="emit('add-shift', $event)"
+          @delete-shift="deleteShift"
+        />
+
+        <div ref="nextSentinel" class="flex min-h-6 items-center justify-center" aria-live="polite">
+          <span v-if="isLoadingNext" class="text-xs text-[var(--text-muted)]">{{
+            $t('ui.loading')
+          }}</span>
+        </div>
+      </template>
+
+      <template v-else>
+        <div
+          ref="gridPreviousSentinel"
+          class="flex min-h-6 items-center justify-center"
+          aria-hidden="true"
+        />
+
+        <MobileScheduleGrid
+          :is-manager="props.isManager"
+          :months="gridMonthSections"
+          :shifts-by-day="shiftsByDay"
+          :today-key="todayKey"
+          @add-shift="emit('add-shift', $event)"
+          @open-day="openGridDay"
+        />
+
+        <div
+          ref="gridNextSentinel"
+          class="flex min-h-6 items-center justify-center"
+          aria-live="polite"
+        >
+          <span v-if="isLoadingNext" class="text-xs text-[var(--text-muted)]">{{
+            $t('ui.loading')
+          }}</span>
+        </div>
+      </template>
+    </div>
 
     <MobileScheduleDayModal
       :model-value="Boolean(selectedGridDay)"
