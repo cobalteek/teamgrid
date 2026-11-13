@@ -15,14 +15,16 @@ const props = withDefaults(
 defineEmits<{ (e: 'delete', shiftId: string): void }>()
 
 const employeeLabel = computed(() =>
-  props.employeeOrder === 'name-first'
+  props.employeeOrder === 'name-first' && props.shift.employee
     ? `${props.shift.employee.name} ${props.shift.employee.surname}`
-    : `${props.shift.employee.surname} ${props.shift.employee.name}`,
+    : props.shift.employee
+      ? `${props.shift.employee.surname} ${props.shift.employee.name}`
+      : '',
 )
 
 const shiftGradient = computed(
   () =>
-    `linear-gradient(135deg, ${props.shift.position.color} 0%, ${props.shift.employee.color} 100%)`,
+    `linear-gradient(135deg, ${props.shift.position ? props.shift.position.color : '#6b7280'} 0%, ${props.shift.employee ? props.shift.employee.color : '#6b7280'} 100%)`,
 )
 
 function formatTime(minutes: number) {
@@ -51,8 +53,10 @@ const shiftTimeLabel = computed(() => {
     />
     <div class="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
       <div class="min-w-0">
-        <p class="m-0 truncate font-bold">{{ shift.position.name }}</p>
-        <p class="mt-1 truncate text-sm text-[var(--text-soft)]">{{ employeeLabel }}</p>
+        <p v-if="shift.position" class="m-0 truncate font-bold">{{ shift.position?.name }}</p>
+        <p v-if="shift.employee" class="mt-1 truncate text-sm text-[var(--text-soft)]">
+          {{ employeeLabel }}
+        </p>
       </div>
       <time v-if="shiftTimeLabel" class="shrink-0 text-base font-semibold">
         {{ shiftTimeLabel }}

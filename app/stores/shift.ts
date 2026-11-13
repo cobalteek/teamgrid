@@ -116,7 +116,7 @@ export const useShiftStore = defineStore('shift', () => {
 
     const organizationId = organizationStore.currentOrganizationId
     try {
-      if (!shiftData.date || !shiftData.employeeId || !shiftData.positionId) {
+      if (!shiftData.date) {
         throw createError('validation.shift.requiredFields')
       }
       const date = new Date(`${shiftData.date}T00:00:00Z`)

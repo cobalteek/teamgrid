@@ -20,6 +20,8 @@ const isSubmitting = ref(false)
 
 const advancedSettings = ref(false)
 const templateEnabled = ref(false)
+const justShift = ref(false)
+
 const formWidthClass = computed(() =>
   advancedSettings.value
     ? 'transition-all duration-350 sm:w-[725px]'
@@ -29,7 +31,7 @@ const formWidthClass = computed(() =>
 const createShift = ref<CreateShift>({
   date: '',
   employeeId: '',
-  positionId: positionStore.positions[0]?.id ? positionStore.positions[0].id : 1,
+  positionId: 0,
   allDay: true,
 })
 
@@ -59,7 +61,7 @@ function resetModal() {
   advancedSettings.value = false
   templateEnabled.value = false
   createShift.value.employeeId = ''
-  createShift.value.positionId = 1
+  createShift.value.positionId = 0
   createShift.value.allDay = true
   createShift.value.startTime = undefined
   createShift.value.endTime = undefined
@@ -68,6 +70,7 @@ function resetModal() {
   template.value.restDays = 0
   template.value.workDays = 0
   template.value.weekdays = []
+  justShift.value = false
 }
 
 const handleCancel = () => {
@@ -77,9 +80,14 @@ const handleCancel = () => {
 
 const handleSubmit = async () => {
   createShift.value.date = props.info.dateStr
-  if (createShift.value.employeeId === '' || createShift.value.positionId === 0) {
+  if (createShift.value.employeeId === '' && createShift.value.positionId === 0 && !justShift.value) {
     errorModal.showError('error.form.fieldsEmpty')
     return
+  }
+
+  if(justShift.value) {
+    createShift.value.employeeId = null
+    createShift.value.positionId = null
   }
   if (!createShift.value.allDay) {
     if (
@@ -95,14 +103,6 @@ const handleSubmit = async () => {
   if (templateEnabled.value) {
     const hasWeekdays = Boolean(template.value.weekdays?.length)
     const hasCycle = template.value.workDays > 0
-    console.log(
-      'hasWeekdays:',
-      hasWeekdays,
-      'hasCycle:',
-      hasCycle,
-      'template.value.weekdays:',
-      template.value.weekdays,
-    )
 
     if (!template.value.endDate || (!hasWeekdays && !hasCycle)) {
       errorModal.showError('error.form.fieldsEmpty')
@@ -165,7 +165,7 @@ function generateShifts(createShift: CreateShift, template: ScheduleTemplate) {
     const endDate = new Date(`${template.endDate}T00:00:00Z`)
 
     while (date <= endDate) {
-      const dayOfWeek = date.getUTCDay() === 0 ? 7 : date.getUTCDay() // Convert Sunday from 0 to 7
+      const dayOfWeek = date.getUTCDay() === 0 ? 7 : date.getUTCDay()
 
       if (template.weekdays.includes(dayOfWeek)) {
         const dateStr = formatDateStr(date)
@@ -232,13 +232,20 @@ function generateShifts(createShift: CreateShift, template: ScheduleTemplate) {
   return newShifts
 }
 
+function toggleJustShift() {
+  justShift.value = !justShift.value
+  if (justShift.value) {
+    createShift.value.employeeId = ''
+  } else {
+    createShift.value.positionId = 0
+  }
+}
+
 watch(
   () => createShift.value.employeeId,
   (employeeId) => {
     if (!employeeId) {
-      createShift.value.positionId = positionStore.positions[0]?.id
-        ? positionStore.positions[0].id
-        : 1
+      createShift.value.positionId = 0
       return
     }
 
@@ -272,12 +279,15 @@ watch(
           placeholder: 'select.employee',
           disabledOption: 'select.employee',
           selectOption: employeeStore.options,
+          disabled: justShift,
         },
         {
           key: 'positionId',
           placeholder: 'select.position',
+          placeholderValue: 0,
           disabledOption: 'select.position',
           selectOption: positionStore.options,
+          disabled: justShift,
         },
       ]"
       v-model="createShift"
@@ -287,6 +297,16 @@ watch(
       @close="handleCancel"
     >
       <template #before-actions>
+        <label
+        class="mt-2 flex w-full cursor-pointer items-start gap-3 rounded-lg border border-[var(--input-border)] bg-[var(--input-bg)] p-3 text-left text-sm leading-5 transition hover:border-[var(--text-blue)]"
+      >
+        <input type="checkbox" class="peer sr-only" @change="toggleJustShift" />
+        <span
+          aria-hidden="true"
+          class="relative mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 border-[var(--input-border)] bg-[var(--bg-modal)] transition peer-checked:border-[var(--btn-bg)] peer-checked:bg-[var(--btn-bg)] peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--text-blue)] peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[var(--bg-modal)] after:h-2 after:w-3 after:rotate-[-45deg] after:border-b-2 after:border-l-2 after:border-[var(--btn-text)] after:opacity-0 after:transition-opacity peer-checked:after:opacity-100"
+        />
+        <span class="w-full select-none"> {{ $t('ui.justShift') }} </span>
+      </label>
         <div v-if="!isSubmitting" class="border-t border-[var(--border-main)] pt-3">
           <button
             type="button"

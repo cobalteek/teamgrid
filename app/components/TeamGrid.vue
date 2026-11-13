@@ -9,6 +9,7 @@ import { useShiftStore } from '../stores/shift'
 import { useOrganizationStore } from '../stores/organization'
 import { useEmployeeStore } from '../stores/employee'
 import { formatDateStrLocale } from '~~/shared/utils/formatDate'
+import type { ShiftWithRelations } from '~~/types/shift'
 
 const { locale } = useI18n()
 const props = defineProps<{
@@ -54,27 +55,83 @@ function getShiftTimeLabel(startTime: number | null, endTime: number | null) {
   }
 }
 
+function employeeLabel(shift: ShiftWithRelations) {
+  return [
+    shift.employee?.surname,
+    shift.employee?.name,
+    shift.employee?.middlename,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .trim()
+}
+
+function sortLabel(shift: ShiftWithRelations) {
+  return employeeLabel(shift) || shift.position?.name || ''
+}
+
+function compareShifts(a: ShiftWithRelations, b: ShiftWithRelations) {
+  const localeName = locale.value === 'ru' ? 'ru-RU' : 'en-US'
+
+  const byEmployeeOrPosition = sortLabel(a).localeCompare(
+    sortLabel(b),
+    localeName,
+    { sensitivity: 'base', numeric: true },
+  )
+
+  if (byEmployeeOrPosition !== 0) {
+    return byEmployeeOrPosition
+  }
+
+  const byPosition = (a.position?.name || '').localeCompare(
+    b.position?.name || '',
+    localeName,
+    { sensitivity: 'base', numeric: true },
+  )
+
+  if (byPosition !== 0) return byPosition
+
+  return (
+    (a.startTime ?? -1) - (b.startTime ?? -1) ||
+    String(a.id).localeCompare(String(b.id))
+  )
+}
+
 const events = computed(() => {
-  return shiftStore.shifts.map((shift) => {
-    return {
-      id: shift.id,
-      title: `${shift.position.name} ${shift.employee.name}`,
-      start: getShiftDateTime(shift.date, shift.allDay ? null : shift.startTime),
-      allDay: shift.allDay,
-      end: shift.allDay ? undefined : getShiftDateTime(shift.date, shift.endTime),
+  return [...shiftStore.shifts]
+    .sort(compareShifts)
+    .map((shift) => {
+      const employeeLabelValue = employeeLabel(shift)
+      const positionLabelValue = shift.position?.name || ''
 
-      extendedProps: {
-        employeeId: shift.employee.id,
-        positionId: shift.position.id,
-        employeeLabel: `${shift.employee.name} ${shift.employee.surname}`,
-        positionLabel: shift.position.name,
-        timeLabel: shift.allDay ? null : getShiftTimeLabel(shift.startTime, shift.endTime),
+      return {
+        id: shift.id,
+        title: employeeLabelValue || positionLabelValue,
 
-        employeeColor: shift.employee.color,
-        positionColor: shift.position.color,
-      },
-    }
-  })
+        start: getShiftDateTime(
+          shift.date,
+          shift.allDay ? null : shift.startTime,
+        ),
+
+        allDay: shift.allDay,
+
+        end: shift.allDay
+          ? undefined
+          : getShiftDateTime(shift.date, shift.endTime),
+
+        extendedProps: {
+          employeeId: shift.employee?.id,
+          positionId: shift.position?.id,
+          employeeLabel: employeeLabelValue,
+          positionLabel: positionLabelValue,
+          timeLabel: shift.allDay
+            ? null
+            : getShiftTimeLabel(shift.startTime, shift.endTime),
+          employeeColor: shift.employee?.color,
+          positionColor: shift.position?.color,
+        },
+      }
+    })
 })
 
 const isAddEmployeeModalOpen = ref(false)
@@ -126,6 +183,8 @@ const calendarOptions = computed(() => ({
   dayHeaders: false,
   dayMaxEvents: 3,
   displayEventTime: false,
+  eventOrder: 'title,start,id',
+  eventOrderStrict: true,
   dateClick: function (info: any) {
     if (!isManager.value) {
       return
@@ -232,16 +291,22 @@ const calendarOptions = computed(() => ({
 
 function eventDidMount(info: any) {
   const employeeColor = info.event.extendedProps.employeeColor
-
+    ? info.event.extendedProps.employeeColor
+    : '#6b7280'
   const positionColor = info.event.extendedProps.positionColor
+    ? info.event.extendedProps.positionColor
+    : '#6b7280'
+
+  const firstColor = positionColor || employeeColor
+  const secondColor = employeeColor || positionColor
 
   info.el.style.background = `
     linear-gradient(
       110deg,
-      ${positionColor} 0%,
-      ${positionColor} 35%,
-      ${employeeColor} 65%,
-      ${employeeColor} 100%
+      ${firstColor} 0%,
+      ${firstColor} 35%,
+      ${secondColor} 65%,
+      ${secondColor} 100%
     )
   `
   info.el.addEventListener('contextmenu', async (e: MouseEvent) => {
@@ -384,11 +449,22 @@ onMounted(async () => {
           <div class="min-w-0 flex-1">
             <div
               class="truncate text-left text-xs font-semibold text-white"
-              :title="event.extendedProps.employeeLabel"
+              :title="
+                event.extendedProps.employeeLabel
+                  ? event.extendedProps.employeeLabel
+                  : event.extendedProps.positionLabel
+              "
             >
-              {{ event.extendedProps.employeeLabel }}
+              {{
+                event.extendedProps.employeeLabel
+                  ? event.extendedProps.employeeLabel
+                  : event.extendedProps.positionLabel
+                    ? event.extendedProps.positionLabel
+                    : $t('ui.shiftName')
+              }}
             </div>
             <div
+              v-if="event.extendedProps.employeeLabel"
               class="truncate text-left text-[11px] text-white/70"
               :title="event.extendedProps.positionLabel"
             >

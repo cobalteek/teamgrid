@@ -162,7 +162,7 @@ export const usePositionStore = defineStore('position', () => {
       .map((p) => ({ value: p.id, label: p.fullName })),
   )
 
-  async function deletePosition(positionId: number) {
+  async function deletePosition(positionId: number, withShifts: boolean) {
     isLoading.value = true
     error.value = null
 
@@ -172,6 +172,7 @@ export const usePositionStore = defineStore('position', () => {
         method: 'POST',
         body: {
           id: positionId,
+          withShifts,
         },
         query: {
           organizationId: organizationStore.currentOrganizationId,

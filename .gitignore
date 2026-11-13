@@ -14,7 +14,8 @@ node_modules
 .output
 .env
 /TeamGrid_Terminal_Cheat_Sheet.md
-scripts
+scripts/*
+!scripts/seed-demo-organizations.ts
 start.cmd
 start.ps1
 .gitignore

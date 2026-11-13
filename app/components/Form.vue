@@ -19,17 +19,22 @@ const emit = defineEmits<{
 type Select<T> = {
   key: string
   placeholder: string
+  placeholderValue?: string | number
   disabledOption: string
   selectOption: {
     label: string
     value: any
   }[]
+  required?: boolean
+  disabled?: boolean
 }
 
 type Field<T> = {
   key: string
   type: string
   placeholder: string
+  required?: boolean
+  disabled?: boolean
 }
 
 function getDeepValue(obj: any, path: string) {
@@ -101,6 +106,8 @@ if (props.date) {
           @input="updateField(field.key, ($event.target as HTMLInputElement).value)"
           :type="field.type"
           :placeholder="$t(field.placeholder)"
+          :required="field.required ?? false"
+          :disabled="field.disabled ?? false"
           class="min-h-11 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] p-2 pl-3 text-[var(--input-text)]"
         />
         <div v-if="selects" class="flex w-full flex-col gap-4">
@@ -109,9 +116,11 @@ if (props.date) {
             :key="select.key"
             :value="getDeepValue(modelValue, select.key) ?? ''"
             @input="onSelectChange($event, select)"
-            class="min-h-11 rounded border border-[var(--input-border)] bg-[var(--input-bg)] pl-3 text-[var(--input-text)]"
+            :required="select.required"
+            :disabled="select.disabled ?? false"
+            class="min-h-11 rounded border border-[var(--input-border)] bg-[var(--input-bg)] pl-3 text-[var(--input-text)] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <option disabled value="">
+            <option disabled :value="select.placeholderValue ?? ''">
               {{ $t(select.placeholder) }}
             </option>
             <option v-for="o in select.selectOption" :key="String(o.value)" :value="o.value">

@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   const startTime = allDay ? null : body.startTime
   const endTime = allDay ? null : body.endTime
 
-  if (!date || !employeeId || !positionId) {
+  if (!date) {
     throw createError({
       statusCode: 400,
       statusMessage: t('validation.shift.requiredFields'),
@@ -46,34 +46,38 @@ export default defineEventHandler(async (event) => {
 
   await requireOrganizationRole(userId, organizationId, ['owner', 'admin'], t('error.onlyManager'))
 
-  const employee = await prisma.employee.findUnique({
-    where: { id: employeeId, organizationId },
-  })
-
-  if (!employee) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: t('error.employee.notFound'),
+  if (employeeId) {
+    const employee = await prisma.employee.findUnique({
+      where: { id: employeeId, organizationId },
     })
+
+    if (!employee) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: t('error.employee.notFound'),
+      })
+    }
   }
 
-  const position = await prisma.position.findUnique({
-    where: { id: positionId, organizationId },
-  })
-
-  if (!position) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: t('error.position.notFound'),
+  if (positionId) {
+    const position = await prisma.position.findUnique({
+      where: { id: positionId, organizationId },
     })
+
+    if (!position) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: t('error.position.notFound'),
+      })
+    }
   }
 
   try {
     const shift = await prisma.shift.create({
       data: {
         date,
-        employeeId,
-        positionId,
+        employeeId: employeeId || null,
+        positionId: positionId || null,
         organizationId,
         allDay,
         startTime,

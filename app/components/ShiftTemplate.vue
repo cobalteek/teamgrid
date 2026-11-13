@@ -203,7 +203,7 @@ watch(
           />
           <button
             type="button"
-            class="cursor-pointer w-fit rounded-md border border-[var(--border-main)] bg-[var(--bg-main)] px-2 text-sm text-[var(--text-main)] hover:border-[var(--accent)] hover:bg-[var(--bg-hover)]"
+            class="w-fit cursor-pointer rounded-md border border-[var(--border-main)] bg-[var(--bg-main)] px-2 text-sm text-[var(--text-main)] hover:border-[var(--accent)] hover:bg-[var(--bg-hover)]"
             @click="other = !other"
           >
             {{ '+' }}
@@ -229,9 +229,7 @@ watch(
             />
           </label>
         </div>
-        <div 
-            @click="resetDays()"
-            >
+        <div @click="resetDays()">
           <p class="text-sm">{{ $t('ui.templateInfoWeek') }}</p>
           <label
             v-for="day in weekDays"
@@ -242,7 +240,7 @@ watch(
           >
             <input
               type="checkbox"
-              class="cursor-pointer peer sr-only"
+              class="peer sr-only cursor-pointer"
               :disabled="modeToggle !== 'weekdays'"
               v-model="templateGrid.weekdays"
               :value="day.value"

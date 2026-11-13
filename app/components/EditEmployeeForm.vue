@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import Modal from './Modal.vue'
 import { useEmployeeStore } from '~/stores/employee'
-import { usePositionStore } from '~/stores/position'
 import { isValidEmail, isValidName } from '~~/shared/utils/validation'
 import type { Employee } from '~~/types/employee'
 
@@ -25,10 +24,10 @@ function onUpdateModelValue(value: boolean) {
 const errorModal = useErrorModal()
 const initApp = useInitializeApp()
 const employeeStore = useEmployeeStore()
-const positionStore = usePositionStore()
 const isSubmitting = ref(false)
 const isDeleteEmployeeConfirmModalOpen = ref(false)
 const selectedEmployeeConfirmDelete = ref('')
+const withShifts = ref(false)
 
 const employee = ref<Employee>({
   id: '',
@@ -70,6 +69,7 @@ async function handleSubmit() {
 
     emit('submit')
     emit('close')
+    resetModal()
   } catch (e) {
     isSubmitting.value = false
     console.log(e)
@@ -80,6 +80,7 @@ async function handleSubmit() {
 
 function handleCancel() {
   emit('close')
+  resetModal()
 }
 
 function confirmDelete() {
@@ -91,8 +92,9 @@ async function handleDelete() {
   isSubmitting.value = true
 
   try {
-    await employeeStore.deleteEmployee(employee.value.id)
+    await employeeStore.deleteEmployee(employee.value.id, withShifts.value)
     emit('close')
+    resetModal()
   } catch (e) {
     isSubmitting.value = false
     errorModal.showError(e as string)
@@ -100,6 +102,30 @@ async function handleDelete() {
   } finally {
     await initApp.init()
   }
+}
+
+const resetModal = () => {
+  isSubmitting.value = false
+  withShifts.value = false
+  employee.value = {
+    id: '',
+    name: '',
+    surname: '',
+    middlename: '',
+    email: '',
+    color: '',
+    position: {
+      id: 0,
+      name: '',
+      fullName: '',
+    },
+    organization: {
+      id: 0,
+      name: '',
+    },
+  }
+  selectedEmployeeConfirmDelete.value = ''
+  isDeleteEmployeeConfirmModalOpen.value = false
 }
 
 watch(
@@ -128,17 +154,10 @@ watch(
       v-model:model-value="employee"
       title="ui.employeeEdit"
       :fields="[
-        { key: 'name', type: 'text', placeholder: 'placeholder.firstName' },
+        { key: 'name', type: 'text', placeholder: 'placeholder.firstName', required: true },
         { key: 'surname', type: 'text', placeholder: 'placeholder.lastName' },
         { key: 'middlename', type: 'text', placeholder: 'placeholder.middleName' },
-        { key: 'email', type: 'email', placeholder: 'placeholder.email' },
-      ]"
-      :comboboxes="[
-        {
-          key: 'position.id',
-          placeholder: 'select.position',
-          selectOption: positionStore.options,
-        },
+        { key: 'email', type: 'email', placeholder: 'placeholder.email', required: true },
       ]"
       submit-btn-name="btn.save"
       :is-loading="isSubmitting"
@@ -157,7 +176,9 @@ watch(
     :model-value="isDeleteEmployeeConfirmModalOpen"
     :message="selectedEmployeeConfirmDelete"
     :is-loading="isSubmitting"
+    :checkboxes="[{ text: 'ui.deleteShiftsEmployeeToo', required: true, model: withShifts }]"
     submit-text="btn.delete"
+    @update:checkbox="withShifts = $event"
     @submit="handleDelete"
     @close="isDeleteEmployeeConfirmModalOpen = false"
   />

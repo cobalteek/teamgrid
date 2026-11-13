@@ -361,7 +361,11 @@
     "user": "Пользователь",
     "status": "Статус",
     "notAnEmployee": "Не является сотрудником",
-    "newPassword": "Новый пароль"
+    "newPassword": "Новый пароль",
+    "shiftName": "Смена",
+    "deleteShiftsEmployeeToo": "Удалить смены этого сотрудника?",
+    "deleteShiftsPositionToo": "Удалить смены этой должности?",
+    "justShift": "Добавить смену без сотрудника и должности?"
   },
   "modal": {
     "editOrganization": "Редактировать организацию"

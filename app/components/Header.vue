@@ -64,7 +64,7 @@ watch(
   >
     <NuxtLink
       to="/"
-      class="flex h-[3.25rem] shrink-0 items-center rounded-xl border border-transparent px-2.5 text-md font-bold tracking-tight transition hover:border-[var(--border-main)] hover:bg-[var(--bg-hover-context)] sm:px-3"
+      class="text-md flex h-[3.25rem] shrink-0 items-center rounded-xl border border-transparent px-2.5 font-bold tracking-tight transition hover:border-[var(--border-main)] hover:bg-[var(--bg-hover-context)] sm:px-3"
     >
       {{ activeBranch === 'master' ? 'TeamGrid' : 'TeamGrid Dev' }}
     </NuxtLink>

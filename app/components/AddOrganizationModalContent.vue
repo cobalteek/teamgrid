@@ -71,7 +71,10 @@ watch(
   <Modal :model-value="modelValue" @update:model-value="onUpdateModelValue">
     <Form
       title="ui.organization.add"
-      :fields="[{ key: 'name', type: 'text', placeholder: 'placeholder.organizationName' }]"
+      :fields="[
+        { key: 'name', type: 'text', placeholder: 'placeholder.organizationName', required: true },
+        { key: 'description', type: 'text', placeholder: 'placeholder.organizationDescription' },
+      ]"
       v-model="newOrganization"
       submitBtnName="ui.organization.add"
       :is-loading="isSubmitting"

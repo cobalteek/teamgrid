@@ -22,9 +22,8 @@ export default defineEventHandler(async (event) => {
     if (
       !shift ||
       !shift.date ||
-      typeof shift.employeeId !== 'string' ||
-      !shift.employeeId ||
-      !Number.isInteger(shift.positionId)
+      (typeof shift.employeeId !== 'string' && shift.employeeId !== null) ||
+      !Number.isInteger(shift.positionId) && shift.positionId !== null
     ) {
       throw createError({
         statusCode: 400,
@@ -57,24 +56,30 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  const employeeIds = [...new Set(shifts.map((shift) => shift.employeeId))]
-  const positionIds = [...new Set(shifts.map((shift) => shift.positionId))]
-  const [employees, positions] = await Promise.all([
-    prisma.employee.findMany({
+  if(shifts.every((shift) => shift.employeeId)) {
+    const employeeIds = shifts.map((shift) => shift.employeeId)
+    const employees = await prisma.employee.findMany({
       where: { id: { in: employeeIds }, organizationId },
-      select: { id: true },
-    }),
-    prisma.position.findMany({
-      where: { id: { in: positionIds }, organizationId },
-      select: { id: true },
-    }),
-  ])
-
-  if (employees.length !== employeeIds.length || positions.length !== positionIds.length) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: t('error.shift.notFound'),
     })
+    if (employees.length !== employeeIds.length) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: t('error.employee.notFound'),
+      })
+    }
+  }
+
+  if(shifts.every((shift) => shift.positionId)) {
+    const positionIds = shifts.map((shift) => shift.positionId)
+    const positions = await prisma.position.findMany({
+      where: { id: { in: positionIds }, organizationId },
+    })
+    if (positions.length !== positionIds.length) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: t('error.position.notFound'),
+      })
+    }
   }
 
   try {
@@ -84,8 +89,8 @@ export default defineEventHandler(async (event) => {
         return prisma.shift.create({
           data: {
             date: shift.date,
-            employeeId: shift.employeeId,
-            positionId: shift.positionId,
+            employeeId: shift.employeeId ?? null,
+            positionId: shift.positionId ?? null,
             organizationId,
             allDay,
             startTime: allDay ? null : shift.startTime,

@@ -360,7 +360,8 @@
     "personalDataConsentText": "consent text",
     "privacyPolicy": "Privacy Policy",
     "userAgreementConsent": "I accept the",
-    "userAgreement": "User Terms"
+    "userAgreement": "User Terms",
+    "shiftName": "Shift"
   },
   "modal": {
     "editOrganization": "Edit organization"

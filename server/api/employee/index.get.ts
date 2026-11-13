@@ -63,12 +63,14 @@ export default defineEventHandler(async (event) => {
         name: employee.name,
         surname: employee.surname,
         middlename: employee.middlename,
-        position: {
-          id: employee.position.id,
-          name: employee.position.name,
-          fullName: employee.position.fullName,
-          organizationId: employee.position.organizationId,
-        },
+        position: employee.position
+          ? {
+              id: employee.position.id,
+              name: employee.position.name,
+              fullName: employee.position.fullName,
+              organizationId: employee.position.organizationId,
+            }
+          : null,
         organizationId: employee.organizationId,
         email: employee.email,
       }
@@ -93,11 +95,13 @@ export default defineEventHandler(async (event) => {
       name: employee.name,
       surname: employee.surname,
       middlename: employee.middlename,
-      position: {
-        id: employee.position.id,
-        name: employee.position.name,
-        organizationId: employee.position.organizationId,
-      },
+      position: employee.position
+        ? {
+            id: employee.position.id,
+            name: employee.position.name,
+            organizationId: employee.position.organizationId,
+          }
+        : null,
       organizationId: employee.organizationId,
       email: employee.email,
     }))

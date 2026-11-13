@@ -63,8 +63,12 @@ function onUpdateModelValue(value: boolean) {
 const errorModal = useErrorModal()
 
 const handleSubmit = async () => {
-  if (employee.value.name === '' || employee.value.position === '' || employee.value.email === '') {
-    errorModal.showError('error.form.fieldsEmpty')
+  if (employee.value.name === '') {
+    errorModal.showError('error.form.nameEmpty')
+    return
+  }
+  if (employee.value.email === '') {
+    errorModal.showError('error.form.emailEmpty')
     return
   }
   if (!isValidEmail(employee.value.email)) {
@@ -79,7 +83,7 @@ const handleSubmit = async () => {
     errorModal.showError('error.auth.fullNameLength')
     return
   }
-  if (!isValidPosition(employee.value.position)) {
+  if (employee.value.position.length > 0 && !isValidPosition(employee.value.position)) {
     errorModal.showError('error.auth.positionLength')
     return
   }
@@ -131,11 +135,11 @@ watch(
     <Form
       title="btn.addEmployee"
       :fields="[
-        { key: 'name', type: 'text', placeholder: 'placeholder.firstName' },
+        { key: 'name', type: 'text', placeholder: 'placeholder.firstName', required: true },
         { key: 'surname', type: 'text', placeholder: 'placeholder.lastName' },
         { key: 'middlename', type: 'text', placeholder: 'placeholder.middleName' },
         { key: 'position', type: 'text', placeholder: 'placeholder.position' },
-        { key: 'email', type: 'email', placeholder: 'placeholder.email' },
+        { key: 'email', type: 'email', placeholder: 'placeholder.email', required: true },
       ]"
       :selects="[
         {
