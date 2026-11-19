@@ -50,7 +50,7 @@ function setValue(value: boolean) {
     <Loading v-if="isLoading" class="min-h-[180px] w-full" />
     <template v-else>
       <div
-        class="px-auto mt-4 flex max-h-[250px] max-w-[500px] flex-col items-center justify-center"
+        class="px-auto mt-4 flex min-h-[160px] max-h-[250px] max-w-[500px] flex-col items-center justify-center"
       >
         <p class="text-lg text-center font-bold p-3 {{ isLoading ? 'opacity-50' : '' }}">
           {{ message }}
