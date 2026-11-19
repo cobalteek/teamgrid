@@ -318,7 +318,7 @@ function eventDidMount(info: any) {
     const shift = await shiftStore.getShiftById(info.event.id)
     isSubmitting.value = false
     selectedShiftId.value = shift.id
-    selectedShiftConfirmDelete.value = `${$t('ui.shiftDeleteConfirm')} ${shift.position.name} ${shift.employee.name} ${locale.value === 'ru' ? formatDateStrLocale(shift.date, 'ru-RU') : formatDateStrLocale(shift.date, 'en-US')}?`
+    selectedShiftConfirmDelete.value = `${$t('ui.shiftDeleteConfirm')} ${shift.position?.name ? shift.position.name : ''} ${shift.employee?.name ? shift.employee.name : ''} ${locale.value === 'ru' ? formatDateStrLocale(shift.date, 'ru-RU') : formatDateStrLocale(shift.date, 'en-US')}?`
     isDeleteShiftConfirmModalOpen.value = true
     return
   })
