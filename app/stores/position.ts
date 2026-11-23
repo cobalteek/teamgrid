@@ -16,6 +16,7 @@ function getErrorMessage(error: unknown) {
 }
 
 export const usePositionStore = defineStore('position', () => {
+  const requestFetch = useRequestFetch()
   const positions = ref<Position[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
@@ -28,13 +29,11 @@ export const usePositionStore = defineStore('position', () => {
     const organizationId = organizationStore.currentOrganizationId
 
     try {
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
       positions.value = []
 
-      positions.value = await $fetch<Position[]>('/api/position', {
+      positions.value = await requestFetch<Position[]>('/api/position', {
         credentials: 'include',
         method: 'GET',
-        headers,
         query: {
           organizationId,
         },
@@ -54,11 +53,8 @@ export const usePositionStore = defineStore('position', () => {
     error.value = null
 
     try {
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-
-      const position = await $fetch<Position>('/api/position', {
+      const position = await requestFetch<Position>('/api/position', {
         query: { positionId },
-        headers,
       })
 
       return position
@@ -88,12 +84,9 @@ export const usePositionStore = defineStore('position', () => {
       })
     }
     try {
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-
-      const createdPosition = await $fetch<Position>('api/position', {
+      const createdPosition = await requestFetch<Position>('api/position', {
         credentials: 'include',
         method: 'POST',
-        headers,
         body: position,
         query: {
           organizationId: organizationStore.currentOrganizationId,
@@ -128,12 +121,9 @@ export const usePositionStore = defineStore('position', () => {
       })
     }
     try {
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-
-      const changedPosition = await $fetch<Position>('api/position', {
+      const changedPosition = await requestFetch<Position>('api/position', {
         credentials: 'include',
         method: 'PATCH',
-        headers,
         body: position,
         query: {
           organizationId: organizationStore.currentOrganizationId,

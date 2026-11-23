@@ -11,6 +11,8 @@ const daysInDemoMonth = new Date(Date.UTC(demoYear, demoMonth + 1, 0)).getUTCDat
 type PositionSeed = {
   name: string
   fullName: string
+  salaryType?: 'hourly' | 'per_shift' | 'monthly'
+  salaryAmount?: number
 }
 
 type EmployeeSeed = {
@@ -18,6 +20,8 @@ type EmployeeSeed = {
   surname: string
   middlename: string
   position: string
+  salaryType?: 'hourly' | 'per_shift' | 'monthly'
+  salaryAmount?: number
 }
 
 type OrganizationSeed = {
@@ -37,21 +41,65 @@ const organizations: OrganizationSeed[] = [
       'Демонстрационная организация: ресепшен, клининг, безопасность и техническая служба. В расписании показаны дневные, вечерние и круглосуточные дежурства.',
     slug: 'severnaya-line',
     positions: [
-      { name: 'Администратор', fullName: 'Администратор бизнес-центра' },
-      { name: 'Менеджер смены', fullName: 'Менеджер операционной смены' },
-      { name: 'Ресепшен', fullName: 'Специалист стойки ресепшен' },
-      { name: 'Инженер', fullName: 'Инженер по эксплуатации здания' },
-      { name: 'Клининг', fullName: 'Специалист клининговой службы' },
-      { name: 'Охрана', fullName: 'Сотрудник службы безопасности' },
+      {
+        name: 'Администратор',
+        fullName: 'Администратор бизнес-центра',
+        salaryType: 'hourly',
+        salaryAmount: 450,
+      },
+      {
+        name: 'Менеджер смены',
+        fullName: 'Менеджер операционной смены',
+        salaryType: 'monthly',
+        salaryAmount: 120000,
+      },
+      {
+        name: 'Ресепшен',
+        fullName: 'Специалист стойки ресепшен',
+        salaryType: 'per_shift',
+        salaryAmount: 3500,
+      },
+      {
+        name: 'Инженер',
+        fullName: 'Инженер по эксплуатации здания',
+        salaryType: 'hourly',
+        salaryAmount: 700,
+      },
+      {
+        name: 'Клининг',
+        fullName: 'Специалист клининговой службы',
+        salaryType: 'per_shift',
+        salaryAmount: 2500,
+      },
+      {
+        name: 'Охрана',
+        fullName: 'Сотрудник службы безопасности',
+        salaryType: 'hourly',
+        salaryAmount: 400,
+      },
     ],
     employees: [
-      { name: 'Анна', surname: 'Сергеева', middlename: 'Игоревна', position: 'Администратор' },
+      {
+        name: 'Анна',
+        surname: 'Сергеева',
+        middlename: 'Игоревна',
+        position: 'Администратор',
+        salaryType: 'per_shift',
+        salaryAmount: 500,
+      },
       { name: 'Иван', surname: 'Петров', middlename: 'Алексеевич', position: 'Менеджер смены' },
       { name: 'Мария', surname: 'Волкова', middlename: 'Олеговна', position: 'Ресепшен' },
       { name: 'Олег', surname: 'Смирнов', middlename: 'Дмитриевич', position: 'Ресепшен' },
       { name: 'Елена', surname: 'Кузнецова', middlename: 'Романовна', position: 'Инженер' },
       { name: 'Максим', surname: 'Орлов', middlename: 'Викторович', position: 'Инженер' },
-      { name: 'Дарья', surname: 'Белова', middlename: 'Андреевна', position: 'Клининг' },
+      {
+        name: 'Дарья',
+        surname: 'Белова',
+        middlename: 'Андреевна',
+        position: 'Клининг',
+        salaryType: 'per_shift',
+        salaryAmount: 3850,
+      },
       { name: 'Сергей', surname: 'Никитин', middlename: 'Павлович', position: 'Клининг' },
       { name: 'Полина', surname: 'Морозова', middlename: 'Ильинична', position: 'Клининг' },
       { name: 'Артём', surname: 'Соколов', middlename: 'Евгеньевич', position: 'Охрана' },
@@ -66,11 +114,36 @@ const organizations: OrganizationSeed[] = [
       'Демонстрационная организация для клиентского сервиса: поддержка, контроль качества и контент. Данные полностью вымышлены и предназначены для просмотра возможностей TeamGrid.',
     slug: 'mayak-service',
     positions: [
-      { name: 'Старший оператор', fullName: 'Старший оператор клиентской поддержки' },
-      { name: 'Оператор', fullName: 'Оператор клиентской поддержки' },
-      { name: 'Техподдержка', fullName: 'Специалист технической поддержки' },
-      { name: 'Контент', fullName: 'Контент-менеджер базы знаний' },
-      { name: 'Контроль качества', fullName: 'Специалист контроля качества' },
+      {
+        name: 'Старший оператор',
+        fullName: 'Старший оператор клиентской поддержки',
+        salaryType: 'monthly',
+        salaryAmount: 110000,
+      },
+      {
+        name: 'Оператор',
+        fullName: 'Оператор клиентской поддержки',
+        salaryType: 'per_shift',
+        salaryAmount: 3000,
+      },
+      {
+        name: 'Техподдержка',
+        fullName: 'Специалист технической поддержки',
+        salaryType: 'hourly',
+        salaryAmount: 600,
+      },
+      {
+        name: 'Контент',
+        fullName: 'Контент-менеджер базы знаний',
+        salaryType: 'monthly',
+        salaryAmount: 90000,
+      },
+      {
+        name: 'Контроль качества',
+        fullName: 'Специалист контроля качества',
+        salaryType: 'hourly',
+        salaryAmount: 550,
+      },
     ],
     employees: [
       {
@@ -78,8 +151,17 @@ const organizations: OrganizationSeed[] = [
         surname: 'Андреева',
         middlename: 'Михайловна',
         position: 'Старший оператор',
+        salaryType: 'monthly',
+        salaryAmount: 125000,
       },
-      { name: 'Роман', surname: 'Громов', middlename: 'Сергеевич', position: 'Старший оператор' },
+      {
+        name: 'Роман',
+        surname: 'Громов',
+        middlename: 'Сергеевич',
+        position: 'Старший оператор',
+        salaryType: 'per_shift',
+        salaryAmount: 3800,
+      },
       { name: 'Алина', surname: 'Ершова', middlename: 'Денисовна', position: 'Оператор' },
       { name: 'Тимур', surname: 'Власов', middlename: 'Рустамович', position: 'Оператор' },
       { name: 'София', surname: 'Крылова', middlename: 'Артуровна', position: 'Оператор' },
@@ -135,6 +217,7 @@ async function seedOrganization(seed: OrganizationSeed) {
     })
 
     await tx.shift.deleteMany({ where: { organizationId: seed.id } })
+    await tx.vacation.deleteMany({ where: { organizationId: seed.id } })
     await tx.employee.deleteMany({ where: { organizationId: seed.id } })
     await tx.position.deleteMany({ where: { organizationId: seed.id } })
 
@@ -142,9 +225,12 @@ async function seedOrganization(seed: OrganizationSeed) {
     for (const [index, position] of seed.positions.entries()) {
       const created = await tx.position.create({
         data: {
-          ...position,
+          name: position.name,
+          fullName: position.fullName,
           organizationId: seed.id,
           color: POSITION_COLORS[index % POSITION_COLORS.length],
+          salaryType: position.salaryType ?? null,
+          salaryAmount: position.salaryAmount ?? null,
         },
         select: { id: true },
       })
@@ -165,6 +251,8 @@ async function seedOrganization(seed: OrganizationSeed) {
           organizationId: seed.id,
           email: `${seed.slug}-${String(index + 1).padStart(2, '0')}@example.com`,
           color: EMPLOYEE_COLORS[index % EMPLOYEE_COLORS.length],
+          salaryType: employee.salaryType ?? null,
+          salaryAmount: employee.salaryAmount ?? null,
         },
         select: { id: true, positionId: true },
       })

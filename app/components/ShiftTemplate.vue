@@ -2,7 +2,7 @@
 import type { CreateShift, ScheduleTemplate } from '~~/types/shift'
 
 const props = defineProps<{
-  date: any
+  date: Date | string | number
   modelValue: ScheduleTemplate
   shift: CreateShift
   templateEnabled: boolean
@@ -32,7 +32,7 @@ const weekDays = [
 ]
 const modeToggle = ref<'weekdays' | 'days' | 'state'>('state')
 const other = ref(false)
-const formatedDate = ref()
+const { formatDate } = useUserDisplayPreferences()
 
 function minutesToTime(value: number | undefined) {
   const minutes = value ?? 0
@@ -72,13 +72,7 @@ const shiftEndTime = computed({
   },
 })
 
-if (props.date) {
-  formatedDate.value = new Intl.DateTimeFormat('ru-RU', {
-    dateStyle: 'short',
-  }).format(props.date)
-} else {
-  formatedDate.value = ''
-}
+const formattedDate = computed(() => (props.date ? formatDate(props.date) : ''))
 
 function getTemplate(workDays: number, restDays: number) {
   templateGrid.value.workDays = workDays
@@ -130,19 +124,11 @@ watch(
       >
         <label class="flex min-w-0 flex-col gap-1 text-sm">
           <span>{{ $t('ui.timeFrom') }}</span>
-          <input
-            v-model="shiftStartTime"
-            type="time"
-            class="min-h-11 min-w-0 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] p-2 text-[var(--input-text)]"
-          />
+          <TimeInput v-model="shiftStartTime" :placeholder="$t('ui.timeFrom')" />
         </label>
         <label class="flex min-w-0 flex-col gap-1 text-sm">
           <span>{{ $t('ui.timeTo') }}</span>
-          <input
-            v-model="shiftEndTime"
-            type="time"
-            class="min-h-11 min-w-0 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] p-2 text-[var(--input-text)]"
-          />
+          <TimeInput v-model="shiftEndTime" :placeholder="$t('ui.timeTo')" />
         </label>
       </fieldset>
     </section>
@@ -160,22 +146,18 @@ watch(
 
       <fieldset :disabled="!templateEnabled" class="mt-3 flex flex-col gap-3 disabled:opacity-40">
         <p class="text-sm text-[var(--text-muted)]">
-          {{ $t('ui.startDate') + ': ' + formatedDate }}
+          {{ $t('ui.startDate') + ': ' + formattedDate }}
         </p>
         <label class="flex flex-col gap-1 text-sm">
           <span>{{ $t('ui.endDate') }}</span>
-          <input
-            v-model="templateGrid.endDate"
-            type="date"
-            class="min-h-11 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] p-2 text-[var(--input-text)]"
-          />
+          <DateInput v-model="templateGrid.endDate" :placeholder="$t('ui.endDate')" />
         </label>
         <p class="text-sm">{{ $t('ui.templateInfoDays') }}</p>
         <div
           :disabled="modeToggle === 'weekdays'"
           :class="[modeToggle === 'days' ? '' : 'opacity-30']"
-          @click="resetWeekdays()"
           class="inline-flex gap-1"
+          @click="resetWeekdays()"
         >
           <TemplatePresetButton
             :work-days="5"
@@ -209,7 +191,7 @@ watch(
             {{ '+' }}
           </button>
         </div>
-        <div :disabled="!other" v-if="other" class="grid grid-cols-2 gap-3">
+        <div v-if="other" :disabled="!other" class="grid grid-cols-2 gap-3">
           <label class="flex min-w-0 flex-col gap-1 text-sm">
             <span>{{ $t('ui.workDays') }}</span>
             <input
@@ -239,10 +221,10 @@ watch(
             :disabled="modeToggle !== 'weekdays'"
           >
             <input
+              v-model="templateGrid.weekdays"
               type="checkbox"
               class="peer sr-only cursor-pointer"
               :disabled="modeToggle !== 'weekdays'"
-              v-model="templateGrid.weekdays"
               :value="day.value"
             />
             <span

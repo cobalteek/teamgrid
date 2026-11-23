@@ -115,18 +115,18 @@ watch(
         <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label class="flex flex-col gap-1 text-sm">
             <span>{{ $t('ui.startDate') }}</span>
-            <input
-              v-model="filters.startDate"
-              type="date"
-              class="min-h-11 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] p-2 text-[var(--input-text)]"
+            <DateInput
+              :model-value="filters.startDate ?? ''"
+              :placeholder="$t('ui.startDate')"
+              @update:model-value="filters.startDate = $event"
             />
           </label>
           <label class="flex flex-col gap-1 text-sm">
             <span>{{ $t('ui.endDate') }}</span>
-            <input
-              v-model="filters.endDate"
-              type="date"
-              class="min-h-11 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] p-2 text-[var(--input-text)]"
+            <DateInput
+              :model-value="filters.endDate ?? ''"
+              :placeholder="$t('ui.endDate')"
+              @update:model-value="filters.endDate = $event"
             />
           </label>
         </div>

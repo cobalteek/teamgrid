@@ -3,6 +3,7 @@ import { requireUser } from '~~/server/utils/auth'
 import { isValidEmail, isValidName } from '~~/shared/utils/validation'
 import { EMPLOYEE_COLORS, POSITION_COLORS } from '~~/shared/utils/defaultColors'
 import { requireOrganizationRole } from '~~/server/utils/member'
+import { parseSalaryConfig } from '~~/server/utils/salary'
 
 export default defineEventHandler(async (event) => {
   const { userId } = await requireUser(event)
@@ -23,6 +24,7 @@ export default defineEventHandler(async (event) => {
     const surname = typeof body?.surname === 'string' ? body.surname.trim() : ''
     const middlename = typeof body?.middlename === 'string' ? body.middlename.trim() : ''
     const position = typeof body?.position === 'string' ? body.position.trim() : ''
+    const salary = parseSalaryConfig(body, t('error.salary.invalid'), { preserveNone: true })
 
     if (!name || !email) {
       throw createError({
@@ -149,6 +151,12 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    const lastEmployee = await prisma.employee.findFirst({
+      where: { organizationId },
+      orderBy: { sortOrder: 'desc' },
+      select: { sortOrder: true },
+    })
+
     const employee = await prisma.employee.create({
       data: {
         name,
@@ -158,6 +166,8 @@ export default defineEventHandler(async (event) => {
         positionId: positionRecord.id,
         organizationId: organizationId,
         color: colorEmployee,
+        sortOrder: (lastEmployee?.sortOrder ?? -1) + 1,
+        ...salary,
       },
     })
 

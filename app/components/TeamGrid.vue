@@ -8,10 +8,47 @@ import { ruBetterLocale, enBetterLocale } from '~~/shared/utils/betterLocaleCale
 import { useShiftStore } from '../stores/shift'
 import { useOrganizationStore } from '../stores/organization'
 import { useEmployeeStore } from '../stores/employee'
-import { formatDateStrLocale } from '~~/shared/utils/formatDate'
 import type { ShiftWithRelations } from '~~/types/shift'
 
+type CalendarDateClickInfo = {
+  dateStr: string
+  date: Date
+}
+
+type CalendarDateFormatInfo = {
+  date: { marker: Date }
+}
+
+type CalendarDayArg = {
+  date: Date
+  dayNumberText?: string
+}
+
+type CalendarEvent = {
+  id: string
+  extendedProps: {
+    employeeId?: string
+    positionId?: number
+    employeeColor?: string
+    positionColor?: string
+  }
+}
+
+type CalendarEventClickInfo = {
+  el: HTMLElement
+  event: CalendarEvent
+  jsEvent: MouseEvent
+}
+
+type CalendarEventMountInfo = {
+  el: HTMLElement
+  event: CalendarEvent
+}
+
 const { locale } = useI18n()
+const { formatDate, formatTime } = useUserDisplayPreferences()
+const userSettingsStore = useUserSettingsStore()
+const { settings: userSettings } = storeToRefs(userSettingsStore)
 const props = defineProps<{
   settings: {
     initialView: string
@@ -27,7 +64,7 @@ const infoDate = ref({
 
 const shiftStore = useShiftStore()
 
-const selectedEmployeeId = ref<number | null>(null)
+const selectedEmployeeId = ref<string | null>(null)
 const selectedPositionId = ref<number | null>(null)
 const selectedShiftId = ref<string>('')
 const selectedShiftConfirmDelete = ref<string>('')
@@ -41,26 +78,16 @@ function getShiftDateTime(date: Date, minutes: number | null) {
   return `${dateKey}T${hours}:${restMinutes}:00`
 }
 
-function formatShiftTime(minutes: number) {
-  const hours = String(Math.floor(minutes / 60)).padStart(2, '0')
-  const restMinutes = String(minutes % 60).padStart(2, '0')
-  return `${hours}:${restMinutes}`
-}
-
 function getShiftTimeLabel(startTime: number | null, endTime: number | null) {
   if (startTime === null || endTime === null) return null
   return {
-    start: formatShiftTime(startTime),
-    end: formatShiftTime(endTime),
+    start: formatTime(startTime),
+    end: formatTime(endTime),
   }
 }
 
 function employeeLabel(shift: ShiftWithRelations) {
-  return [
-    shift.employee?.surname,
-    shift.employee?.name,
-    shift.employee?.middlename,
-  ]
+  return [shift.employee?.surname, shift.employee?.name, shift.employee?.middlename]
     .filter(Boolean)
     .join(' ')
     .trim()
@@ -73,65 +100,51 @@ function sortLabel(shift: ShiftWithRelations) {
 function compareShifts(a: ShiftWithRelations, b: ShiftWithRelations) {
   const localeName = locale.value === 'ru' ? 'ru-RU' : 'en-US'
 
-  const byEmployeeOrPosition = sortLabel(a).localeCompare(
-    sortLabel(b),
-    localeName,
-    { sensitivity: 'base', numeric: true },
-  )
+  const byEmployeeOrPosition = sortLabel(a).localeCompare(sortLabel(b), localeName, {
+    sensitivity: 'base',
+    numeric: true,
+  })
 
   if (byEmployeeOrPosition !== 0) {
     return byEmployeeOrPosition
   }
 
-  const byPosition = (a.position?.name || '').localeCompare(
-    b.position?.name || '',
-    localeName,
-    { sensitivity: 'base', numeric: true },
-  )
+  const byPosition = (a.position?.name || '').localeCompare(b.position?.name || '', localeName, {
+    sensitivity: 'base',
+    numeric: true,
+  })
 
   if (byPosition !== 0) return byPosition
 
-  return (
-    (a.startTime ?? -1) - (b.startTime ?? -1) ||
-    String(a.id).localeCompare(String(b.id))
-  )
+  return (a.startTime ?? -1) - (b.startTime ?? -1) || String(a.id).localeCompare(String(b.id))
 }
 
 const events = computed(() => {
-  return [...shiftStore.shifts]
-    .sort(compareShifts)
-    .map((shift) => {
-      const employeeLabelValue = employeeLabel(shift)
-      const positionLabelValue = shift.position?.name || ''
+  return [...shiftStore.shifts].sort(compareShifts).map((shift) => {
+    const employeeLabelValue = employeeLabel(shift)
+    const positionLabelValue = shift.position?.name || ''
 
-      return {
-        id: shift.id,
-        title: employeeLabelValue || positionLabelValue,
+    return {
+      id: shift.id,
+      title: employeeLabelValue || positionLabelValue,
 
-        start: getShiftDateTime(
-          shift.date,
-          shift.allDay ? null : shift.startTime,
-        ),
+      start: getShiftDateTime(shift.date, shift.allDay ? null : shift.startTime),
 
-        allDay: shift.allDay,
+      allDay: shift.allDay,
 
-        end: shift.allDay
-          ? undefined
-          : getShiftDateTime(shift.date, shift.endTime),
+      end: shift.allDay ? undefined : getShiftDateTime(shift.date, shift.endTime),
 
-        extendedProps: {
-          employeeId: shift.employee?.id,
-          positionId: shift.position?.id,
-          employeeLabel: employeeLabelValue,
-          positionLabel: positionLabelValue,
-          timeLabel: shift.allDay
-            ? null
-            : getShiftTimeLabel(shift.startTime, shift.endTime),
-          employeeColor: shift.employee?.color,
-          positionColor: shift.position?.color,
-        },
-      }
-    })
+      extendedProps: {
+        employeeId: shift.employee?.id,
+        positionId: shift.position?.id,
+        employeeLabel: employeeLabelValue,
+        positionLabel: positionLabelValue,
+        timeLabel: shift.allDay ? null : getShiftTimeLabel(shift.startTime, shift.endTime),
+        employeeColor: shift.employee?.color,
+        positionColor: shift.position?.color,
+      },
+    }
+  })
 })
 
 const isAddEmployeeModalOpen = ref(false)
@@ -177,15 +190,15 @@ const calendarOptions = computed(() => ({
   plugins: [dayGridPlugin, listPlugin, interactionPlugin],
 
   initialView: props.settings.initialView,
+  firstDay: userSettings.value.weekStartsOn === 'sunday' ? 0 : 1,
   aspectRatio: 1.05,
   locale: locale.value === 'ru' ? ruBetterLocale : enBetterLocale,
-  firstDay: 1,
   dayHeaders: false,
   dayMaxEvents: 3,
   displayEventTime: false,
   eventOrder: 'title,start,id',
   eventOrderStrict: true,
-  dateClick: function (info: any) {
+  dateClick: function (info: CalendarDateClickInfo) {
     if (!isManager.value) {
       return
     }
@@ -232,7 +245,7 @@ const calendarOptions = computed(() => ({
     right: isManager.value ? 'addEmployee editOrganization deleteShifts' : '',
   },
 
-  titleFormat: (date: any) => {
+  titleFormat: (date: CalendarDateFormatInfo) => {
     const title = date.date.marker.toLocaleDateString(locale.value === 'ru' ? 'ru-RU' : 'en-US', {
       month: 'long',
       year: 'numeric',
@@ -242,14 +255,14 @@ const calendarOptions = computed(() => ({
     return result.charAt(0).toUpperCase() + result.slice(1)
   },
 
-  dayHeaderContent(arg: any) {
+  dayHeaderContent(arg: CalendarDayArg) {
     const text = arg.date.toLocaleDateString(locale.value === 'ru' ? 'ru-RU' : 'en-US', {
       weekday: 'short',
     })
 
     return text.charAt(0).toUpperCase() + text.slice(1)
   },
-  dayCellContent(arg: any) {
+  dayCellContent(arg: CalendarDayArg) {
     const weekday = arg.date.toLocaleDateString(locale.value === 'ru' ? 'ru-RU' : 'en-US', {
       weekday: 'short',
     })
@@ -266,7 +279,7 @@ const calendarOptions = computed(() => ({
   },
   events: events.value,
   eventDidMount,
-  eventClick(info: any) {
+  eventClick(info: CalendarEventClickInfo) {
     const rect = info.el.getBoundingClientRect()
 
     const x = info.jsEvent.clientX - rect.left
@@ -278,18 +291,20 @@ const calendarOptions = computed(() => ({
     const diagonalX = rect.width * 0.5 + (y / rect.height - 0.5) * 20
 
     if (x < diagonalX) {
-      selectedEmployeeId.value = selectedEmployeeId.value === employeeId ? null : employeeId
+      selectedEmployeeId.value =
+        selectedEmployeeId.value === employeeId ? null : (employeeId ?? null)
 
       selectedPositionId.value = null
     } else {
-      selectedPositionId.value = selectedPositionId.value === positionId ? null : positionId
+      selectedPositionId.value =
+        selectedPositionId.value === positionId ? null : (positionId ?? null)
 
       selectedEmployeeId.value = null
     }
   },
 }))
 
-function eventDidMount(info: any) {
+function eventDidMount(info: CalendarEventMountInfo) {
   const employeeColor = info.event.extendedProps.employeeColor
     ? info.event.extendedProps.employeeColor
     : '#6b7280'
@@ -318,7 +333,7 @@ function eventDidMount(info: any) {
     const shift = await shiftStore.getShiftById(info.event.id)
     isSubmitting.value = false
     selectedShiftId.value = shift.id
-    selectedShiftConfirmDelete.value = `${$t('ui.shiftDeleteConfirm')} ${shift.position?.name ? shift.position.name : ''} ${shift.employee?.name ? shift.employee.name : ''} ${locale.value === 'ru' ? formatDateStrLocale(shift.date, 'ru-RU') : formatDateStrLocale(shift.date, 'en-US')}?`
+    selectedShiftConfirmDelete.value = `${$t('ui.shiftDeleteConfirm')} ${shift.position?.name ? shift.position.name : ''} ${shift.employee?.name ? shift.employee.name : ''} ${formatDate(shift.date)}?`
     isDeleteShiftConfirmModalOpen.value = true
     return
   })
@@ -334,7 +349,7 @@ function eventDidMount(info: any) {
   updateEventOpacity(info.event)
 }
 
-function getEventOpacity(employeeId: number, positionId: number) {
+function getEventOpacity(employeeId: string | undefined, positionId: number | undefined) {
   if (selectedEmployeeId.value === null && selectedPositionId.value === null) {
     return 1
   }
@@ -350,7 +365,7 @@ function getEventOpacity(employeeId: number, positionId: number) {
   return 1
 }
 
-function updateEventOpacity(event: any) {
+function updateEventOpacity(event: CalendarEvent) {
   const employeeId = event.extendedProps.employeeId
 
   const positionId = event.extendedProps.positionId

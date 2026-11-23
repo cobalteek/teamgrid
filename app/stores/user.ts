@@ -2,22 +2,8 @@ import { defineStore } from 'pinia'
 import { useOrganizationStore } from '~/stores/organization'
 import type { User, UserWithRole } from '~~/types/user'
 
-type RequestError = {
-  data?: { message?: string }
-  message?: string
-}
-
-function getErrorMessage(error: unknown) {
-  if (typeof error !== 'object' || error === null) {
-    return $t('error.user.loadUsers')
-  }
-
-  const requestError = error as RequestError
-
-  return requestError.data?.message ?? requestError.message ?? $t('error.user.loadUsers')
-}
-
 export const useUserStore = defineStore('user', () => {
+  const requestFetch = useRequestFetch()
   const organizationUsers = ref<User[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
@@ -29,11 +15,8 @@ export const useUserStore = defineStore('user', () => {
     error.value = null
 
     try {
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-
-      organizationUsers.value = await $fetch<User[]>('/api/user', {
+      organizationUsers.value = await requestFetch<User[]>('/api/user', {
         credentials: 'include',
-        headers,
         method: 'GET',
         query: {
           organizationId: organizationStore.currentOrganizationId,
@@ -55,11 +38,8 @@ export const useUserStore = defineStore('user', () => {
     error.value = null
     const organizationId = organizationStore.currentOrganizationId
     try {
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-
-      const userWithRole = await $fetch<UserWithRole>('/api/user/role', {
+      const userWithRole = await requestFetch<UserWithRole>('/api/user/role', {
         credentials: 'include',
-        headers,
         method: 'GET',
         query: {
           userId,
@@ -82,11 +62,8 @@ export const useUserStore = defineStore('user', () => {
     error.value = null
     const organizationId = organizationStore.currentOrganizationId
     try {
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-
-      await $fetch('/api/user/role', {
+      await requestFetch('/api/user/role', {
         credentials: 'include',
-        headers,
         method: 'PATCH',
         body: {
           userId,
@@ -112,11 +89,8 @@ export const useUserStore = defineStore('user', () => {
     error.value = null
     const organizationId = organizationStore.currentOrganizationId
     try {
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-
-      await $fetch('/api/user/role', {
+      await requestFetch('/api/user/role', {
         credentials: 'include',
-        headers,
         method: 'PATCH',
         body: {
           userId,

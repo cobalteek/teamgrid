@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import { useErrorModal } from '../composables/useErrorModal'
+import { useInitializeApp } from '../composables/appInit'
+
+const initApp = useInitializeApp()
 
 useHead({
   title: $t('pages.login'),
@@ -39,7 +42,7 @@ async function onLogin() {
 
   try {
     await auth.login(form.value)
-
+    await initApp.init()
     await navigateTo('/dashboard')
   } catch (e: unknown) {
     isSubmitting.value = false

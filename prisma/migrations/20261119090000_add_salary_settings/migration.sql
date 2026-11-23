@@ -1,0 +1,7 @@
+ALTER TABLE "Employee"
+ADD COLUMN "salaryType" TEXT,
+ADD COLUMN "salaryAmount" DOUBLE PRECISION;
+
+ALTER TABLE "Position"
+ADD COLUMN "salaryType" TEXT,
+ADD COLUMN "salaryAmount" DOUBLE PRECISION;

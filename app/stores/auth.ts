@@ -13,6 +13,7 @@ function asRequestError(error: unknown): RequestError {
 }
 
 export const useAuthStore = defineStore('auth', () => {
+  const requestFetch = useRequestFetch()
   const user = ref<User | null>(null)
   const isReady = ref(false)
   const isLoading = ref(false)
@@ -22,11 +23,8 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function fetchMe() {
     try {
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-
-      user.value = await $fetch<User>('/api/auth/me', {
+      user.value = await requestFetch<User>('/api/auth/me', {
         credentials: 'include',
-        headers,
       })
     } catch (e: unknown) {
       const error = asRequestError(e)

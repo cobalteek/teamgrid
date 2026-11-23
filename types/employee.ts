@@ -1,8 +1,11 @@
+import type { SalaryFormType, SalaryType } from './salary'
+
 export type Employee = {
   id: string
   name: string
   surname: string
   middlename: string
+  positionId?: number
   position: {
     id: number
     name: string
@@ -14,6 +17,9 @@ export type Employee = {
     name: string
   }
   color: string
+  sortOrder: number
+  salaryType: SalaryType | 'none' | null
+  salaryAmount: number | null
 }
 
 export type CreateEmployee = {
@@ -23,4 +29,6 @@ export type CreateEmployee = {
   position: string
   email: string
   organizationId: number
+  salaryType?: SalaryFormType | null
+  salaryAmount?: number | string | null
 }

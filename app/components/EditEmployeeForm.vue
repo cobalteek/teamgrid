@@ -1,8 +1,16 @@
 <script setup lang="ts">
 import Modal from './Modal.vue'
 import { useEmployeeStore } from '~/stores/employee'
+import { usePositionStore } from '~/stores/position'
 import { isValidEmail, isValidName } from '~~/shared/utils/validation'
 import type { Employee } from '~~/types/employee'
+import type { SalaryFormType } from '~~/types/salary'
+import { normalizeSalaryAmount } from '~~/types/salary'
+
+type EmployeeFormModel = Omit<Employee, 'salaryType' | 'salaryAmount'> & {
+  salaryType: SalaryFormType
+  salaryAmount: number | string | null
+}
 
 const props = defineProps<{
   modelValue: boolean
@@ -23,19 +31,23 @@ function onUpdateModelValue(value: boolean) {
 }
 const errorModal = useErrorModal()
 const initApp = useInitializeApp()
+
 const employeeStore = useEmployeeStore()
+const positionStore = usePositionStore()
+
 const isSubmitting = ref(false)
 const isDeleteEmployeeConfirmModalOpen = ref(false)
 const selectedEmployeeConfirmDelete = ref('')
 const withShifts = ref(false)
 
-const employee = ref<Employee>({
+const employee = ref<EmployeeFormModel>({
   id: '',
   name: '',
   surname: '',
   middlename: '',
   email: '',
   color: '',
+  sortOrder: 0,
   position: {
     id: 0,
     name: '',
@@ -45,7 +57,20 @@ const employee = ref<Employee>({
     id: 0,
     name: '',
   },
+  salaryType: 'inherit',
+  salaryAmount: '',
 })
+
+function getEmployeePayload(): Employee {
+  const salaryType = employee.value.salaryType === 'inherit' ? null : employee.value.salaryType
+  const positionId = employee.value.position.id
+  return {
+    ...employee.value,
+    positionId,
+    salaryType,
+    salaryAmount: salaryType ? normalizeSalaryAmount(employee.value.salaryAmount) : null,
+  }
+}
 
 async function handleSubmit() {
   if (
@@ -61,11 +86,19 @@ async function handleSubmit() {
     errorModal.showError('error.invalidEmail')
     return
   }
+  if (
+    employee.value.salaryType !== 'inherit' &&
+    employee.value.salaryType !== 'none' &&
+    normalizeSalaryAmount(employee.value.salaryAmount) === null
+  ) {
+    errorModal.showError('error.salary.invalid')
+    return
+  }
 
   isSubmitting.value = true
 
   try {
-    await employeeStore.changeEmployee(employee.value)
+    await employeeStore.changeEmployee(getEmployeePayload())
 
     emit('submit')
     emit('close')
@@ -114,6 +147,7 @@ const resetModal = () => {
     middlename: '',
     email: '',
     color: '',
+    sortOrder: 0,
     position: {
       id: 0,
       name: '',
@@ -123,6 +157,8 @@ const resetModal = () => {
       id: 0,
       name: '',
     },
+    salaryType: 'inherit',
+    salaryAmount: '',
   }
   selectedEmployeeConfirmDelete.value = ''
   isDeleteEmployeeConfirmModalOpen.value = false
@@ -140,6 +176,8 @@ watch(
           ..._employee,
           position: { ..._employee.position },
           organization: { ..._employee.organization },
+          salaryType: _employee.salaryType ?? 'inherit',
+          salaryAmount: _employee.salaryAmount ?? '',
         }
       }
     }
@@ -158,6 +196,35 @@ watch(
         { key: 'surname', type: 'text', placeholder: 'placeholder.lastName' },
         { key: 'middlename', type: 'text', placeholder: 'placeholder.middleName' },
         { key: 'email', type: 'email', placeholder: 'placeholder.email', required: true },
+        {
+          key: 'salaryAmount',
+          type: 'number',
+          placeholder: 'salary.amount',
+          disabled: employee.salaryType === 'inherit' || employee.salaryType === 'none',
+        },
+      ]"
+      :selects="[
+        {
+          key: 'position.id',
+          placeholder: 'ui.position',
+          disabledOption: 'ui.position',
+          selectOption: positionStore.positions.map((position) => ({
+            value: position.id,
+            label: position.name,
+          })),
+        },
+        {
+          key: 'salaryType',
+          placeholder: 'salary.typeLabel',
+          disabledOption: 'salary.typeLabel',
+          selectOption: [
+            { value: 'inherit', label: $t('salary.inheritPosition') },
+            { value: 'none', label: $t('salary.noPay') },
+            { value: 'hourly', label: $t('salary.hourly') },
+            { value: 'per_shift', label: $t('salary.perShift') },
+            { value: 'monthly', label: $t('salary.monthly') },
+          ],
+        },
       ]"
       submit-btn-name="btn.save"
       :is-loading="isSubmitting"

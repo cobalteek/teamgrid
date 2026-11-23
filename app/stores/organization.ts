@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { useRequestHeaders } from '#imports'
 import type { Organization, OrganizationAccess, OrganizationRole } from '~~/types/organization'
 
 type RequestError = {
@@ -18,10 +17,15 @@ function getErrorMessage(error: unknown) {
 }
 
 export const useOrganizationStore = defineStore('organization', () => {
+  const requestFetch = useRequestFetch()
   const organizations = ref<OrganizationAccess[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const currentOrganization = ref<OrganizationAccess | null>(null)
+  const currentOrganizationCookie = useCookie<string | null>('currentOrganizationId', {
+    maxAge: 60 * 60 * 24 * 365,
+    sameSite: 'lax',
+  })
 
   const currentOrganizationId = computed(() => currentOrganization.value?.id ?? null)
   const currentRole = computed(() => currentOrganization.value?.role ?? null)
@@ -39,19 +43,24 @@ export const useOrganizationStore = defineStore('organization', () => {
     error.value = null
 
     try {
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-
-      organizations.value = await $fetch<OrganizationAccess[]>('/api/organization', {
+      organizations.value = await requestFetch<OrganizationAccess[]>('/api/organization', {
         credentials: 'include',
         method: 'GET',
-        headers,
       })
 
-      const savedId = import.meta.client ? localStorage.getItem('currentOrganizationId') : null
-      currentOrganization.value =
+      const savedId =
+        currentOrganizationCookie.value ??
+        (import.meta.client ? localStorage.getItem('currentOrganizationId') : null)
+      const selectedOrganization =
         organizations.value.find((organization) => organization.id === Number(savedId)) ??
         organizations.value[0] ??
         null
+      currentOrganization.value = selectedOrganization
+
+      if (selectedOrganization && import.meta.client) {
+        currentOrganizationCookie.value = String(selectedOrganization.id)
+        localStorage.setItem('currentOrganizationId', String(selectedOrganization.id))
+      }
 
       return organizations.value
     } catch (e: unknown) {
@@ -67,12 +76,9 @@ export const useOrganizationStore = defineStore('organization', () => {
     error.value = null
 
     try {
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-
-      await $fetch<Organization>('/api/organization', {
+      await requestFetch<Organization>('/api/organization', {
         credentials: 'include',
         method: 'POST',
-        headers,
         body: {
           name,
           description,
@@ -107,12 +113,9 @@ export const useOrganizationStore = defineStore('organization', () => {
     error.value = null
 
     try {
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-
-      await $fetch<Organization>('/api/organization', {
+      await requestFetch<Organization>('/api/organization', {
         credentials: 'include',
         method: 'PATCH',
-        headers,
         body: { name },
         query: {
           organizationId: currentOrganizationId.value,
@@ -140,12 +143,9 @@ export const useOrganizationStore = defineStore('organization', () => {
     error.value = null
 
     try {
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-
-      await $fetch<Organization>('/api/organization', {
+      await requestFetch<Organization>('/api/organization', {
         credentials: 'include',
         method: 'PATCH',
-        headers,
         body: {
           name: currentOrganization.value.name,
           description,
@@ -181,9 +181,17 @@ export const useOrganizationStore = defineStore('organization', () => {
       })
     }
 
+    const route = useRoute()
+    const isManagerPage = computed(() => route.name === 'schedule' || route.name === 'bonus')
+
+    if (isManagerPage.value && !access.isManager) {
+      navigateTo('/dashboard')
+    }
+
     currentOrganization.value = access
 
     if (import.meta.client) {
+      currentOrganizationCookie.value = String(access.id)
       localStorage.setItem('currentOrganizationId', String(access.id))
     }
   }

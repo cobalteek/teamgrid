@@ -34,11 +34,16 @@ function openEditOrganizationModal() {
 }
 
 const isDashboard = computed(() => route.name === 'dashboard')
+const isSchedule = computed(() => route.name === 'schedule')
+const isBonus = computed(() => route.name === 'bonus')
+const showOrganizationSwitcher = computed(
+  () => isDashboard.value || isSchedule.value || isBonus.value,
+)
 
 function updateOrganizationAccess() {
   canEditOrganization.value = Boolean(
     user.value &&
-    isDashboard.value &&
+    (isDashboard.value || isBonus.value) &&
     organizationStore.currentOrganizationId &&
     organizationStore.isManager,
   )
@@ -69,22 +74,101 @@ watch(
       {{ activeBranch === 'master' ? 'TeamGrid' : 'TeamGrid Dev' }}
     </NuxtLink>
     <ClientOnly>
-      <div v-if="user && isDashboard" class="order-3 w-full min-w-0 md:order-none md:w-auto">
+      <div
+        v-if="user && showOrganizationSwitcher"
+        class="order-3 w-full min-w-0 md:order-none md:w-auto"
+      >
         <OrganizationSwitcher @add-organization="openModal" />
       </div>
     </ClientOnly>
     <nav class="ml-auto hidden min-w-0 items-center gap-2 sm:flex sm:gap-3">
-      <select
-        :value="locale"
-        class="select h-[3.25rem] cursor-pointer rounded-xl border-[var(--border-main)] bg-[var(--btn-bg)] px-3 text-xs font-semibold tracking-wide uppercase transition outline-none hover:border-[var(--text-blue)] focus:border-[var(--text-blue)]"
-        aria-label="Language"
-        @change="setLocale(($event.target as HTMLSelectElement).value as 'ru' | 'en')"
-      >
-        <option value="ru">Ru</option>
-        <option value="en">En</option>
-      </select>
-      <ToggleTheme />
       <template v-if="user">
+        <NuxtLink
+          v-if="organizationStore.isManager"
+          to="/schedule"
+          class="group hidden h-[3.25rem] w-[3.25rem] items-center justify-center rounded-xl border border-transparent transition hover:border-[var(--border-main)] hover:bg-[var(--bg-hover-context)] hover:text-[var(--text-blue)] md:flex"
+          :class="
+            isSchedule
+              ? 'border-[var(--border-main)] bg-[var(--bg-hover-context)] text-[var(--text-blue)]'
+              : ''
+          "
+          :title="$t('ui.managerSchedule')"
+          :aria-label="$t('ui.managerSchedule')"
+          :aria-current="isSchedule ? 'page' : undefined"
+        >
+          <svg
+            class="h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="3" y="4.5" width="18" height="16" rx="2" />
+            <path d="M16 2.5v4M8 2.5v4M3 9.5h18M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01" />
+          </svg>
+          <span class="sr-only">{{ $t('ui.managerSchedule') }}</span>
+        </NuxtLink>
+        <NuxtLink
+          v-if="organizationStore.isManager"
+          to="/bonus"
+          class="group hidden h-[3.25rem] w-[3.25rem] items-center justify-center rounded-xl border border-transparent transition hover:border-[var(--border-main)] hover:bg-[var(--bg-hover-context)] hover:text-[var(--text-blue)] md:flex"
+          :class="
+            isBonus
+              ? 'border-[var(--border-main)] bg-[var(--bg-hover-context)] text-[var(--text-blue)]'
+              : ''
+          "
+          :title="$t('ui.bonus')"
+          :aria-label="$t('ui.bonus')"
+          :aria-current="isBonus ? 'page' : undefined"
+        >
+          <svg
+            class="h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path
+              d="M12 3v18M17 7.5c0-1.7-2.2-3-5-3s-5 1.3-5 3 2.2 3 5 3 5 1.3 5 3-2.2 3-5 3-5-1.3-5-3"
+            />
+          </svg>
+          <span class="sr-only">{{ $t('ui.bonus') }}</span>
+        </NuxtLink>
+        <NuxtLink
+          to="/settings"
+          class="group hidden h-[3.25rem] w-[3.25rem] items-center justify-center rounded-xl border border-transparent transition hover:border-[var(--border-main)] hover:bg-[var(--bg-hover-context)] hover:text-[var(--text-blue)] md:flex"
+          :class="
+            route.name === 'settings'
+              ? 'border-[var(--border-main)] bg-[var(--bg-hover-context)] text-[var(--text-blue)]'
+              : ''
+          "
+          :title="$t('ui.settings')"
+          :aria-label="$t('ui.settings')"
+          :aria-current="route.name === 'settings' ? 'page' : undefined"
+        >
+          <svg
+            class="h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z" />
+            <path
+              d="m19.4 15 .1.1a2 2 0 1 1-2.8 2.8l-.1-.1a2 2 0 0 0-3.4 1.4v.3a2 2 0 1 1-4 0v-.3a2 2 0 0 0-3.4-1.4l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A2 2 0 0 0 3.6 12a2 2 0 0 0-.6-1.4l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A2 2 0 0 0 9.2 6.4H9a2 2 0 1 1 4 0v.1a2 2 0 0 0 3.4 1.4l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a2 2 0 0 0 0 3.4Z"
+            />
+          </svg>
+          <span class="sr-only">{{ $t('ui.settings') }}</span>
+        </NuxtLink>
         <button
           type="button"
           class="group hidden max-w-56 min-w-0 cursor-pointer items-center gap-2 rounded-xl border border-[var(--border-main)] bg-[var(--btn-bg)] px-2 py-1.5 text-left transition hover:border-[var(--text-blue)] hover:bg-[var(--bg-hover-context)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--text-blue)] sm:flex"
@@ -144,6 +228,16 @@ watch(
         </button>
       </template>
       <template v-else>
+        <select
+          :value="locale"
+          class="select h-[3.25rem] cursor-pointer rounded-xl border-[var(--border-main)] bg-[var(--btn-bg)] px-3 text-xs font-semibold tracking-wide uppercase transition outline-none hover:border-[var(--text-blue)] focus:border-[var(--text-blue)]"
+          aria-label="Language"
+          @change="setLocale(($event.target as HTMLSelectElement).value as 'ru' | 'en')"
+        >
+          <option value="ru">Ru</option>
+          <option value="en">En</option>
+        </select>
+        <ToggleTheme />
         <NuxtLink
           class="flex h-[3.25rem] items-center rounded-xl border border-transparent px-3 text-sm font-semibold transition hover:border-[var(--border-main)] hover:bg-[var(--bg-hover-context)]"
           to="/login"
@@ -172,7 +266,6 @@ watch(
       </button>
       <MobileMenu
         v-if="isMobileMenuOpen"
-        :locale="locale"
         :can-edit-organization="canEditOrganization"
         @open-edit-organization-modal="openEditOrganizationModal"
         @go-dashboard="goDashboard"

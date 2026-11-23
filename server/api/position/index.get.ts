@@ -27,6 +27,8 @@ export default defineEventHandler(async (event) => {
     id: true,
     name: true,
     fullName: true,
+    salaryType: true,
+    salaryAmount: true,
   }
 
   try {
@@ -50,6 +52,8 @@ export default defineEventHandler(async (event) => {
         id: position.id,
         name: position.name,
         fullName: position.fullName,
+        salaryType: position.salaryType,
+        salaryAmount: position.salaryAmount,
       }
     }
 
@@ -72,6 +76,8 @@ export default defineEventHandler(async (event) => {
       name: position.name,
       fullName: position.fullName,
       organizationId: organizationId,
+      salaryType: position.salaryType,
+      salaryAmount: position.salaryAmount,
     }))
   } catch (error) {
     console.log(error)

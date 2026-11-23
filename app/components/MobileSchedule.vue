@@ -3,7 +3,9 @@ import MobileScheduleDayModal from './mobile-schedule/MobileScheduleDayModal.vue
 import MobileScheduleFeed from './mobile-schedule/MobileScheduleFeed.vue'
 import MobileScheduleGrid from './mobile-schedule/MobileScheduleGrid.vue'
 import MobileScheduleToolbar from './mobile-schedule/MobileScheduleToolbar.vue'
+import { storeToRefs } from 'pinia'
 import { useShiftStore } from '~/stores/shift'
+import { useUserSettingsStore } from '~/stores/userSettings'
 import {
   useMobileScheduleDates,
   type MobileScheduleViewMode,
@@ -15,6 +17,9 @@ const props = defineProps<{ isManager: boolean }>()
 const emit = defineEmits<{ (e: 'add-shift', dateKey: string): void }>()
 
 const { locale } = useI18n()
+const userSettingsStore = useUserSettingsStore()
+const { settings } = storeToRefs(userSettingsStore)
+const { formatDate } = useUserDisplayPreferences()
 const shiftStore = useShiftStore()
 const {
   addMonths,
@@ -29,7 +34,10 @@ const {
   startOfToday,
   toDateKey,
   toMonthKey,
-} = useMobileScheduleDates(locale)
+} = useMobileScheduleDates(
+  locale,
+  computed(() => settings.value.weekStartsOn),
+)
 
 const todayKey = toDateKey(startOfToday())
 const selectedMonth = ref(toMonthKey(startOfToday()))
@@ -469,7 +477,7 @@ async function openDeleteConfirm(shiftId: string) {
     return
   }
   selectedShiftId.value = shift.id
-  selectedShiftConfirmDelete.value = `${$t('ui.shiftDeleteConfirm')} ${shift.position.name} ${shift.employee.name} ${locale.value === 'ru' ? formatDateStrLocale(shift.date, 'ru-RU') : formatDateStrLocale(shift.date, 'en-US')}?`
+  selectedShiftConfirmDelete.value = `${$t('ui.shiftDeleteConfirm')} ${shift.position.name} ${shift.employee.name} ${formatDate(shift.date)}?`
   isOpenDeleteConfirm.value = true
   return
 }
