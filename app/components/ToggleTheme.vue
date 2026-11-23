@@ -1,5 +1,7 @@
 <script setup lang="ts">
 const theme = useState<'dark' | 'light'>('theme', () => 'dark')
+const auth = useAuthStore()
+const userSettingsStore = useUserSettingsStore()
 
 const animationKey = ref(0)
 const shouldAnimate = ref(false)
@@ -11,12 +13,17 @@ function toggleTheme() {
     document.documentElement.classList.toggle('light', theme.value === 'light')
     localStorage.setItem('theme', theme.value)
   }
+  if (auth.isAuthed) {
+    void userSettingsStore.updateSettings({ theme: theme.value })
+  }
   shouldAnimate.value = true
   animationKey.value += 1
 }
 
 onMounted(() => {
-  const savedTheme = localStorage.getItem('theme') as 'dark' | 'light' | null
+  const savedTheme = userSettingsStore.isReady
+    ? userSettingsStore.settings.theme
+    : (localStorage.getItem('theme') as 'dark' | 'light' | null)
 
   if (savedTheme) {
     theme.value = savedTheme

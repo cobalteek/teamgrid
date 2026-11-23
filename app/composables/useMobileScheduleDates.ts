@@ -1,4 +1,5 @@
 import type { Ref } from 'vue'
+import type { WeekStartsOn } from '~~/types/user-settings'
 
 export type MobileScheduleViewMode = 'feed' | 'grid'
 
@@ -27,7 +28,7 @@ function localeCode(locale: string) {
   return locale === 'ru' ? 'ru-RU' : 'en-US'
 }
 
-export function useMobileScheduleDates(locale: Ref<string>) {
+export function useMobileScheduleDates(locale: Ref<string>, weekStartsOn: Ref<WeekStartsOn>) {
   function capitalize(value: string) {
     return value.charAt(0).toUpperCase() + value.slice(1)
   }
@@ -127,7 +128,8 @@ export function useMobileScheduleDates(locale: Ref<string>) {
   }
 
   function gridDaysForMonth(monthStart: Date) {
-    const offset = (monthStart.getUTCDay() + 6) % 7
+    const firstDay = weekStartsOn.value === 'sunday' ? 0 : 1
+    const offset = (monthStart.getUTCDay() - firstDay + 7) % 7
 
     return [
       ...Array.from({ length: offset }, () => null),

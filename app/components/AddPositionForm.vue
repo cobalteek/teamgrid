@@ -2,9 +2,16 @@
 import Modal from './Modal.vue'
 import { usePositionStore } from '~/stores/position'
 import type { Position } from '~~/types/position'
+import type { SalaryFormType } from '~~/types/salary'
 import { isValidPosition } from '~~/shared/utils/validation'
+import { normalizeSalaryAmount } from '~~/types/salary'
 
-const props = defineProps<{
+type PositionFormModel = Omit<Position, 'salaryType' | 'salaryAmount'> & {
+  salaryType: SalaryFormType
+  salaryAmount: number | string | null
+}
+
+defineProps<{
   modelValue: boolean
 }>()
 
@@ -12,6 +19,21 @@ const emit = defineEmits<{
   (e: 'update:modelValue', v: boolean): void
   (e: 'close' | 'submit'): void
 }>()
+
+function createEmptyPosition(): PositionFormModel {
+  return {
+    id: 0,
+    name: '',
+    fullName: '',
+    organization: {
+      id: 0,
+      name: '',
+    },
+    color: '',
+    salaryType: 'none',
+    salaryAmount: '',
+  }
+}
 
 function onUpdateModelValue(value: boolean) {
   emit('update:modelValue', value)
@@ -21,30 +43,25 @@ function onUpdateModelValue(value: boolean) {
   }
 }
 const positionStore = usePositionStore()
-const position = ref<Position>({
-  id: 0,
-  name: '',
-  fullName: '',
-  organization: {
-    id: 0,
-    name: '',
-  },
-  color: '',
-})
+const position = ref<PositionFormModel>(createEmptyPosition())
 const errorModal = useErrorModal()
 const initApp = useInitializeApp()
 const isSubmitting = ref(false)
 
 const resetModal = () => {
-  position.value = {
-    id: 0,
-    name: '',
-    fullName: '',
-    organization: {
-      id: 0,
-      name: '',
-    },
-    color: '',
+  position.value = createEmptyPosition()
+}
+
+function getPositionPayload(): Position {
+  const salaryType =
+    position.value.salaryType === 'none' || position.value.salaryType === 'inherit'
+      ? null
+      : position.value.salaryType
+
+  return {
+    ...position.value,
+    salaryType,
+    salaryAmount: salaryType ? normalizeSalaryAmount(position.value.salaryAmount) : null,
   }
 }
 
@@ -57,6 +74,14 @@ async function handleSubmit() {
     return
   }
 
+  if (
+    position.value.salaryType !== 'none' &&
+    normalizeSalaryAmount(position.value.salaryAmount) === null
+  ) {
+    errorModal.showError('error.salary.invalid')
+    return
+  }
+
   if (position.value.fullName === '') {
     position.value.fullName = `${$t('ui.fullNamePosition')}_${position.value.name}`
   }
@@ -64,7 +89,7 @@ async function handleSubmit() {
   isSubmitting.value = true
 
   try {
-    await positionStore.createPosition(position.value)
+    await positionStore.createPosition(getPositionPayload())
   } catch (e) {
     isSubmitting.value = false
     console.log(e)
@@ -92,6 +117,25 @@ function handleCancel() {
       :fields="[
         { key: 'name', type: 'text', placeholder: 'placeholder.positionName', required: true },
         { key: 'fullName', type: 'text', placeholder: 'placeholder.positionFullName' },
+        {
+          key: 'salaryAmount',
+          type: 'number',
+          placeholder: 'salary.amount',
+          disabled: position.salaryType === 'none',
+        },
+      ]"
+      :selects="[
+        {
+          key: 'salaryType',
+          placeholder: 'salary.typeLabel',
+          disabledOption: 'salary.typeLabel',
+          selectOption: [
+            { value: 'none', label: $t('salary.none') },
+            { value: 'hourly', label: $t('salary.hourly') },
+            { value: 'per_shift', label: $t('salary.perShift') },
+            { value: 'monthly', label: $t('salary.monthly') },
+          ],
+        },
       ]"
       submit-btn-name="btn.save"
       :is-loading="isSubmitting"

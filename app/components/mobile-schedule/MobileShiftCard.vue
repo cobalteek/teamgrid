@@ -27,11 +27,7 @@ const shiftGradient = computed(
     `linear-gradient(135deg, ${props.shift.position ? props.shift.position.color : '#6b7280'} 0%, ${props.shift.employee ? props.shift.employee.color : '#6b7280'} 100%)`,
 )
 
-function formatTime(minutes: number) {
-  const hours = String(Math.floor(minutes / 60)).padStart(2, '0')
-  const restMinutes = String(minutes % 60).padStart(2, '0')
-  return `${hours}:${restMinutes}`
-}
+const { formatTime } = useUserDisplayPreferences()
 
 const shiftTimeLabel = computed(() => {
   if (props.shift.allDay || props.shift.startTime === null || props.shift.endTime === null) {

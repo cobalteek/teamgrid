@@ -1,9 +1,9 @@
-<script setup lang="ts" generic="T extends Record<string, unknown>">
+<script setup lang="ts">
 const props = defineProps<{
   title: string
-  fields?: readonly Field<T>[]
-  selects?: readonly Select<T>[]
-  modelValue: T
+  fields?: readonly Field[]
+  selects?: readonly Select[]
+  modelValue: Record<string, unknown>
   date?: Date
   submitBtnName: string
   isLoading: boolean
@@ -16,20 +16,20 @@ const emit = defineEmits<{
   delete: []
 }>()
 
-type Select<T> = {
+type Select = {
   key: string
   placeholder: string
   placeholderValue?: string | number
   disabledOption: string
   selectOption: {
     label: string
-    value: any
+    value: string | number
   }[]
   required?: boolean
   disabled?: boolean
 }
 
-type Field<T> = {
+type Field = {
   key: string
   type: string
   placeholder: string
@@ -37,17 +37,26 @@ type Field<T> = {
   disabled?: boolean
 }
 
-function getDeepValue(obj: any, path: string) {
-  return path.split('.').reduce((acc, part) => acc && acc[part], obj)
+function getDeepValue(obj: unknown, path: string): unknown {
+  return path.split('.').reduce<unknown>((acc, part) => {
+    if (!acc || typeof acc !== 'object' || !(part in acc)) return undefined
+    return (acc as Record<string, unknown>)[part]
+  }, obj)
 }
 
-function setDeepValue(obj: any, path: string, value: any) {
+function setDeepValue(obj: Record<string, unknown>, path: string, value: unknown) {
   const parts = path.split('.')
   const last = parts.pop()!
-  const deepParent = parts.reduce((acc, part) => {
-    if (!acc[part]) acc[part] = {}
-    return acc[part]
-  }, obj)
+  let deepParent = obj
+
+  for (const part of parts) {
+    const current = deepParent[part]
+    if (!current || typeof current !== 'object' || Array.isArray(current)) {
+      deepParent[part] = {}
+    }
+    deepParent = deepParent[part] as Record<string, unknown>
+  }
+
   deepParent[last] = value
 }
 
@@ -55,7 +64,7 @@ function updateField(key: string, value: string) {
   setDeepValue(props.modelValue, key, value)
 }
 
-function onSelectChange(event: Event, select: Select<T>) {
+function onSelectChange(event: Event, select: Select) {
   const value = (event.target as HTMLSelectElement).value
 
   const option = select.selectOption.find((option) => String(option.value) === value)
@@ -77,15 +86,8 @@ const handleDelete = () => {
   emit('delete')
 }
 
-const formatedDate = ref()
-
-if (props.date) {
-  formatedDate.value = new Intl.DateTimeFormat('ru-RU', {
-    dateStyle: 'short',
-  }).format(props.date)
-} else {
-  formatedDate.value = ''
-}
+const { formatDate } = useUserDisplayPreferences()
+const formattedDate = computed(() => (props.date ? formatDate(props.date) : ''))
 </script>
 
 <template>
@@ -95,30 +97,40 @@ if (props.date) {
     <Loading v-if="isLoading" class="min-h-[180px] w-full" />
     <template v-else>
       <h2 class="w-full p-1 text-center text-xl font-bold">
-        {{ $t(title) + ' ' + (formatedDate ? formatedDate : '') }}
+        {{ $t(title) + ' ' + (formattedDate ? formattedDate : '') }}
       </h2>
-      <form @submit.prevent="handleSubmit" class="flex w-full flex-col gap-4">
-        <input
-          v-if="fields"
-          v-for="field in fields"
-          :key="field.key"
-          :value="getDeepValue(modelValue, field.key) ?? ''"
-          @input="updateField(field.key, ($event.target as HTMLInputElement).value)"
-          :type="field.type"
-          :placeholder="$t(field.placeholder)"
-          :required="field.required ?? false"
-          :disabled="field.disabled ?? false"
-          class="min-h-11 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] p-2 pl-3 text-[var(--input-text)]"
-        />
+      <form class="flex w-full flex-col gap-4" @submit.prevent="handleSubmit">
+        <template v-if="fields">
+          <template v-for="field in fields" :key="field.key">
+            <DateInput
+              v-if="field.type === 'date'"
+              :model-value="String(getDeepValue(modelValue, field.key) ?? '')"
+              :placeholder="$t(field.placeholder)"
+              :required="field.required ?? false"
+              :disabled="field.disabled ?? false"
+              @update:model-value="updateField(field.key, $event)"
+            />
+            <input
+              v-else
+              :value="getDeepValue(modelValue, field.key) ?? ''"
+              :type="field.type"
+              :placeholder="$t(field.placeholder)"
+              :required="field.required ?? false"
+              :disabled="field.disabled ?? false"
+              class="min-h-11 rounded-md border border-[var(--input-border)] bg-[var(--input-bg)] p-2 pl-3 text-[var(--input-text)]"
+              @input="updateField(field.key, ($event.target as HTMLInputElement).value)"
+            />
+          </template>
+        </template>
         <div v-if="selects" class="flex w-full flex-col gap-4">
           <select
             v-for="select in selects"
             :key="select.key"
             :value="getDeepValue(modelValue, select.key) ?? ''"
-            @input="onSelectChange($event, select)"
             :required="select.required"
             :disabled="select.disabled ?? false"
             class="min-h-11 rounded border border-[var(--input-border)] bg-[var(--input-bg)] pl-3 text-[var(--input-text)] disabled:cursor-not-allowed disabled:opacity-50"
+            @input="onSelectChange($event, select)"
           >
             <option disabled :value="select.placeholderValue ?? ''">
               {{ $t(select.placeholder) }}
@@ -133,18 +145,18 @@ if (props.date) {
           <div class="flex gap-2">
             <button
               type="button"
-              @click="handleCancel"
               class="px-4 py-2 rounded-md bg-[var(--btn-bg)] text-[var(--btn-text)] hover:text-[var(--text-soft)] {{ isLoading ? 'opacity-50 cursor-not-allowed' : '' }}"
               :disabled="isLoading"
+              @click="handleCancel"
             >
               {{ $t('btn.cancel') }}
             </button>
             <button
               v-if="props.delete"
               type="button"
-              @click="handleDelete"
               class="px-4 py-2 rounded-md bg-[var(--btn-bg)] text-[var(--btn-text)] hover:text-[var(--btn-delete-hover-bg)] {{ isLoading ? 'opacity-50 cursor-not-allowed' : '' }}"
               :disabled="isLoading"
+              @click="handleDelete"
             >
               {{ $t('btn.delete') }}
             </button>

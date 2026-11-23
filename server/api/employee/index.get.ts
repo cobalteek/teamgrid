@@ -32,6 +32,10 @@ export default defineEventHandler(async (event) => {
       position: true,
       email: true,
       organizationId: true,
+      color: true,
+      sortOrder: true,
+      salaryType: true,
+      salaryAmount: true,
     }
 
     if (queryUserId) {
@@ -73,6 +77,9 @@ export default defineEventHandler(async (event) => {
           : null,
         organizationId: employee.organizationId,
         email: employee.email,
+        sortOrder: employee.sortOrder,
+        salaryType: employee.salaryType,
+        salaryAmount: employee.salaryAmount,
       }
     }
 
@@ -80,6 +87,7 @@ export default defineEventHandler(async (event) => {
       where: {
         organizationId,
       },
+      orderBy: [{ sortOrder: 'asc' }, { surname: 'asc' }, { name: 'asc' }],
       select: selectFields,
     })
 
@@ -99,11 +107,16 @@ export default defineEventHandler(async (event) => {
         ? {
             id: employee.position.id,
             name: employee.position.name,
+            fullName: employee.position.fullName,
             organizationId: employee.position.organizationId,
           }
         : null,
       organizationId: employee.organizationId,
       email: employee.email,
+      color: employee.color,
+      sortOrder: employee.sortOrder,
+      salaryType: employee.salaryType,
+      salaryAmount: employee.salaryAmount,
     }))
   } catch (error) {
     console.error(error)

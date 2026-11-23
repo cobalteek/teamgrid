@@ -69,6 +69,8 @@ export default defineEventHandler(async (event) => {
               positionId: true,
               email: true,
               color: true,
+              salaryType: true,
+              salaryAmount: true,
             },
           },
 
@@ -77,6 +79,8 @@ export default defineEventHandler(async (event) => {
               id: true,
               name: true,
               color: true,
+              salaryType: true,
+              salaryAmount: true,
             },
           },
           organization: {
@@ -127,6 +131,8 @@ export default defineEventHandler(async (event) => {
             positionId: true,
             email: true,
             color: true,
+            salaryType: true,
+            salaryAmount: true,
           },
         },
 
@@ -135,6 +141,8 @@ export default defineEventHandler(async (event) => {
             id: true,
             name: true,
             color: true,
+            salaryType: true,
+            salaryAmount: true,
           },
         },
         organization: {
@@ -173,6 +181,8 @@ export default defineEventHandler(async (event) => {
             positionId: shift.employee?.positionId,
             email: shift.employee?.email,
             color: shift.employee?.color,
+            salaryType: shift.employee?.salaryType,
+            salaryAmount: shift.employee?.salaryAmount,
           }
         : null,
       position: shift.position
@@ -180,6 +190,8 @@ export default defineEventHandler(async (event) => {
             id: shift.position?.id,
             name: shift.position?.name,
             color: shift.position?.color,
+            salaryType: shift.position?.salaryType,
+            salaryAmount: shift.position?.salaryAmount,
           }
         : null,
     }))

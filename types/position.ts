@@ -1,3 +1,5 @@
+import type { SalaryType } from './salary'
+
 export type Position = {
   id: number
   name: string
@@ -7,4 +9,6 @@ export type Position = {
     name: string
   }
   color: string
+  salaryType: SalaryType | null
+  salaryAmount: number | null
 }

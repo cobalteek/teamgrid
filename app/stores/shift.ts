@@ -24,6 +24,7 @@ function getErrorMessage(error: unknown) {
 }
 
 export const useShiftStore = defineStore('shift', () => {
+  const requestFetch = useRequestFetch()
   const shifts = ref<ShiftWithRelations[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
@@ -37,8 +38,6 @@ export const useShiftStore = defineStore('shift', () => {
     const organizationId = organizationStore.currentOrganizationId
 
     try {
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-
       if (!organizationId) {
         throw createError({
           statusCode: 404,
@@ -46,10 +45,9 @@ export const useShiftStore = defineStore('shift', () => {
         })
       }
 
-      const fetchedShifts = await $fetch<ShiftWithRelations[]>('/api/shift', {
+      const fetchedShifts = await requestFetch<ShiftWithRelations[]>('/api/shift', {
         credentials: 'include',
         method: 'GET',
-        headers,
         query: {
           organizationId: organizationId,
           employeeId,
@@ -82,8 +80,6 @@ export const useShiftStore = defineStore('shift', () => {
     const organizationId = organizationStore.currentOrganizationId
 
     try {
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-
       if (!organizationId) {
         throw createError({
           statusCode: 404,
@@ -91,10 +87,9 @@ export const useShiftStore = defineStore('shift', () => {
         })
       }
 
-      const shift = await $fetch<ShiftWithRelations>(`/api/shift`, {
+      const shift = await requestFetch<ShiftWithRelations>(`/api/shift`, {
         credentials: 'include',
         method: 'GET',
-        headers,
         query: {
           organizationId: organizationId,
           shiftId: shiftId,
@@ -120,7 +115,6 @@ export const useShiftStore = defineStore('shift', () => {
         throw createError('validation.shift.requiredFields')
       }
       const date = new Date(`${shiftData.date}T00:00:00Z`)
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
       const existingShift = shifts.value.find(
         (shift) =>
           formatDateStr(new Date(shift.date)) === formatDateStr(date) &&
@@ -133,10 +127,9 @@ export const useShiftStore = defineStore('shift', () => {
         date,
       }
 
-      const newShift = await $fetch<ShiftWithRelations>('/api/shift', {
+      const newShift = await requestFetch<ShiftWithRelations>('/api/shift', {
         credentials: 'include',
         method: 'POST',
-        headers,
         query: {
           organizationId,
         },
@@ -164,8 +157,6 @@ export const useShiftStore = defineStore('shift', () => {
         throw createError({ statusCode: 400, statusMessage: 'error.bulk.notFound' })
       }
 
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-
       for (const newShift of shiftData) {
         const dateUTC = new Date(`${newShift.date}T00:00:00Z`)
         const existingShift = shifts.value.find(
@@ -184,10 +175,9 @@ export const useShiftStore = defineStore('shift', () => {
         date: new Date(`${shift.date}T00:00:00Z`),
       }))
 
-      const newShifts = await $fetch<ShiftWithRelations[]>('/api/shift/bulk', {
+      const newShifts = await requestFetch<ShiftWithRelations[]>('/api/shift/bulk', {
         credentials: 'include',
         method: 'POST',
-        headers,
         body: { shifts: formattedShifts, organizationId },
       })
 

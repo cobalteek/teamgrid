@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
       !shift ||
       !shift.date ||
       (typeof shift.employeeId !== 'string' && shift.employeeId !== null) ||
-      !Number.isInteger(shift.positionId) && shift.positionId !== null
+      (!Number.isInteger(shift.positionId) && shift.positionId !== null)
     ) {
       throw createError({
         statusCode: 400,
@@ -56,8 +56,15 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  if(shifts.every((shift) => shift.employeeId)) {
-    const employeeIds = shifts.map((shift) => shift.employeeId)
+  const employeeIds = [
+    ...new Set(
+      shifts
+        .map((shift) => shift.employeeId)
+        .filter((employeeId): employeeId is string => Boolean(employeeId)),
+    ),
+  ]
+
+  if (employeeIds.length > 0) {
     const employees = await prisma.employee.findMany({
       where: { id: { in: employeeIds }, organizationId },
     })
@@ -69,8 +76,15 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  if(shifts.every((shift) => shift.positionId)) {
-    const positionIds = shifts.map((shift) => shift.positionId)
+  const positionIds = [
+    ...new Set(
+      shifts
+        .map((shift) => shift.positionId)
+        .filter((positionId): positionId is number => Number.isInteger(positionId)),
+    ),
+  ]
+
+  if (positionIds.length > 0) {
     const positions = await prisma.position.findMany({
       where: { id: { in: positionIds }, organizationId },
     })

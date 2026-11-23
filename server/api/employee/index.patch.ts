@@ -2,6 +2,7 @@ import { prisma } from '~~/server/utils/prisma'
 import { requireUser } from '~~/server/utils/auth'
 import { isValidEmail, isValidName } from '~~/shared/utils/validation'
 import { requireOrganizationRole } from '~~/server/utils/member'
+import { parseSalaryConfig } from '~~/server/utils/salary'
 
 export default defineEventHandler(async (event) => {
   const { userId } = await requireUser(event)
@@ -22,7 +23,9 @@ export default defineEventHandler(async (event) => {
     const name = typeof body?.name === 'string' ? body.name.trim() : ''
     const surname = typeof body?.surname === 'string' ? body.surname.trim() : ''
     const middlename = typeof body?.middlename === 'string' ? body.middlename.trim() : ''
-
+    const salary = parseSalaryConfig(body, t('error.salary.invalid'), { preserveNone: true })
+    const positionId = typeof body?.positionId === 'number' ? body.positionId : -1
+    console.log(positionId)
     if (!name || !email) {
       throw createError({
         statusCode: 400,
@@ -38,6 +41,13 @@ export default defineEventHandler(async (event) => {
       (middlename && !isValidName(middlename))
     ) {
       throw createError({ statusCode: 400, statusMessage: t('error.auth.nameLength') })
+    }
+
+    if(positionId === -1) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: t('error.position.notFound'),
+      })
     }
 
     const existsEmail = await prisma.employee.findFirst({
@@ -75,6 +85,47 @@ export default defineEventHandler(async (event) => {
           statusMessage: t('error.auth.emailNotVerified'),
         })
       }
+
+      const userRole = await prisma.role.findUnique({
+        where: { name: 'user' },
+        select: { id: true },
+      })
+
+      if (!userRole) {
+        throw createError({
+          statusCode: 500,
+          statusMessage: 'error.role.notFound',
+        })
+      }
+
+      await prisma.organizationMember.upsert({
+        where: {
+          userId_organizationId: {
+            userId: user.id,
+            organizationId,
+          },
+        },
+        update: {},
+        create: {
+          userId: user.id,
+          organizationId,
+          roleId: userRole.id,
+        },
+      })
+    }
+
+    const position = await prisma.position.findUnique({
+        where: {
+          id: positionId,
+          organizationId,
+        },
+      })
+
+      if (!position) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'error.position.notFound',
+      })
     }
 
     const updateData = {
@@ -82,6 +133,8 @@ export default defineEventHandler(async (event) => {
       surname,
       middlename,
       email,
+      position: { connect: { id: position.id } },
+      ...salary,
     }
 
     const updatedEmployee = await prisma.employee.update({

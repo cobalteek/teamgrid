@@ -14,15 +14,22 @@ model User {
   name     String
   gender   String
 
+  locale                        String  @default("ru")
+  theme                         String  @default("dark")
+  timeFormat                    String  @default("24h")
+  dateFormat                    String  @default("dmy")
+  weekStartsOn                  String  @default("monday")
+  excludeRussianFiveTwoHolidays Boolean @default(false)
+
   createdAt DateTime @default(now())
 
-  emailVerifiedAt DateTime?
+  emailVerifiedAt           DateTime?
   emailVerificationDeadline DateTime?
 
   emailVerificationTokens EmailVerificationToken[]
-  passwordRecoverToken PasswordRecoverToken[]
-  PasswordResetSession PasswordResetSession[]
-  tokenVersion Int @default(0)
+  passwordRecoverToken    PasswordRecoverToken[]
+  PasswordResetSession    PasswordResetSession[]
+  tokenVersion            Int                      @default(0)
   memberships             OrganizationMember[]
   consents                ConsentRecord[]
   createdNotifications    Notification[]           @relation("NotificationCreatedBy")
@@ -30,12 +37,15 @@ model User {
 }
 
 model Employee {
-  id         String @id @default(cuid())
-  name       String
-  surname    String
-  middlename String
-  email      String
-  color      String
+  id           String  @id @default(cuid())
+  name         String
+  surname      String
+  middlename   String
+  email        String
+  color        String
+  sortOrder    Int     @default(0)
+  salaryType   String?
+  salaryAmount Float?
 
   positionId Int?
   position   Position? @relation(fields: [positionId], references: [id], onDelete: SetNull)
@@ -43,7 +53,9 @@ model Employee {
   organizationId Int
   organization   Organization @relation(fields: [organizationId], references: [id])
 
-  shifts Shift[]
+  shifts     Shift[]
+  vacations  Vacation[]
+  bonusRules BonusRule[]
 
   @@unique([email, organizationId])
 }
@@ -61,20 +73,38 @@ model Shift {
   endTime   Int?
 
   organization Organization @relation(fields: [organizationId], references: [id])
-  employee     Employee?     @relation(fields: [employeeId], references: [id], onDelete: SetNull)
-  position     Position?     @relation(fields: [positionId], references: [id], onDelete: SetNull)
+  employee     Employee?    @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  position     Position?    @relation(fields: [positionId], references: [id], onDelete: SetNull)
+}
+
+model Vacation {
+  id             String   @id @default(cuid())
+  startDate      DateTime
+  endDate        DateTime
+  note           String?
+  employeeId     String
+  organizationId Int
+
+  employee     Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, startDate, endDate])
+  @@index([employeeId, startDate, endDate])
 }
 
 model Position {
-  id             Int    @id @default(autoincrement())
+  id             Int     @id @default(autoincrement())
   name           String
   fullName       String
   organizationId Int
   color          String
+  salaryType     String?
+  salaryAmount   Float?
 
   organization Organization @relation(fields: [organizationId], references: [id])
   employees    Employee[]
   shifts       Shift[]
+  bonusRules   BonusRule[]
 
   @@unique([organizationId, name])
 }
@@ -84,10 +114,50 @@ model Organization {
   name        String @unique
   description String
 
-  members   OrganizationMember[]
-  positions Position[]
-  shifts    Shift[]
-  employees Employee[]
+  members     OrganizationMember[]
+  positions   Position[]
+  shifts      Shift[]
+  employees   Employee[]
+  vacations   Vacation[]
+  bonusRules  BonusRule[]
+  bonusMonths BonusMonth[]
+}
+
+model BonusRule {
+  id             Int      @id @default(autoincrement())
+  name           String
+  scope          String
+  formula        String
+  organizationId Int
+  positionId     Int?
+  employeeId     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  position     Position?    @relation(fields: [positionId], references: [id], onDelete: SetNull)
+  employee     Employee?    @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  months       BonusMonth[]
+
+  @@index([organizationId, scope])
+  @@index([positionId])
+  @@index([employeeId])
+}
+
+model BonusMonth {
+  id             Int      @id @default(autoincrement())
+  month          String
+  variables      Json
+  ruleId         Int
+  organizationId Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  rule         BonusRule    @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([ruleId, month])
+  @@index([organizationId, month])
 }
 
 model Role {
@@ -114,8 +184,8 @@ model OrganizationMember {
 model EmailVerificationToken {
   id        String    @id @default(cuid())
   userId    String
-  codeHash String @unique
-  attempts Int @default(0)
+  codeHash  String    @unique
+  attempts  Int       @default(0)
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime  @default(now())
@@ -128,8 +198,8 @@ model EmailVerificationToken {
 model PasswordRecoverToken {
   id        String    @id @default(cuid())
   userId    String
-  codeHash String
-  attempts Int @default(0)
+  codeHash  String
+  attempts  Int       @default(0)
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime  @default(now())
@@ -140,12 +210,12 @@ model PasswordRecoverToken {
 }
 
 model PasswordResetSession {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  tokenHash String   @unique
+  tokenHash String    @unique
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -167,17 +237,17 @@ model Notification {
   createdBy      User?                   @relation("NotificationCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   recipients     NotificationRecipient[]
   checkboxes     NotificationCheckbox[]
-  consentRecords ConsentRecord[]          @relation("NotificationConsent")
+  consentRecords ConsentRecord[]         @relation("NotificationConsent")
 
   @@index([createdAt])
 }
 
 model NotificationCheckbox {
-  id             String       @id @default(cuid())
+  id             String  @id @default(cuid())
   notificationId String
   label          String
-  sortOrder      Int          @default(0)
-  required       Boolean      @default(true)
+  sortOrder      Int     @default(0)
+  required       Boolean @default(true)
 
   notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
 

@@ -2,6 +2,7 @@ import { prisma } from '~~/server/utils/prisma'
 import { isValidName } from '~~/shared/utils/validation'
 import { defineEventHandler, createError, getQuery } from 'h3'
 import { requireOrganizationRole } from '~~/server/utils/member'
+import { parseSalaryConfig } from '~~/server/utils/salary'
 
 export default defineEventHandler(async (event) => {
   const t = await useTranslation(event)
@@ -10,6 +11,7 @@ export default defineEventHandler(async (event) => {
   const organizationId = query.organizationId ? Number(query.organizationId) : undefined
   const body = await readBody(event)
   const { name, fullName } = body
+  const salary = parseSalaryConfig(body, t('error.salary.invalid'))
   if (!isValidName(name) || !isValidName(fullName)) {
     throw createError({
       statusCode: 400,
@@ -47,6 +49,7 @@ export default defineEventHandler(async (event) => {
       fullName,
       organizationId,
       color: colorPosition,
+      ...salary,
     },
   })
 

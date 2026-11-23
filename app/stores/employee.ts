@@ -18,6 +18,7 @@ function getErrorMessage(error: unknown) {
 }
 
 export const useEmployeeStore = defineStore('employee', () => {
+  const requestFetch = useRequestFetch()
   const employees = ref<Employee[]>([])
   const isLoading = ref(false)
   const error = ref<string | null>(null)
@@ -31,12 +32,9 @@ export const useEmployeeStore = defineStore('employee', () => {
 
     try {
       employees.value = []
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-
-      employees.value = await $fetch<Employee[]>('/api/employee', {
+      employees.value = await requestFetch<Employee[]>('/api/employee', {
         credentials: 'include',
         method: 'GET',
-        headers,
         query: {
           organizationId,
         },
@@ -56,12 +54,9 @@ export const useEmployeeStore = defineStore('employee', () => {
     error.value = null
 
     try {
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-
-      const newEmployee = await $fetch<Employee>('/api/employee', {
+      const newEmployee = await requestFetch<Employee>('/api/employee', {
         credentials: 'include',
         method: 'POST',
-        headers,
         body: employeeData,
       })
 
@@ -83,11 +78,8 @@ export const useEmployeeStore = defineStore('employee', () => {
     const organizationId = organizationStore.currentOrganizationId
 
     try {
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-
-      const employee = await $fetch<Employee>('/api/employee', {
+      const employee = await requestFetch<Employee>('/api/employee', {
         query: { userId, organizationId },
-        headers,
       })
 
       return employee
@@ -104,13 +96,10 @@ export const useEmployeeStore = defineStore('employee', () => {
     error.value = null
 
     try {
-      const headers = import.meta.server ? useRequestHeaders(['cookie']) : undefined
-
-      const changedEmployee = await $fetch<Employee>('/api/employee', {
+      const changedEmployee = await requestFetch<Employee>('/api/employee', {
         credentials: 'include',
         method: 'PATCH',
         body: employee,
-        headers,
       })
 
       return changedEmployee
@@ -119,6 +108,33 @@ export const useEmployeeStore = defineStore('employee', () => {
       throw e
     } finally {
       isLoading.value = false
+    }
+  }
+
+  async function reorderEmployees(employeeIds: string[]) {
+    const previousEmployees = [...employees.value]
+    const employeeById = new Map(employees.value.map((employee) => [employee.id, employee]))
+
+    employees.value = employeeIds
+      .map((id, sortOrder) => {
+        const employee = employeeById.get(id)
+        return employee ? { ...employee, sortOrder } : null
+      })
+      .filter((employee): employee is Employee => employee !== null)
+
+    try {
+      await requestFetch('/api/employee/reorder', {
+        credentials: 'include',
+        method: 'PATCH',
+        body: {
+          organizationId: organizationStore.currentOrganizationId,
+          employeeIds,
+        },
+      })
+    } catch (e: unknown) {
+      employees.value = previousEmployees
+      error.value = getErrorMessage(e)
+      throw e
     }
   }
 
@@ -164,6 +180,7 @@ export const useEmployeeStore = defineStore('employee', () => {
     createEmployee,
     getEmployeeById,
     changeEmployee,
+    reorderEmployees,
     deleteEmployee,
     options,
   }
